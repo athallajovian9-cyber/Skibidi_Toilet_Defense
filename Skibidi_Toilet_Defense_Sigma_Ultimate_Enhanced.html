@@ -675,7 +675,7 @@ function ensureAudio(){
     nextBgmTime = audioCtx.currentTime + 0.05;
     if(!bgmTimerId) bgmTimerId = setInterval(bgmScheduler, 25);
   }
-  if(audioCtx.state === 'suspended') audioCtx.resume();
+  if(audioCtx.state === 'suspended') { try { audioCtx.resume().catch(()=>{}); } catch(e){} }
 }
 
 function tone(freq, dur, type='sine', vol=0.2, delay=0, glideTo=null, pan=0){
@@ -973,6 +973,7 @@ function showDifficulty(){
           if(cp.allies) Object.assign(hiredRanks, cp.allies);
           syncAlliesWithRanks();
           if(cp.diffKey) { diff = DIFFICULTIES[cp.diffKey] || DIFFICULTIES.normal; chosenDifficultyKey = cp.diffKey; }
+          if(cp.relics && Array.isArray(cp.relics)){ relicsCollected = cp.relics.slice(); updateRelicsHud(); }
           recomputePlayer();
           updateHud();
           startWave();
@@ -1474,12 +1475,15 @@ function drawJetpackCameraman(a, now){
   drawLabel('JETPACK UZI', 0, -28 * sc, '#ff9d4d');
 }
 
+let relicPrevState = null;
 function openRelicModal(){
   const unowned = RELIC_POOL.filter(r => !hasRelic(r.id));
   if(!unowned.length){
     setTimeout(() => openUpgradeScreen(true), 400);
     return;
   }
+  relicPrevState = state;
+  state = 'relicSelect';
   // Pick up to 3 random relics
   const shuffled = unowned.sort(() => Math.random() - 0.5).slice(0, 3);
   const container = document.getElementById('relicChoices');
@@ -1496,6 +1500,8 @@ function openRelicModal(){
       updateRelicsHud();
       document.getElementById('relicModal').style.display = 'none';
       showToast('⚡ RELIC EQUIPPED: ' + r.name + '!');
+      state = relicPrevState || 'playing';
+      relicPrevState = null;
       setTimeout(() => openUpgradeScreen(true), 450);
     };
     container.appendChild(card);
@@ -1610,8 +1616,8 @@ const deployedAllies = [];
 
 function spawnAllyEntity(type){
   const yBase = H - 62;
-  const isTitan = type.startsWith('titan');
-  let y = isTitan ? (type === 'titanTv' ? H * 0.22 : H * 0.32) : yBase + (Math.random() - 0.5) * 22;
+  const isTitanAir = (type.startsWith('titan') && type !== 'titanDrill') || type === 'jetpackCam';
+  let y = isTitanAir ? (type === 'titanTv' ? H * 0.22 : type === 'jetpackCam' ? H * 0.26 : H * 0.32) : yBase + (Math.random() - 0.5) * 22;
   let x = Math.random() * (W - 160) + 80;
   let speed = 2.0;
   if(type === 'simp') speed = 3.2;
@@ -1763,7 +1769,7 @@ function updateHiredAllies(dt, now){
     if(a.attackAnim > 0) a.attackAnim -= dt;
 
     // Free 2D movement: hoverers roam the sky band, walkers roam the whole battlefield
-    const isHover = a.type.startsWith('titan') || a.type === 'astro' || a.type === 'gmini' || a.type === 'overseer';
+    const isHover = (a.type.startsWith('titan') && a.type !== 'titanDrill') || a.type === 'astro' || a.type === 'gmini' || a.type === 'overseer' || a.type === 'jetpackCam';
     a.isHover = isHover;
     a.yMin = isHover ? H * 0.08 : H * 0.40;
     a.yMax = isHover ? (a.type === 'titanCamera' ? H * 0.76 : H * 0.72) : Math.max(H * 0.45, Math.min((a.baseY !== undefined ? a.baseY : H - 62) + 8, H - 24));
@@ -2033,10 +2039,12 @@ function updateHiredAllies(dt, now){
         sfx.rocketHit();
         shake = 15; flash = 0.22;
         showToast('TITAN CAMERAMAN: ROCKET HAMMER SLAM!');
-        toilets.forEach((t, tidx) => {
-          if(t.y > H * 0.35){
-            popOneToilet(tidx, {source:'HAMMER_SLAM', dmg: 10});
+        const hammerTargets = toilets.filter(t => t.y > H * 0.35);
+        hammerTargets.forEach(t => {
+          const tidx = toilets.indexOf(t);
+          if(tidx !== -1){
             t.y = Math.min(H + 30, t.y + 90);
+            popOneToilet(tidx, {source:'HAMMER_SLAM', dmg: 10});
           }
         });
         if(boss) hitBoss(18, boss.x, boss.y, 'HAMMER_SLAM');
@@ -2096,8 +2104,10 @@ function updateHiredAllies(dt, now){
         sfx.laserFire();
         shake = 10; flash = 0.25;
         showToast('TITAN TV MAN: CINEMA DISINTEGRATOR!');
-        toilets.forEach((t, tidx) => {
-          popOneToilet(tidx, {source:'TITAN_TV', dmg: 15});
+        const tvTargets = toilets.slice();
+        tvTargets.forEach(t => {
+          const tidx = toilets.indexOf(t);
+          if(tidx !== -1) popOneToilet(tidx, {source:'TITAN_TV', dmg: 15});
         });
         if(boss) hitBoss(24, boss.x, boss.y, 'TITAN_TV');
       }
@@ -2196,11 +2206,19 @@ function updateHiredAllies(dt, now){
         if(a.attackTimer <= 0){
           a.attackTimer = S.cd;
           a.attackAnim = 10;
-          if((S.role === 'rapid' || S.role === 'sniper') && target){
+          if((S.role === 'rapid' || S.role === 'sniper' || S.role === 'strafer') && target){
+            if(S.role === 'strafer'){
+              const tdx = target.x - a.x, tdy = target.y - (a.y + 4);
+              const len = Math.max(1, Math.hypot(tdx, tdy));
+              bullets.push({ x: a.x - 8, y: a.y + 4, vx: (tdx / len) * 12, vy: (tdy / len) * 12, r: 3, dmg: S.dmg, kind: 'minigun', rad: 0 });
+              bullets.push({ x: a.x + 8, y: a.y + 4, vx: (tdx / len) * 12, vy: (tdy / len) * 12, r: 3, dmg: S.dmg, kind: 'minigun', rad: 0 });
+              sfx.minigun();
+            } else {
             const tdx = target.x - a.x, tdy = target.y - (a.y - 14);
             const len = Math.max(1, Math.hypot(tdx, tdy));
             bullets.push({ x: a.x + a.dir * 14, y: a.y - 14, vx: (tdx / len) * 13, vy: (tdy / len) * 13, r: 3, dmg: S.dmg, kind: 'minigun', rad: 0 });
             sfx.minigun();
+            }
           } else if(S.role === 'artillery' && target){
             const tdx = target.x - a.x, tdy = target.y - (a.y - 20);
             const len = Math.max(1, Math.hypot(tdx, tdy));
@@ -2787,11 +2805,15 @@ function useBassBlast(){
   sfx.bassDrop();
   bassBlastVfxTimer = 28;
   flash = 0.2; shake = 14;
-  toilets.forEach((t, idx) => {
-    t.y = Math.min(H + 20, t.y + 160);
-    t.stunTimer = Math.max(t.stunTimer || 0, 40);
-    popParticles(t.x, t.y, '#ffd35c', 8);
-    popOneToilet(idx, {source:'BASS', dmg: 3});
+  const allBassTargets = toilets.slice();
+  allBassTargets.forEach(t => {
+    const idx = toilets.indexOf(t);
+    if(idx !== -1){
+      t.y = Math.min(H + 20, t.y + 160);
+      t.stunTimer = Math.max(t.stunTimer || 0, 40);
+      popParticles(t.x, t.y, '#ffd35c', 8);
+      popOneToilet(idx, {source:'BASS', dmg: 3});
+    }
   });
   if(boss){
     boss.y = Math.min(H * 0.45, boss.y + 70);
@@ -3136,7 +3158,7 @@ function updateBullets(dt){
         hitBoss(b.dmg, b.x, b.y, 'MINIGUN');
         detonated = true;
       }
-      if(!detonated && b.y < -30){ bullets.splice(i, 1); detonated = true; }
+      if(!detonated && (b.y < -40 || b.y > H + 60 || b.x < -40 || b.x > W + 40)){ bullets.splice(i, 1); detonated = true; }
     } else {
       for(let j = 0; j < toilets.length; j++){
         if(Math.hypot(b.x - toilets[j].x, b.y - toilets[j].y) < b.rad){
@@ -3151,7 +3173,7 @@ function updateBullets(dt){
         explodeRocket(b);
         detonated = true;
       }
-      if(!detonated && b.y < -60){
+      if(!detonated && (b.y < -60 || b.y > H + 60 || b.x < -60 || b.x > W + 60)){
         bullets.splice(i, 1);
         explodeRocket(b);
         detonated = true;
@@ -3454,7 +3476,10 @@ function isFinalWave(w){ return w === TOTAL_WAVES; }
 function isBossWave(w){ return !isFinalWave(w) && w % 5 === 0; }
 
 function resetGame(){
-  toilets = []; particles = [];
+  toilets = []; particles = []; floorTraps = []; ragdolls = []; floorDecals = [];
+  relicsCollected = []; activeTrapArm = null; bossSlowMoTimer = 0;
+  updateRelicsHud(); updateTrapButtons();
+  const rModal = document.getElementById('relicModal'); if(rModal) rModal.style.display = 'none';
   score = 0; lives = 3; wave = 1; sigma = 0;
   skillPoints = 2; // Starter budget to hire/upgrade immediately!
   abilityCharge = 0;
@@ -3612,7 +3637,7 @@ function spawnToilet(forcedType=null){
     splitOnDeath: type === 'splitter', healTimer: 0, phase: type === 'phantom' ? Math.random()*Math.PI*2 : 0,
     armorShieldHp: type === 'juggernaut' ? Math.min(28, 12 + Math.floor(wave/5)) : 0,
     maxShieldHp: type === 'juggernaut' ? Math.min(28, 12 + Math.floor(wave/5)) : 0,
-    warpTimer: 0,
+    warpTimer: 0, acidTimer: 0,
     skin: 18 + Math.random()*16, hair: Math.random(), blink: Math.random()*180, hitFlash:0,
     burnTimer:0, burnDmg:0, burnAccum:0, freezeTimer:0, stunTimer:0, glitchTimer:0, rotorAngle:0, nitroActive:false, hypnoTimer:0
   });
@@ -3674,6 +3699,7 @@ function spawnFinalBoss(){
 }
 
 function popParticles(x,y,color,count=14){
+  if(particles.length > 180) particles.splice(0, count);
   for(let i=0;i<count;i++){
     const roll = Math.random();
     const kind = roll < 0.4 ? 'shard' : roll < 0.72 ? 'drop' : 'spark';
@@ -3855,7 +3881,7 @@ function popOneToilet(i, meta={}){
         showToast('🩸 VAMPIRIC BARRIER CHARGED!');
       }
     }
-    if(hasRelic('kinetic_ricochet') && Math.random() < 0.45 && toilets.length > 0){
+    if(hasRelic('kinetic_ricochet') && meta && meta.source !== 'RICOCHET' && Math.random() < 0.45 && toilets.length > 0){
       const nearIdx = Math.floor(Math.random() * toilets.length);
       if(toilets[nearIdx]) popOneToilet(nearIdx, { source:'RICOCHET', dmg: Math.max(1, Math.floor(damage * 0.5)) });
     }
@@ -3976,7 +4002,14 @@ canvas.addEventListener('pointerdown', (e)=>{
   const p = canvasPoint(e);
   handleCanvasTap(p.x, p.y);
 }, {passive:false});
-canvas.addEventListener('contextmenu', (e)=> e.preventDefault());
+canvas.addEventListener('contextmenu', (e)=> {
+  e.preventDefault();
+  if(activeTrapArm){
+    activeTrapArm = null;
+    updateTrapButtons();
+    showToast('TRAP PLACEMENT CANCELLED');
+  }
+});
 
 document.getElementById('trapBouncerBtn').addEventListener('click', () => selectTrapArm('spring'));
 document.getElementById('trapAcidBtn').addEventListener('click', () => selectTrapArm('acid'));
@@ -4046,6 +4079,7 @@ function useSigmaBlast(){
   }
   if(boss) hitBoss(boss.isFinal?Math.round(18*player.blastPower):Math.round(6*player.blastPower),boss.x,boss.y,'BLAST');
   showToast('SIGMA BLAST — '+cleared+' TARGETS CLEARED');
+  if(cleared > 0) checkWaveClear();
   updateHud(); return true;
 }
 
@@ -4079,6 +4113,9 @@ function quitToMainMenu(){
   document.getElementById('pauseOverlay').style.display = 'none';
   document.getElementById('hireScreen').style.display = 'none';
   document.getElementById('upgradeScreen').style.display = 'none';
+  const rModal = document.getElementById('relicModal'); if(rModal) rModal.style.display = 'none';
+  floorTraps = []; ragdolls = []; floorDecals = []; relicsCollected = []; activeTrapArm = null; bossSlowMoTimer = 0;
+  updateRelicsHud(); updateTrapButtons();
   overlay.style.display = 'none';
   modsPanel.style.display = 'none';
   toilets = []; particles = []; bullets = []; drones = []; teslaArcs = []; cryoRings = []; sonicRings = [];
@@ -4106,7 +4143,8 @@ function saveCheckpoint(){
       skills: skillRanks,
       weapons: weaponRanks,
       allies: hiredRanks,
-      diffKey: chosenDifficultyKey
+      diffKey: chosenDifficultyKey,
+      relics: relicsCollected
     };
     storage.set('skibidiCheckpoint', JSON.stringify(data));
   }
@@ -5000,8 +5038,8 @@ function loop(ts){
           if(tr.charges <= 0){ floorTraps.splice(trIdx, 1); }
           break;
         } else if(tr.type === 'acid' && dist < tr.r + t.r){
-          t.speed *= 0.85;
-          if(Math.random() < 0.15){
+          t.acidTimer = 32;
+          if(Math.random() < 0.09){
             sfx.acidSizzle();
             popOneToilet(tIdx, { source:'BURN', dmg: 1 });
           }
@@ -5048,6 +5086,7 @@ function loop(ts){
       }
       if(!toilets[i] || toilets[i]!==t) continue;
       let moveFactor = (t.stunTimer>0) ? 0 : ((t.freezeTimer>0) ? 0.28 : 1);
+      if(t.acidTimer > 0){ t.acidTimer -= dt; moveFactor *= 0.65; }
       if(chronoFreezeTimer > 0) moveFactor *= 0.18;
       if(t.hypnoTimer > 0){ t.hypnoTimer -= dt; moveFactor = 0; }
 
