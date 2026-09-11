@@ -1,40 +1,71 @@
 @echo off
 REM ========================================================
-REM       SKIBIDI TOILET DEFENSE: SIGMA LAUNCHER v3.0
+REM       SKIBIDI TOILET DEFENSE: SIGMA LAUNCHER v3.1
 REM   Smart Browser Detection, Frameless App, Kiosk, 
 REM   Resolution Selector & Save Profile Backup System
 REM ========================================================
 setlocal enabledelayedexpansion
 
-title SKIBIDI TOILET DEFENSE -- SIGMA LAUNCHER v3.0
+title SKIBIDI TOILET DEFENSE -- SIGMA LAUNCHER v3.1
 color 0A
 mode con: cols=76 lines=36 >nul 2>&1
 
 set "SCRIPT_DIR=%~dp0"
 set "APP_DIR=%LocalAppData%\SkibidiLauncher"
 
-REM --- Smart Game File Detection ---
+REM --- Smart Game File Detection with Multi-Folder Auto-Scan ---
 set "GAME="
 set "GAME_NAME="
 
-if exist "%SCRIPT_DIR%Skibidi_Toilet_Defense_Sigma_Ultimate_Enhanced (1).html" (
-    set "GAME=%SCRIPT_DIR%Skibidi_Toilet_Defense_Sigma_Ultimate_Enhanced (1).html"
-    set "GAME_NAME=Sigma Ultimate [Enhanced Edition v3.0]"
-) else if exist "%SCRIPT_DIR%Skibidi_Toilet_Defense_Sigma_Ultimate_Enhanced.html" (
+REM 1. Check local folder
+if exist "%SCRIPT_DIR%Skibidi_Toilet_Defense_Sigma_Ultimate_Enhanced.html" (
     set "GAME=%SCRIPT_DIR%Skibidi_Toilet_Defense_Sigma_Ultimate_Enhanced.html"
-    set "GAME_NAME=Sigma Ultimate [Enhanced V2 Edition]"
-) else if exist "%SCRIPT_DIR%Skibidi_Toilet_Defense_Sigma_Ultimate.html" (
+    set "GAME_NAME=Sigma Ultimate [Enhanced Edition v3.1]"
+    goto :gameFound
+)
+if exist "%SCRIPT_DIR%Skibidi_Toilet_Defense_Mobile.html" (
+    set "GAME=%SCRIPT_DIR%Skibidi_Toilet_Defense_Mobile.html"
+    set "GAME_NAME=Sigma Ultimate [Mobile / Universal Edition]"
+    goto :gameFound
+)
+if exist "%SCRIPT_DIR%Skibidi_Toilet_Defense_Sigma_Ultimate.html" (
     set "GAME=%SCRIPT_DIR%Skibidi_Toilet_Defense_Sigma_Ultimate.html"
     set "GAME_NAME=Sigma Ultimate Standard"
-) else (
-    for %%F in ("%SCRIPT_DIR%*skibidi*.html") do (
-        if not defined GAME (
-            set "GAME=%%~fF"
-            set "GAME_NAME=%%~nxF"
+    goto :gameFound
+)
+
+REM 2. Check SigmaAhh subfolder or Desktop/Downloads
+for %%P in (
+    "%SCRIPT_DIR%SigmaAhh"
+    "%USERPROFILE%\Desktop\SigmaAhh"
+    "%USERPROFILE%\Downloads\SigmaAhh"
+    "%USERPROFILE%\Downloads"
+    "%USERPROFILE%\Downloads\skibidi-defense-site"
+) do (
+    if not defined GAME (
+        if exist "%%~fP\Skibidi_Toilet_Defense_Sigma_Ultimate_Enhanced.html" (
+            set "GAME=%%~fP\Skibidi_Toilet_Defense_Sigma_Ultimate_Enhanced.html"
+            set "GAME_NAME=Sigma Ultimate [Enhanced Edition v3.1]"
+            goto :gameFound
+        )
+        if exist "%%~fP\Skibidi_Toilet_Defense_Mobile.html" (
+            set "GAME=%%~fP\Skibidi_Toilet_Defense_Mobile.html"
+            set "GAME_NAME=Sigma Ultimate [Mobile Edition]"
+            goto :gameFound
         )
     )
 )
 
+REM 3. Wildcard search in script folder
+for %%F in ("%SCRIPT_DIR%*skibidi*.html") do (
+    if not defined GAME (
+        set "GAME=%%~fF"
+        set "GAME_NAME=%%~nxF"
+        goto :gameFound
+    )
+)
+
+:gameFound
 if not defined GAME (
     color 0C
     echo.
@@ -42,8 +73,8 @@ if not defined GAME (
     echo  ERROR: Skibidi Toilet Game HTML file not found!
     echo ================================================================
     echo  Make sure launcher.bat is in the same folder as:
-    echo    - Skibidi_Toilet_Defense_Sigma_Ultimate_Enhanced (1).html
-    echo    - or Skibidi_Toilet_Defense_Sigma_Ultimate_Enhanced.html
+    echo    - Skibidi_Toilet_Defense_Sigma_Ultimate_Enhanced.html
+    echo    - or Skibidi_Toilet_Defense_Mobile.html
     echo.
     echo  Current directory: "%SCRIPT_DIR%"
     echo ================================================================
@@ -104,7 +135,7 @@ set "RES_NAME=720p HD (1280x720)"
 :menu
 cls
 echo ============================================================================
-echo      [+] SKIBIDI TOILET DEFENSE -- SIGMA LAUNCHER v3.0 [+]
+echo      [+] SKIBIDI TOILET DEFENSE -- SIGMA LAUNCHER v3.1 [+]
 echo ============================================================================
 echo  Target: %GAME_NAME%
 if "%LAUNCH_MODE%"=="app" (
