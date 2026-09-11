@@ -1,0 +1,41 @@
+================================================================================
+           SKIBIDI TOILET DEFENSE: SIGMA PROTOCOL (PC EDITION)
+                         OFFICIAL OPERATIVE'S MANUAL
+================================================================================
+
+[+] QUICK START GUIDE:
+1. Double-click 'launcher.bat' (or use 'Play_Game.vbs').
+2. Select your installed web browser from the menu (Chrome, Edge, Brave, etc.).
+3. The game will automatically launch in pure Frameless Desktop App Mode
+   (no URL bars, no bookmarks, zero distractions).
+
+--------------------------------------------------------------------------------
+[+] BATTLEFIELD CONTROLS & HOTKEYS:
+- Left Click / Tap  : Attack toilets & collect energy powerups
+- [1] Key            : Arm Hydraulic Plunger Spring (15⚡ Sigma Energy)
+                       -> Launches toilets backward in bowling-pin cascade stuns!
+- [2] Key            : Arm Corrosive Acid Puddle (20⚡ Sigma Energy)
+                       -> Melts enemy armor plates and saps movement traction!
+- [3] Key            : Arm Explosive Bio-Sludge Barrel (25⚡ Sigma Energy)
+                       -> Shoot, tap, or ram it to trigger a huge AoE blast!
+- Right-Click        : Cancel active trap placement mode
+- [SPACEBAR]         : SIGMA BLAST (Screen-wide EMP wipe & Boss damage)
+- [V] Key            : TV Man Hypno-Glow (Freezes all active enemies)
+- [B] Key            : Speakerman Bass Drop (Heavy radial knockback earthquake)
+- [H] Key            : Open Alliance Barracks (Hire Titan Drillman, Mech-Hound, etc.)
+- [S] Key            : Open Weapon Shop (Upgrade passive guns, lasers, rockets)
+- [P] / [ESC]        : Pause Game / Open Settings Menu
+
+--------------------------------------------------------------------------------
+[+] SURVIVAL TACTICS & ARENA RULES:
+- Defend the reinforced drainage threshold at the top of the sewer floor!
+  Toilets breach when they cross the yellow hazard warning line.
+- Ground traps can ONLY be placed on the sewer floor below the breach threshold.
+- Down Bosses every 5 waves to trigger the SIGMA RELIC PROTOCOL:
+  Draft 1 of 3 permanent game-changing passive artifacts for your run.
+
+--------------------------------------------------------------------------------
+[+] COMMUNITY & ONLINE HUBS:
+- Play Online in Browser : https://athallajovian9-cyber.github.io/Skibidi_Toilet_Defense/
+- Official Discord Server: https://discord.gg/3qRP6zHHjq
+================================================================================

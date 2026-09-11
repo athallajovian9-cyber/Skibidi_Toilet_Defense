@@ -462,6 +462,65 @@
     100% { transform: scale(2.2); opacity: 0; }
   }
 
+
+  /* ================= OPERATIVE FIELD MANUAL / TUTORIAL ================= */
+  #tutorialScreen {
+    position: absolute; inset: 0; display: none;
+    align-items: center; justify-content: center; flex-direction: column;
+    background: rgba(5, 8, 6, 0.98); z-index: 35;
+    padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    box-sizing: border-box; text-align: left;
+  }
+  .tutContainer {
+    width: min(920px, 95vw); max-height: 84vh; overflow-y: auto;
+    background: #0a100c; border: 2px solid var(--pipe); border-radius: 10px;
+    padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+  }
+  .tutHeader {
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--pipe); padding-bottom: 14px; margin-bottom: 18px;
+  }
+  .tutHeader h2 { margin: 0; color: var(--gold); font-size: clamp(18px, 3.5vw, 24px); }
+  .tutCloseBtn {
+    background: #141f17; border: 1px solid var(--pipe); color: var(--porcelain);
+    padding: 6px 16px; border-radius: 4px; cursor: pointer; font-weight: bold;
+    font-family: inherit; font-size: 12px; margin: 0;
+  }
+  .tutCloseBtn:hover { border-color: var(--sigma); color: #fff; }
+  .tutTabs {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px;
+  }
+  .tutTabBtn {
+    background: #121a15; border: 1px solid var(--pipe); color: #8fa385;
+    padding: 8px 14px; border-radius: 4px; cursor: pointer; font-family: inherit;
+    font-size: 11px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;
+    margin: 0;
+  }
+  .tutTabBtn.active {
+    background: #1c2e22; border-color: var(--sigma); color: var(--sigma);
+    box-shadow: 0 0 10px rgba(139,255,92,0.25);
+  }
+  .tutContent { display: none; }
+  .tutContent.active { display: block; }
+  .tutGrid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px; margin-top: 12px;
+  }
+  .tutCard {
+    background: #0f1612; border: 1px solid #223328; border-radius: 6px;
+    padding: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+  .tutCard h4 {
+    margin: 0 0 8px; color: var(--sigma); font-size: 14px; letter-spacing: 0.5px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .tutCard p { font-size: 12px; color: #a2b59c; line-height: 1.5; margin: 0; }
+  .tutKey {
+    background: #1a291f; border: 1px solid #36543e; color: var(--gold);
+    padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 11px;
+    display: inline-block;
+  }
+
 </style>
 </head>
 <body>
@@ -494,6 +553,10 @@
     <div style="color:#9bb096;font-size:12px;margin-right:8px">Game Speed:</div>
     <button class="speedBtn" data-speed="1" id="speedNormal">Normal</button>
     <button class="speedBtn" data-speed="2" id="speed2x">2x</button>
+  </div>
+
+  <div style="margin-top:16px;">
+    <button id="openTutorialBtn" class="miniBtn" style="border-color:var(--gold);color:var(--gold);padding:10px 24px;font-size:12px;letter-spacing:1px;box-shadow:0 0 12px rgba(255,211,92,0.2);">📖 FIELD MANUAL / TUTORIAL</button>
   </div>
 </div>
 
@@ -535,6 +598,7 @@
     <button id="bassBlastBtn" class="miniBtn">BASS DROP [B]</button>
     <button id="hireBtn" class="miniBtn">HIRE [H]</button>
     <button id="shopBtn" class="miniBtn">SHOP [S]</button>
+    <button id="inGameTutBtn" class="miniBtn" style="border-color:var(--gold);color:var(--gold);">GUIDE [T]</button>
     <button id="modsBtn" class="miniBtn">MODS [M]</button>
     <button id="pauseBtn" class="miniBtn">PAUSE [P]</button>
     <button id="fsMobileBtn" class="miniBtn" style="border-color:#6ad7ff;color:#6ad7ff;">⛶ FULLSCREEN</button>
@@ -558,6 +622,7 @@
     </div>
     <p>Nothing moves while paused.</p>
     <button id="resumeBtn">RESUME</button>
+    <button id="pauseTutBtn" style="background:#141f17;border:1px solid var(--gold);color:var(--gold);padding:8px 18px;margin-top:6px;cursor:pointer;">📖 OPERATIVE'S MANUAL</button>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
       <button id="quitMenuBtn" style="background:#2a3a35;color:var(--porcelain);box-shadow:none;border:1px solid var(--pipe);">QUIT TO MAIN MENU</button>
       <button id="quitGameBtn" style="background:#5a1a1a;color:#ffd9d9;box-shadow:none;border:1px solid #7a2020;">QUIT GAME</button>
@@ -4054,10 +4119,16 @@ window.addEventListener('keydown', (e)=>{
   } else if(e.key.toLowerCase() === 's'){
     if(state === 'shop') closeManualShop();
     else openManualShop();
+  } else if(e.key.toLowerCase() === 't'){
+    const tut = document.getElementById('tutorialScreen');
+    if(tut && tut.style.display === 'flex') closeTutorial();
+    else openTutorial();
   } else if(e.key.toLowerCase() === 'm'){
     if(modsPanel.style.display === 'flex') modsCloseBtn.click();
     else modsBtn.click();
   } else if(e.key.toLowerCase() === 'p' || e.key === 'Escape'){
+    const tut = document.getElementById('tutorialScreen');
+    if(tut && tut.style.display === 'flex'){ closeTutorial(); return; }
     togglePause();
   }
 });
@@ -5371,10 +5442,154 @@ const lastDiff = storage.get('skibidiLastDifficulty', 'normal');
 const lastBtn = document.querySelector(`.diffBtn[data-diff="${lastDiff}"]`);
 if(lastBtn) lastBtn.classList.add('selected');
 
+
+/* ================= TUTORIAL / FIELD MANUAL LOGIC ================= */
+let tutorialPrevState = null;
+
+function openTutorial(){
+  ensureAudio(); sfx.uiClick();
+  tutorialPrevState = state;
+  if(state === 'playing') state = 'tutorial';
+  document.getElementById('tutorialScreen').style.display = 'flex';
+}
+
+function closeTutorial(){
+  document.getElementById('tutorialScreen').style.display = 'none';
+  if(tutorialPrevState){
+    state = tutorialPrevState;
+    tutorialPrevState = null;
+  }
+}
+
+function initTutorialUI(){
+  const openBtn = document.getElementById('openTutorialBtn');
+  if(openBtn) openBtn.addEventListener('click', openTutorial);
+  const inGameBtn = document.getElementById('inGameTutBtn');
+  if(inGameBtn) inGameBtn.addEventListener('click', openTutorial);
+  const pauseBtn = document.getElementById('pauseTutBtn');
+  if(pauseBtn) pauseBtn.addEventListener('click', openTutorial);
+  const closeBtn = document.getElementById('tutCloseBtn');
+  if(closeBtn) closeBtn.addEventListener('click', closeTutorial);
+
+  document.querySelectorAll('.tutTabBtn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      sfx.uiClick();
+      document.querySelectorAll('.tutTabBtn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tutContent').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      const tabId = btn.getAttribute('data-tab');
+      const content = document.getElementById(tabId);
+      if(content) content.classList.add('active');
+    });
+  });
+}
+initTutorialUI();
+
 /* Accessibility: allow Enter/Space to activate any .diffBtn already handled above.
    Also ensure focus visible styling (CSS). */
 
 /* Start by showing the boot screen (already visible) */
 </script>
+
+<div id="tutorialScreen">
+  <div class="tutContainer">
+    <div class="tutHeader">
+      <h2>OPERATIVE'S TACTICAL MANUAL // INTEL</h2>
+      <button class="tutCloseBtn" id="tutCloseBtn">CLOSE [ESC / T]</button>
+    </div>
+
+    <div class="tutTabs">
+      <button class="tutTabBtn active" data-tab="tutBasics">1. Core Mission</button>
+      <button class="tutTabBtn" data-tab="tutTraps">2. Floor Traps & Physics</button>
+      <button class="tutTabBtn" data-tab="tutAllies">3. Alliance Barracks</button>
+      <button class="tutTabBtn" data-tab="tutControls">4. Hotkeys & Abilities</button>
+    </div>
+
+    <!-- TAB 1: BASICS -->
+    <div id="tutBasics" class="tutContent active">
+      <p style="color:#d2e5ce;font-size:13px;margin-bottom:14px;">The sewer drainage facility is under assault by rogue toilet invaders. Hold the defensive perimeter at all costs!</p>
+      <div class="tutGrid">
+        <div class="tutCard">
+          <h4><span class="tutKey">THRESHOLD</span> Breach Line</h4>
+          <p>The yellow hazard line across the sewer floor is the reinforced breach threshold. Toilets that cross this line drain Lives. Prevent any enemy from passing!</p>
+        </div>
+        <div class="tutCard">
+          <h4><span class="tutKey">CLICK / TAP</span> Direct Strike</h4>
+          <p>Click or tap directly on approaching toilets to smack them with plungers. Rapid clicks build Combo Multipliers (up to 4.0x score & faster ability recharge).</p>
+        </div>
+        <div class="tutCard">
+          <h4><span class="tutKey">RELICS</span> Boss Protocols</h4>
+          <p>Defeat colossal Bosses every 5 waves to trigger the Sigma Relic Protocol: draft 1 of 3 permanent physical relics to create game-changing run synergies.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: TRAPS -->
+    <div id="tutTraps" class="tutContent">
+      <p style="color:#d2e5ce;font-size:13px;margin-bottom:14px;">Place interactive ground traps directly on the sewer floor using Sigma Energy:</p>
+      <div class="tutGrid">
+        <div class="tutCard">
+          <h4><span class="tutKey">[1]</span> Hydraulic Spring Bouncer (15⚡)</h4>
+          <p>Launches toilets backward with bowling-pin cascade physics! Flying toilets crash into trailing enemies behind them, delivering heavy impact stun.</p>
+        </div>
+        <div class="tutCard">
+          <h4><span class="tutKey">[2]</span> Corrosive Acid Puddle (20⚡)</h4>
+          <p>Lingering boiling acid pool that melts enemy armored plates and reduces movement traction so your defenders can easily pick them apart.</p>
+        </div>
+        <div class="tutCard">
+          <h4><span class="tutKey">[3]</span> Explosive Sludge Barrel (25⚡)</h4>
+          <p>Heavy volatile drum placed in the arena. Shoot, click, or detonate it when toilets swarm nearby for a massive 185px shockwave explosion!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: ALLIANCE -->
+    <div id="tutAllies" class="tutContent">
+      <p style="color:#d2e5ce;font-size:13px;margin-bottom:14px;">Recruit autonomous units that physically run and brawl across the sewer floor in the Barracks [H]:</p>
+      <div class="tutGrid">
+        <div class="tutCard">
+          <h4><span class="tutKey">🪠</span> Plungerman & Rushers</h4>
+          <p>Fast frontline sprinters wielding dual plungers. They chase down toilets and deliver rapid physical melee beatdowns.</p>
+        </div>
+        <div class="tutCard">
+          <h4><span class="tutKey">🔩</span> Titan Drillman (Legendary)</h4>
+          <p>Colossal armored titan! Slams a spinning diamond drill into the sewer floor to generate devastating seismic fissures across enemy lines.</p>
+        </div>
+        <div class="tutCard">
+          <h4><span class="tutKey">🐕</span> Camera Mech-Hound</h4>
+          <p>Four-legged cybernetic canine. Sprints at high speed, leaps onto toilets, and locks them in place with high-voltage jaw grapples.</p>
+        </div>
+        <div class="tutCard">
+          <h4><span class="tutKey">🚀</span> Jetpack Dual-Uzi</h4>
+          <p>Low-altitude airborne commando. Strafes across the battlefield spraying rapid twin-bullet volleys into the swarm below.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: CONTROLS -->
+    <div id="tutControls" class="tutContent">
+      <p style="color:#d2e5ce;font-size:13px;margin-bottom:14px;">Keyboard shortcuts & primary abilities:</p>
+      <div class="tutGrid">
+        <div class="tutCard">
+          <h4><span class="tutKey">SPACEBAR</span> Sigma Blast</h4>
+          <p>Fires a full-arena EMP pulse when the Sigma Meter reaches 100%. Wipes swarms and deals heavy damage to bosses.</p>
+        </div>
+        <div class="tutCard">
+          <h4><span class="tutKey">[V]</span> TV Man Hypno-Glow</h4>
+          <p>Broadcasts hypnotic purple CRT radiation across the facility, completely freezing all toilet enemies in place for 6 seconds.</p>
+        </div>
+        <div class="tutCard">
+          <h4><span class="tutKey">[B]</span> Speakerman Bass Drop</h4>
+          <p>Drops a massive sonic shockwave that knocks the entire enemy vanguard backward and inflicts concussive stun.</p>
+        </div>
+        <div class="tutCard">
+          <h4><span class="tutKey">[H] / [S]</span> Barracks & Shop</h4>
+          <p>[H] opens the Alliance Barracks to recruit defenders. [S] opens the Weapon Shop to upgrade automated laser/rocket/turret defenses.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
