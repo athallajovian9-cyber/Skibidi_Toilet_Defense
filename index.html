@@ -91,7 +91,7 @@
 
     /* HERO */
     .hero {
-      min-height: 92vh;
+      min-height: 90vh;
       display: flex; flex-direction: column; justify-content: center; align-items: center;
       text-align: center;
       padding: 120px 20px 60px;
@@ -189,6 +189,53 @@
       display: block;
     }
 
+    /* GUIDE SECTION */
+    .guide-section {
+      padding: 80px max(24px, 5vw);
+      background: rgba(10, 16, 12, 0.6);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .guide-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 28px;
+      max-width: 1200px;
+      margin: 40px auto 0;
+    }
+    .guide-card {
+      background: #0c120e;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 28px;
+      position: relative;
+    }
+    .guide-step {
+      font-family: var(--font-mono); font-size: 11px;
+      color: var(--sigma); letter-spacing: 2px; font-weight: 700;
+      margin-bottom: 8px; text-transform: uppercase;
+    }
+    .guide-card h3 {
+      font-size: 20px; color: #fff; margin-bottom: 14px;
+    }
+    .guide-card p {
+      font-size: 14px; color: var(--text-muted); line-height: 1.6; margin-bottom: 14px;
+    }
+    .guide-list {
+      list-style: none;
+      font-size: 13px; color: #bed0c1;
+    }
+    .guide-list li {
+      margin-bottom: 8px; display: flex; align-items: flex-start; gap: 8px;
+    }
+    .guide-list li::before {
+      content: '▶'; color: var(--sigma); font-size: 10px; margin-top: 3px;
+    }
+    .key-badge {
+      background: #19261e; border: 1px solid #2f4a38; color: var(--gold);
+      padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+    }
+
     /* FEATURES GRID */
     .section-header {
       text-align: center; margin-bottom: 50px;
@@ -249,9 +296,20 @@
       border: 1px solid var(--border);
       border-radius: 8px;
       padding: 30px;
-      width: 320px;
+      width: 340px;
       text-align: left;
       display: flex; flex-direction: column; justify-content: space-between;
+      position: relative;
+    }
+    .dl-card.highlight {
+      border-color: var(--sigma);
+      box-shadow: 0 0 24px rgba(139, 255, 92, 0.15);
+    }
+    .dl-pill {
+      position: absolute; top: -12px; right: 20px;
+      background: var(--sigma); color: #070a08;
+      font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+      letter-spacing: 1px; text-transform: uppercase;
     }
     .dl-card h3 {
       font-size: 20px; margin-bottom: 10px; color: var(--gold);
@@ -260,7 +318,7 @@
       font-size: 13px; color: var(--text-muted); margin-bottom: 24px;
     }
     .dl-btn {
-      width: 100%; text-align: center; padding: 12px;
+      width: 100%; text-align: center; padding: 14px;
       background: #141f18; border: 1px solid #314d3a; color: var(--sigma);
       text-decoration: none; font-weight: 700; font-size: 13px;
       letter-spacing: 1px; text-transform: uppercase; border-radius: 4px;
@@ -269,6 +327,14 @@
     .dl-btn:hover {
       background: var(--sigma); color: #070a08;
       box-shadow: 0 0 16px rgba(139, 255, 92, 0.4);
+    }
+    .dl-btn.btn-glow {
+      background: var(--sigma); color: #070a08;
+      border-color: var(--sigma);
+    }
+    .dl-btn.btn-glow:hover {
+      background: #a4ff7c;
+      box-shadow: 0 0 24px rgba(139, 255, 92, 0.6);
     }
 
     /* FOOTER */
@@ -296,10 +362,10 @@
     </a>
     <ul class="nav-links">
       <li><a href="#play">PLAY NOW</a></li>
+      <li><a href="#guide">HOW TO PLAY</a></li>
       <li><a href="#features">FEATURES</a></li>
       <li><a href="#downloads">DOWNLOADS</a></li>
-      <li><a href="#discord">COMMUNITY</a></li>
-      <li><a href="Skibidi_Toilet_Defense_Mobile.html" target="_blank" class="btn-nav">LAUNCH GAME</a></li>
+      <li><a href="Skibidi_Toilet_Defense_Mobile.html" target="_blank" class="btn-nav">LAUNCH FULLSCREEN</a></li>
     </ul>
   </nav>
 
@@ -311,7 +377,7 @@
     
     <div class="hero-actions">
       <a href="#play" class="btn btn-primary">⚡ PLAY ONLINE INSTANTLY</a>
-      <a href="#downloads" class="btn btn-secondary">💾 DOWNLOAD LAUNCHER.BAT</a>
+      <a href="#downloads" class="btn btn-secondary">💾 DOWNLOAD PC BUNDLE (.ZIP)</a>
     </div>
   </section>
 
@@ -331,6 +397,53 @@
         <div>60 FPS // SYNTH BGM READY</div>
       </div>
       <iframe src="Skibidi_Toilet_Defense_Mobile.html" class="screen-frame" title="Game Frame" allow="fullscreen; autoplay"></iframe>
+    </div>
+  </section>
+
+  <!-- HOW TO PLAY / USER GUIDE -->
+  <section id="guide" class="guide-section">
+    <div class="section-header">
+      <h2>OPERATIVE'S <span>TACTICAL GUIDE</span></h2>
+      <p>Everything you need to know to run the game, survive waves, and master controls.</p>
+    </div>
+
+    <div class="guide-grid">
+      <div class="guide-card">
+        <div class="guide-step">INSTALLATION & SETUP</div>
+        <h3>🖥️ Running on Windows PC</h3>
+        <p>The batch launcher requires the game HTML file to be in the same folder to detect and start your browser in frameless app mode:</p>
+        <ul class="guide-list">
+          <li>Download the <strong>All-in-One PC Package (.ZIP)</strong> below.</li>
+          <li>Extract the ZIP to any folder on your computer.</li>
+          <li>Double click <strong>launcher.bat</strong>.</li>
+          <li>Choose your browser (Chrome, Edge, Brave, etc.) to play with zero address bar distractions!</li>
+        </ul>
+      </div>
+
+      <div class="guide-card">
+        <div class="guide-step">KEYBOARD & TOUCH CONTROLS</div>
+        <h3>🕹️ Battlefield Hotkeys</h3>
+        <p>Master these essential shortcuts during combat:</p>
+        <ul class="guide-list">
+          <li><span class="key-badge">Click / Tap</span> Target toilets & collect energy powerups</li>
+          <li><span class="key-badge">1</span>, <span class="key-badge">2</span>, <span class="key-badge">3</span> Arm Spring Bouncer, Acid Puddle, or TNT Barrel</li>
+          <li><span class="key-badge">SPACE</span> Sigma Blast (Screen-wide EMP wipe)</li>
+          <li><span class="key-badge">V</span> TV Hypno Ray &nbsp;|&nbsp; <span class="key-badge">B</span> Bass Drop Shockwave</li>
+          <li><span class="key-badge">H</span> Alliance Barracks &nbsp;|&nbsp; <span class="key-badge">S</span> Weapon Shop</li>
+        </ul>
+      </div>
+
+      <div class="guide-card">
+        <div class="guide-step">SURVIVAL STRATEGY</div>
+        <h3>🛡️ Arena Defense Mechanics</h3>
+        <p>Defend the reinforced drainage threshold at all costs:</p>
+        <ul class="guide-list">
+          <li>Toilets breach at the <strong>yellow warning hazard line</strong>.</li>
+          <li><strong>Trap Placement:</strong> Traps can only be armed on the sewer floor below the hazard threshold line.</li>
+          <li><strong>Bouncer Physics:</strong> Spring bouncers launch toilets into others for cascade bowling-pin stun.</li>
+          <li><strong>Relic Picks:</strong> Every 5 waves after downing a Boss, select 1 permanent Sigma Relic!</li>
+        </ul>
+      </div>
     </div>
   </section>
 
@@ -383,31 +496,32 @@
   <!-- DOWNLOADS -->
   <section id="downloads" class="download-section">
     <div class="section-header">
-      <h2>GET THE <span>NATIVE FILES</span></h2>
+      <h2>GET THE <span>OFFICIAL PACKAGES</span></h2>
       <p>Download standalone packages to run locally with zero latency or browser bars.</p>
     </div>
 
     <div class="download-boxes">
-      <div class="dl-card">
+      <div class="dl-card highlight">
+        <div class="dl-pill">RECOMMENDED FOR PC</div>
         <div>
-          <h3>🚀 Sigma Launcher v3.0</h3>
-          <p>Windows batch launcher with auto-detection for Chrome, Edge, Brave, and Firefox. Frameless app mode, resolution switcher & save backups.</p>
+          <h3>📦 Complete PC Package (.ZIP)</h3>
+          <p>Contains <strong>launcher.bat</strong> AND the required <strong>Game HTML files</strong> together in one package. Just extract and double click launcher.bat to play!</p>
         </div>
-        <a href="launcher.bat" download class="dl-btn">DOWNLOAD .BAT</a>
+        <a href="Skibidi_Toilet_Defense_PC_Package.zip" download class="dl-btn btn-glow">DOWNLOAD FULL PC BUNDLE (.ZIP)</a>
       </div>
 
       <div class="dl-card">
         <div>
-          <h3>📱 Mobile Edition HTML</h3>
-          <p>Full single-file offline game with horizontal swipe action docks, touch ripple rings, and borderless mobile fullscreen support.</p>
+          <h3>📱 Mobile Edition (.HTML)</h3>
+          <p>Single offline HTML file optimized for Android and iOS browsers. Features horizontal thumb docks, touch ripples, and borderless fullscreen toggle.</p>
         </div>
         <a href="Skibidi_Toilet_Defense_Mobile.html" download class="dl-btn">DOWNLOAD MOBILE .HTML</a>
       </div>
 
       <div class="dl-card">
         <div>
-          <h3>🛡️ Discord Server Asset Pack</h3>
-          <p>Official high-res esports vector logo, channel architecture templates, and role configuration guide.</p>
+          <h3>🛡️ Discord & Asset Pack</h3>
+          <p>Official high-res esports vector logo, channel architecture templates, and role configuration guide for community builders.</p>
         </div>
         <a href="Skibidi_Defense_Minimal_Esports.png" download class="dl-btn">DOWNLOAD LOGO PACK</a>
       </div>
