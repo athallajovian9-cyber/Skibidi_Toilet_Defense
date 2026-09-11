@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SKIBIDI TOILET DEFENSE: SIGMA PROTOCOL | Official Game Hub</title>
+  <link rel="icon" href="Skibidi_Defense_Minimal_Esports.png" type="image/png">
+  <meta name="description" content="Official website for Skibidi Toilet Defense: Sigma Edition. High-octane 2.5D physical defense arcade game. Play in browser, mobile, or launch via frameless desktop app.">
+  <meta name="theme-color" content="#080b09">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,600;0,700;1,700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #070a08;
+      --bg-card: rgba(16, 24, 20, 0.7);
+      --border: #1f3025;
+      --border-glow: #8bff5c;
+      --sigma: #8bff5c;
+      --cyan: #00f0ff;
+      --gold: #ffd35c;
+      --alert: #ff4d4d;
+      --text: #eaf5eb;
+      --text-muted: #8fa392;
+      --font-display: 'Chakra Petch', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    html {
+      scroll-behavior: smooth;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-display);
+    }
+
+    body {
+      overflow-x: hidden;
+      line-height: 1.6;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(139, 255, 92, 0.08), transparent 45%),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 48px 48px, 48px 48px;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 72px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 max(24px, 5vw);
+      background: rgba(7, 10, 8, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 12px;
+      text-decoration: none; color: var(--text);
+    }
+    .nav-logo {
+      width: 42px; height: 42px; border-radius: 8px;
+      border: 1px solid var(--border-glow);
+    }
+    .nav-title {
+      font-weight: 700; font-size: 18px; letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+    .nav-title span { color: var(--sigma); }
+    .nav-links {
+      display: flex; gap: 24px; list-style: none; align-items: center;
+    }
+    .nav-links a {
+      color: var(--text-muted); text-decoration: none;
+      font-size: 14px; font-weight: 600; letter-spacing: 1px;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--sigma); }
+    .btn-nav {
+      background: var(--sigma); color: #070a08 !important;
+      padding: 8px 18px; border-radius: 4px; font-weight: 700 !important;
+      text-transform: uppercase; transition: transform 0.15s, box-shadow 0.15s !important;
+    }
+    .btn-nav:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 16px rgba(139, 255, 92, 0.4);
+    }
+
+    /* HERO */
+    .hero {
+      min-height: 92vh;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      text-align: center;
+      padding: 120px 20px 60px;
+      position: relative;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(139, 255, 92, 0.1); border: 1px solid rgba(139, 255, 92, 0.3);
+      padding: 6px 16px; border-radius: 50px; color: var(--sigma);
+      font-family: var(--font-mono); font-size: 12px; letter-spacing: 1.5px;
+      margin-bottom: 24px;
+    }
+    .hero-badge::before {
+      content: ''; width: 8px; height: 8px; background: var(--sigma);
+      border-radius: 50%; box-shadow: 0 0 8px var(--sigma);
+    }
+    .hero h1 {
+      font-size: clamp(38px, 7vw, 76px);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      max-width: 900px;
+      margin-bottom: 20px;
+    }
+    .hero h1 span.glitch {
+      color: var(--sigma);
+      text-shadow: 0 0 20px rgba(139, 255, 92, 0.5);
+    }
+    .hero p {
+      font-size: clamp(16px, 2.2vw, 20px);
+      color: var(--text-muted);
+      max-width: 640px;
+      margin-bottom: 36px;
+    }
+    .hero-actions {
+      display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+    }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+      padding: 16px 32px; border-radius: 6px; font-weight: 700; font-size: 15px;
+      text-decoration: none; text-transform: uppercase; letter-spacing: 1.5px;
+      cursor: pointer; transition: all 0.2s; border: none; font-family: inherit;
+    }
+    .btn-primary {
+      background: var(--sigma); color: #070a08;
+      box-shadow: 0 0 24px rgba(139, 255, 92, 0.4);
+    }
+    .btn-primary:hover {
+      background: #a4ff7c; transform: translateY(-3px);
+      box-shadow: 0 0 32px rgba(139, 255, 92, 0.6);
+    }
+    .btn-secondary {
+      background: rgba(16, 24, 20, 0.8); border: 1px solid var(--border);
+      color: var(--text); backdrop-filter: blur(6px);
+    }
+    .btn-secondary:hover {
+      border-color: var(--cyan); color: var(--cyan); transform: translateY(-3px);
+      box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+    }
+
+    /* GAME PLAY EMBED CONTAINER */
+    .game-section {
+      padding: 40px max(24px, 5vw) 80px;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .screen-container {
+      width: min(1180px, 100%);
+      background: #000;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(139, 255, 92, 0.15);
+      position: relative;
+    }
+    .screen-header {
+      background: #0f1612;
+      padding: 12px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono); font-size: 12px; color: var(--text-muted);
+    }
+    .screen-dots { display: flex; gap: 8px; }
+    .screen-dots span {
+      width: 10px; height: 10px; border-radius: 50%; display: inline-block;
+    }
+    .screen-dots span:nth-child(1) { background: #ff5f56; }
+    .screen-dots span:nth-child(2) { background: #ffbd2e; }
+    .screen-dots span:nth-child(3) { background: #27c93f; }
+    
+    .screen-frame {
+      width: 100%;
+      height: 640px;
+      border: none;
+      display: block;
+    }
+
+    /* FEATURES GRID */
+    .section-header {
+      text-align: center; margin-bottom: 50px;
+    }
+    .section-header h2 {
+      font-size: clamp(28px, 4vw, 44px); text-transform: uppercase;
+      letter-spacing: 1.5px; margin-bottom: 12px;
+    }
+    .section-header h2 span { color: var(--sigma); }
+    .section-header p { color: var(--text-muted); font-size: 16px; }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 max(24px, 5vw) 100px;
+    }
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 32px;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      position: relative; overflow: hidden;
+    }
+    .feature-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--sigma);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(139, 255, 92, 0.1);
+    }
+    .feature-icon {
+      font-size: 38px; margin-bottom: 18px; display: inline-block;
+    }
+    .feature-title {
+      font-size: 20px; font-weight: 700; margin-bottom: 10px;
+      text-transform: uppercase; letter-spacing: 1px; color: #fff;
+    }
+    .feature-desc {
+      color: var(--text-muted); font-size: 14px; line-height: 1.6;
+    }
+
+    /* DOWNLOADS BAR */
+    .download-section {
+      background: linear-gradient(180deg, rgba(16, 24, 20, 0.4), #0c140f);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 80px max(24px, 5vw);
+      text-align: center;
+    }
+    .download-boxes {
+      display: flex; gap: 24px; justify-content: center; flex-wrap: wrap;
+      margin-top: 40px;
+    }
+    .dl-card {
+      background: #090e0b;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 30px;
+      width: 320px;
+      text-align: left;
+      display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .dl-card h3 {
+      font-size: 20px; margin-bottom: 10px; color: var(--gold);
+    }
+    .dl-card p {
+      font-size: 13px; color: var(--text-muted); margin-bottom: 24px;
+    }
+    .dl-btn {
+      width: 100%; text-align: center; padding: 12px;
+      background: #141f18; border: 1px solid #314d3a; color: var(--sigma);
+      text-decoration: none; font-weight: 700; font-size: 13px;
+      letter-spacing: 1px; text-transform: uppercase; border-radius: 4px;
+      transition: all 0.15s;
+    }
+    .dl-btn:hover {
+      background: var(--sigma); color: #070a08;
+      box-shadow: 0 0 16px rgba(139, 255, 92, 0.4);
+    }
+
+    /* FOOTER */
+    footer {
+      padding: 40px max(24px, 5vw);
+      text-align: center;
+      border-top: 1px solid var(--border);
+      font-size: 13px; color: var(--text-muted);
+    }
+    footer a { color: var(--sigma); text-decoration: none; }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .screen-frame { height: 480px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="#" class="nav-brand">
+      <img src="Skibidi_Defense_Minimal_Esports.png" alt="Logo" class="nav-logo">
+      <div class="nav-title">SKIBIDI <span>DEFENSE</span></div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#play">PLAY NOW</a></li>
+      <li><a href="#features">FEATURES</a></li>
+      <li><a href="#downloads">DOWNLOADS</a></li>
+      <li><a href="#discord">COMMUNITY</a></li>
+      <li><a href="Skibidi_Toilet_Defense_Mobile.html" target="_blank" class="btn-nav">LAUNCH GAME</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">SIGMA PROTOCOL // VER 3.0 RELEASED</div>
+    <h1>DEFEND THE SEWER.<br><span class="glitch">SMASH THE TOILETS.</span></h1>
+    <p>The ultimate high-octane 2.5D physical defense game. Deploy walking Camera & Speaker titans, lay physics-based floor traps, and purge the horde.</p>
+    
+    <div class="hero-actions">
+      <a href="#play" class="btn btn-primary">⚡ PLAY ONLINE INSTANTLY</a>
+      <a href="#downloads" class="btn btn-secondary">💾 DOWNLOAD LAUNCHER.BAT</a>
+    </div>
+  </section>
+
+  <!-- IN-BROWSER EMBEDDED PLAY SECTION -->
+  <section id="play" class="game-section">
+    <div class="section-header">
+      <h2>LIVE <span>ARCADE</span> ARENA</h2>
+      <p>Play directly inside your browser below, or switch to Fullscreen / Mobile Mode.</p>
+    </div>
+
+    <div class="screen-container">
+      <div class="screen-header">
+        <div class="screen-dots">
+          <span></span><span></span><span></span>
+        </div>
+        <div>TACTICAL_FEED // SECTOR-04</div>
+        <div>60 FPS // SYNTH BGM READY</div>
+      </div>
+      <iframe src="Skibidi_Toilet_Defense_Mobile.html" class="screen-frame" title="Game Frame" allow="fullscreen; autoplay"></iframe>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features">
+    <div class="section-header">
+      <h2>TACTICAL <span>WARFARE</span> FEATURES</h2>
+      <p>Built from the ground up for physical consistency, game feel, and deep synergy.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">🪤</span>
+        <div class="feature-title">Physical Floor Traps</div>
+        <div class="feature-desc">Place hydraulic plunger springs to launch toilets backward in bowling-pin chain reactions, deploy corrosive acid puddles, or drop explosive sludge barrels.</div>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">🦾</span>
+        <div class="feature-title">Dynamic Alliance Units</div>
+        <div class="feature-desc">Allies walk and sprint across the sewer floor! Hire Titan Drillman with seismic fissures, quad-pedal Mech-Hounds, and low-altitude jetpack commandos.</div>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">🛡️</span>
+        <div class="feature-title">Destructible Enemy Armor</div>
+        <div class="feature-desc">Face armored Juggernaut Toilets whose plates ricochet light fire until physically shattered, hyper-velocity Astro Toilets, and multi-armed mutants.</div>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">💥</span>
+        <div class="feature-title">Ragdoll & Battle Scars</div>
+        <div class="feature-desc">Toilets don't just disappear—overkill hits launch them into tumbling 2.5D ragdoll cartwheels. Scorch craters and acid pools permanently stain the battleground.</div>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">⚡</span>
+        <div class="feature-title">Boss Slow-Mo & Relics</div>
+        <div class="feature-desc">Savor cinematic impact freeze-frames when downing bosses, followed by the Sigma Relic Protocol: draft permanent passive synergies every 5 waves.</div>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">📱</span>
+        <div class="feature-title">Universal Touch & PC</div>
+        <div class="feature-desc">Seamless auto-adaptive layout with thumb-dock touch controls, safe-area support, and standalone frameless Windows batch launcher.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DOWNLOADS -->
+  <section id="downloads" class="download-section">
+    <div class="section-header">
+      <h2>GET THE <span>NATIVE FILES</span></h2>
+      <p>Download standalone packages to run locally with zero latency or browser bars.</p>
+    </div>
+
+    <div class="download-boxes">
+      <div class="dl-card">
+        <div>
+          <h3>🚀 Sigma Launcher v3.0</h3>
+          <p>Windows batch launcher with auto-detection for Chrome, Edge, Brave, and Firefox. Frameless app mode, resolution switcher & save backups.</p>
+        </div>
+        <a href="launcher.bat" download class="dl-btn">DOWNLOAD .BAT</a>
+      </div>
+
+      <div class="dl-card">
+        <div>
+          <h3>📱 Mobile Edition HTML</h3>
+          <p>Full single-file offline game with horizontal swipe action docks, touch ripple rings, and borderless mobile fullscreen support.</p>
+        </div>
+        <a href="Skibidi_Toilet_Defense_Mobile.html" download class="dl-btn">DOWNLOAD MOBILE .HTML</a>
+      </div>
+
+      <div class="dl-card">
+        <div>
+          <h3>🛡️ Discord Server Asset Pack</h3>
+          <p>Official high-res esports vector logo, channel architecture templates, and role configuration guide.</p>
+        </div>
+        <a href="Skibidi_Defense_Minimal_Esports.png" download class="dl-btn">DOWNLOAD LOGO PACK</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2026 <strong>Skibidi Toilet Defense: Sigma Edition</strong>. Developed for elite autonomous gaming.</p>
+    <p style="margin-top: 8px; font-size: 11px; opacity: 0.7;">Powered by HTML5 Canvas & Web Audio API Procedural Synthwave Engine.</p>
+  </footer>
+
+</body>
+</html>

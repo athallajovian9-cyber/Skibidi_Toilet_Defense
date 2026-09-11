@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- MATTE CARBON ESPORTS BACKGROUND -->
+  <rect width="512" height="512" fill="#080b09"/>
+
+  <!-- SUBTLE TACTICAL GRID / CALIBRATION MARKS (VALORANT STYLE) -->
+  <g stroke="#1a251e" stroke-width="1.5" opacity="0.6">
+    <!-- Center coordinate crossbars -->
+    <line x1="256" y1="24" x2="256" y2="488" stroke-dasharray="6,6"/>
+    <line x1="24" y1="256" x2="488" y2="256" stroke-dasharray="6,6"/>
+    <!-- Outer Corner brackets -->
+    <path d="M 44,70 L 44,44 L 70,44" fill="none"/>
+    <path d="M 468,70 L 468,44 L 442,44" fill="none"/>
+    <path d="M 44,442 L 44,468 L 70,468" fill="none"/>
+    <path d="M 468,442 L 468,468 L 442,468" fill="none"/>
+  </g>
+
+  <!-- TACTICAL SPEC TEXT -->
+  <text x="44" y="96" font-family="'Consolas', 'Courier New', monospace" font-size="10" fill="#425848" letter-spacing="3">DEFENSE // SIGMA-01</text>
+  <text x="468" y="96" text-anchor="end" font-family="'Consolas', 'Courier New', monospace" font-size="10" fill="#425848" letter-spacing="2">SYS.VER // 3.0</text>
+  <text x="44" y="430" font-family="'Consolas', 'Courier New', monospace" font-size="10" fill="#425848" letter-spacing="2">SECTOR // S-04</text>
+  <text x="468" y="430" text-anchor="end" font-family="'Consolas', 'Courier New', monospace" font-size="10" fill="#8bff5c" letter-spacing="3">STATUS // ARMED</text>
+
+  <!-- THE PRIMARY ICONIC EMBLEM -->
+  <!-- Outer Angular Aegis Hex Shield Geometry -->
+  <g id="outerShield">
+    <!-- Left Wing -->
+    <polygon points="110,140 170,140 230,280 200,340 110,240" fill="#141d18"/>
+    <!-- Right Wing -->
+    <polygon points="402,140 342,140 282,280 312,340 402,240" fill="#141d18"/>
+    
+    <!-- Accent Chevron Flaps (Sharp Precision Toxic Green) -->
+    <polygon points="88,200 116,200 156,270 128,270" fill="#8bff5c"/>
+    <polygon points="424,200 396,200 356,270 384,270" fill="#8bff5c"/>
+  </g>
+
+  <!-- CENTRAL GEOMETRIC CAMERA-HELM EMBLEM (FLAT VECTOR GEOMETRY) -->
+  <g id="centralEmblem">
+    <!-- Top Visor / Crown Shell -->
+    <polygon points="172,110 340,110 376,160 136,160" fill="#ffffff"/>
+    
+    <!-- Main Body Chassis (Solid Carbon Silhouette) -->
+    <polygon points="144,168 368,168 338,300 256,380 174,300" fill="#0f1612" stroke="#ffffff" stroke-width="6" stroke-linejoin="miter"/>
+
+    <!-- Dynamic Cut Facets (Valorant Angular Style) -->
+    <!-- Left Facet -->
+    <polygon points="152,176 220,176 186,290 176,280" fill="#1b251f"/>
+    <!-- Right Facet -->
+    <polygon points="360,176 292,176 326,290 336,280" fill="#25342a"/>
+    <!-- Bottom V-Chin Accent -->
+    <polygon points="256,336 296,296 256,362 216,296" fill="#8bff5c"/>
+
+    <!-- THE OPTICAL LENS CORE (GEOMETRIC HEXAGON APERTURE) -->
+    <!-- Outer Hex Rim -->
+    <polygon points="256,190 298,214 298,262 256,286 214,262 214,214" fill="#060907" stroke="#8bff5c" stroke-width="5" stroke-linejoin="miter"/>
+    
+    <!-- Inner High-Contrast Core -->
+    <polygon points="256,202 286,219 286,255 256,272 226,255 226,219" fill="#00f0ff"/>
+    <polygon points="256,214 274,224 274,248 256,258 238,248 238,224" fill="#080d0a"/>
+    
+    <!-- Precision Center Dot -->
+    <circle cx="256" cy="236" r="5" fill="#ffffff"/>
+
+    <!-- Clean Rec Notch -->
+    <rect x="250" y="124" width="12" height="12" fill="#ff4d4d"/>
+  </g>
+
+  <!-- TARGETING CROSSHAIRS / RANGEFINER BRACKETS -->
+  <g stroke="#ffffff" stroke-width="3" fill="none">
+    <!-- Top reticle tick -->
+    <line x1="256" y1="78" x2="256" y2="98"/>
+    <!-- Bottom reticle tick -->
+    <line x1="256" y1="392" x2="256" y2="412"/>
+    <!-- Left reticle tick -->
+    <line x1="78" y1="236" x2="98" y2="236"/>
+    <!-- Right reticle tick -->
+    <line x1="414" y1="236" x2="434" y2="236"/>
+  </g>
+
+  <!-- LOWER TACTICAL BRANDING (BOLD GEOMETRIC MODERN SANS) -->
+  <g id="wordmark">
+    <!-- Main Team / Org Title -->
+    <text x="256" y="445" text-anchor="middle" font-family="'Impact', 'Arial Black', 'Trebuchet MS', sans-serif" font-weight="900" font-size="28" fill="#ffffff" letter-spacing="12">
+      ALLIANCE
+    </text>
+    <!-- Subtitle Pill -->
+    <rect x="180" y="456" width="152" height="18" fill="#8bff5c"/>
+    <text x="256" y="469" text-anchor="middle" font-family="'Consolas', monospace" font-weight="900" font-size="10" fill="#080b09" letter-spacing="4">
+      SIGMA PROTOCOL
+    </text>
+  </g>
+</svg>
