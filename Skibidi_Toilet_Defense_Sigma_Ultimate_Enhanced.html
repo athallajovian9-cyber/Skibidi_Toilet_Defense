@@ -567,12 +567,12 @@
     pointer-events: auto;
     display: flex; flex-direction: column; justify-content: center;
   }
-  .hudLeft { min-width: 170px; }
-  .hudCenter {
+  .hudLeft { min-width: 110px; }
+  .hudCenter { max-width: 320px; 
     flex: 1; max-width: 480px; align-items: center; text-align: center;
     padding: 6px 16px;
   }
-  .hudRight { min-width: 200px; }
+  .hudRight { min-width: 130px; }
   .hudRow { display: flex; align-items: center; gap: 10px; }
   .hudDivider { width: 1px; height: 26px; background: rgba(255,255,255,0.12); }
   .hudMetric { display: flex; align-items: center; gap: 8px; }
@@ -683,62 +683,48 @@
   <div id="hypnoOverlay"><div class="hypnoScanlines"></div></div>
   <div id="buffsBar"></div>
 
-  <!-- CLEAN MODERN TACTICAL HUD -->
+  <!-- ULTRA-COMPACT MINIMAL HUD -->
   <div id="modernHud">
-    <!-- LEFT CLUSTER: BASE HEALTH & SKILL BARRACKS -->
+    <!-- LEFT: HP & SKILL -->
     <div class="hudCard hudLeft">
       <div class="hudRow">
         <div class="hudMetric hpMetric">
           <span class="hudIcon">❤️</span>
-          <div class="hudData">
-            <span class="hudLabel">BASE HP</span>
-            <span class="hudVal" id="livesVal">3</span>
-          </div>
+          <span class="hudVal" id="livesVal">3</span>
         </div>
         <div class="hudDivider"></div>
-        <div class="hudMetric skillMetric" id="quickBarracksTrigger" title="Click or Press [H] to open Barracks">
+        <div class="hudMetric skillMetric" id="quickBarracksTrigger" title="Press [H] for Barracks">
           <span class="hudIcon">⚡</span>
-          <div class="hudData">
-            <span class="hudLabel">SKILL PTS</span>
-            <span class="hudVal highlight" id="skillPtsHud">0</span>
-          </div>
-          <span class="hudBadge" id="barracksAlertBadge">RECRUIT [H]</span>
+          <span class="hudVal highlight" id="skillPtsHud">0</span>
+          <span class="hudBadge" id="barracksAlertBadge">HIRE [H]</span>
         </div>
       </div>
     </div>
 
-    <!-- CENTER CLUSTER: WAVE STATUS & OBJECTIVE PROGRESS -->
+    <!-- CENTER: WAVE & PROGRESS -->
     <div class="hudCard hudCenter">
       <div class="waveHeader">
-        <span class="waveTag">MISSION WAVE</span>
-        <span class="waveNumber" id="waveVal">1 / 20</span>
+        <span class="waveNumber" id="waveVal">WAVE 1/20</span>
         <span class="speedTag" id="speedHud">1x</span>
       </div>
       <div id="waveProgressWrap"><div id="waveProgressFill"></div></div>
-      <div id="objectiveHud">OBJECTIVE: SURVIVE THE WAVE</div>
+      <div id="objectiveHud">15 TOILETS LEFT</div>
       <div id="bossBarWrap"><div id="bossBarFill"></div></div>
       <div id="sigmaMeterWrap"><div id="sigmaMeterFill"></div></div>
     </div>
 
-    <!-- RIGHT CLUSTER: TACTICAL SCORE & COMBAT MULTIPLIER -->
+    <!-- RIGHT: SCORE & COMBO -->
     <div class="hudCard hudRight">
       <div class="hudRow">
         <div class="hudMetric scoreMetric">
           <span class="hudIcon">🏆</span>
-          <div class="hudData">
-            <span class="hudLabel">SCORE</span>
-            <span class="hudVal" id="scoreVal">0</span>
-          </div>
+          <span class="hudVal" id="scoreVal">0</span>
         </div>
         <div class="hudDivider"></div>
-        <div class="hudMetric comboMetric">
-          <div class="hudData">
-            <span class="hudLabel" id="streakHud">STREAK 0</span>
-            <span class="hudVal comboVal" id="comboHud">COMBO x1.0</span>
-          </div>
-        </div>
+        <span class="hudVal comboVal" id="comboHud">x1.0</span>
+        <span id="streakHud" style="display:none;">0</span>
         <div class="hudDivider"></div>
-        <button id="quickPauseToggle" class="hudActionBtn" title="Pause Game [ESC / P]">⏸️</button>
+        <button id="quickPauseToggle" class="hudActionBtn" title="Pause">⏸️</button>
       </div>
       <div id="relicsHud" style="display:none;font-size:10px;color:var(--gold);margin-top:2px;">RELICS: <span id="relicsList"></span></div>
     </div>
@@ -746,25 +732,22 @@
   <div id="toast"></div>
   <div id="waveBanner"><div class="big" id="waveBannerBig">WAVE 1</div><div class="small" id="waveBannerSmall"></div></div>
   <canvas id="game"></canvas>
-  <div id="howto">CLICK / TAP targets before they breach. Crits, chains, turret focus and wave modifiers reward smart play. SIGMA BLAST clears crowds and damages bosses. P pauses. ESC pauses/resumes.</div>
+  
   
   <div id="trapBar">
-    <span class="trapLabel">🪤 TRAPS:</span>
-    <button id="trapBouncerBtn" class="trapBtn" data-trap="spring" title="Hydraulic Plunger Spring [1] - Launches toilets backward into crowds">🪠 SPRING [1] <span class="trapCost">15⚡</span></button>
-    <button id="trapAcidBtn" class="trapBtn" data-trap="acid" title="Corrosive Acid Puddle [2] - Melts armor and slows traction">🧪 ACID [2] <span class="trapCost">20⚡</span></button>
-    <button id="trapBarrelBtn" class="trapBtn" data-trap="barrel" title="Explosive Sludge Barrel [3] - Shoot/tap to detonate in huge AoE">🛢️ BARREL [3] <span class="trapCost">25⚡</span></button>
+    <button id="trapBouncerBtn" class="trapBtn" data-trap="spring">🪠 SPRING [1] 15⚡</button>
+    <button id="trapAcidBtn" class="trapBtn" data-trap="acid">🧪 ACID [2] 20⚡</button>
+    <button id="trapBarrelBtn" class="trapBtn" data-trap="barrel">🛢️ BARREL [3] 25⚡</button>
   </div>
 
   <div id="actionBar">
-    <button id="abilityBtn" class="miniBtn">SIGMA BLAST [SPACE] 0%</button>
-    <button id="tvHypnoBtn" class="miniBtn">TV HYPNO [V] 0%</button>
-    <button id="bassBlastBtn" class="miniBtn">BASS DROP [B]</button>
-    <button id="hireBtn" class="miniBtn">HIRE [H]</button>
-    <button id="shopBtn" class="miniBtn">SHOP [S]</button>
-    <button id="inGameTutBtn" class="miniBtn" style="border-color:var(--gold);color:var(--gold);">GUIDE [T]</button>
-    <button id="modsBtn" class="miniBtn">MODS [M]</button>
-    <button id="pauseBtn" class="miniBtn">PAUSE [P]</button>
-    <button id="fsMobileBtn" class="miniBtn" style="border-color:#6ad7ff;color:#6ad7ff;">⛶ FULLSCREEN</button>
+    <button id="abilityBtn" class="miniBtn">💥 BLAST [SPACE] 0%</button>
+    <button id="tvHypnoBtn" class="miniBtn">📺 HYPNO [V] 0%</button>
+    <button id="bassBlastBtn" class="miniBtn">🔊 BASS [B]</button>
+    <button id="hireBtn" class="miniBtn">⚔️ HIRE [H]</button>
+    <button id="shopBtn" class="miniBtn">🛒 SHOP [S]</button>
+    <button id="inGameTutBtn" class="miniBtn" style="border-color:var(--gold);color:var(--gold);">📖 GUIDE [T]</button>
+    <button id="fsMobileBtn" class="miniBtn" style="border-color:#6ad7ff;color:#6ad7ff;">⛶ FULL</button>
   </div>
 
   <div id="relicModal" class="screen" style="display:none;z-index:25;background:rgba(5,8,6,0.96);">
@@ -3821,7 +3804,7 @@ function chargeAlliance(amount){
   allianceCharge = Math.min(100, allianceCharge + amount);
   const btn = document.getElementById('tvHypnoBtn');
   if(btn){
-    btn.textContent = allianceCharge >= 100 ? 'TV HYPNO [V] READY' : 'TV HYPNO [V] ' + Math.floor(allianceCharge) + '%';
+    btn.textContent = allianceCharge >= 100 ? '📺 HYPNO [READY]' : '📺 HYPNO ' + Math.floor(allianceCharge) + '%';
     btn.classList.toggle('ready', allianceCharge >= 100);
   }
 }
@@ -4609,19 +4592,19 @@ function updateHud(){
   const bestVal = document.getElementById('bestVal');
   if(bestVal) bestVal.textContent = Math.max(bestScore, score);
   livesVal.textContent = lives;
-  waveVal.textContent = wave + ' / ' + TOTAL_WAVES;
+  waveVal.textContent = 'WAVE ' + wave + '/' + TOTAL_WAVES;
   if(skillPtsHud) skillPtsHud.textContent = skillPoints;
   const pts = document.getElementById('skillPtsVal');
   if(pts) pts.textContent = skillPoints;
   sigmaFill.style.width = Math.min(100, sigma) + '%';
   const comboHud = document.getElementById('comboHud');
-  if(comboHud){ comboHud.textContent = 'COMBO x' + comboMult().toFixed(1); comboHud.classList.toggle('hot', combo >= 12); }
+  if(comboHud){ comboHud.textContent = 'x' + comboMult().toFixed(1); comboHud.classList.toggle('hot', combo >= 12); }
   const sh = document.getElementById('streakHud'); if(sh) sh.textContent = 'STREAK ' + streak;
-  const oh = document.getElementById('objectiveHud'); if(oh) oh.textContent = isFinalWave(wave) ? 'OBJECTIVE: DEFEAT THE G-MAN' : (isBossWave(wave) ? 'OBJECTIVE: DEFEAT THE BOSS' : 'OBJECTIVE: CLEAR ' + Math.max(0, toiletsToSpawnThisWave - toiletsSpawnedThisWave + toilets.length) + ' TARGETS • ' + waveModifier);
+  const oh = document.getElementById('objectiveHud'); if(oh) oh.textContent = isFinalWave(wave) ? 'BOSS: DEFEAT G-MAN' : (isBossWave(wave) ? 'BOSS: DEFEAT TOILET BOSS' : Math.max(0, toiletsToSpawnThisWave - toiletsSpawnedThisWave + toilets.length) + ' TOILETS LEFT');
   const ps = document.getElementById('pauseStats'); if(ps) ps.textContent = 'Score ' + score + '  •  Pops ' + totalPops + '  •  Missed ' + totalMissed + '  •  Crits ' + criticalHits;
   const abilityBtn = document.getElementById('abilityBtn');
   if(abilityBtn){
-    abilityBtn.textContent = abilityCharge >= 100 ? 'SIGMA BLAST [SPACE] READY' : 'SIGMA BLAST [SPACE] ' + Math.floor(abilityCharge) + '%';
+    abilityBtn.textContent = abilityCharge >= 100 ? '💥 BLAST [READY]' : '💥 BLAST ' + Math.floor(abilityCharge) + '%';
     abilityBtn.classList.toggle('ready', abilityCharge >= 100);
   }
   const progress = document.getElementById('waveProgressFill');
