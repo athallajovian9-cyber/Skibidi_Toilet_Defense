@@ -1962,175 +1962,295 @@ function drawSimpCameraman2(a, now){
 }
 
 function drawTitanDrillman(a, now){
-  const sc = 1.7;
+  const sc = 1.75;
   const legSwing = Math.sin(a.walkCycle) * 0.42;
-  const heavyThud = Math.abs(Math.sin(a.walkCycle)) * -4 * sc;
+  const heavyThud = Math.abs(Math.sin(a.walkCycle)) * -4.5 * sc;
   ctx.translate(0, heavyThud);
 
-  // 1. REAR HEAVY INDUSTRIAL GENERATOR BACKPACK & EXHAUST VENTS
-  ctx.fillStyle = '#1c1f24';
-  roundPath(-12 * sc, -16 * sc, 24 * sc, 26 * sc, 4 * sc); ctx.fill();
-  ctx.strokeStyle = '#323a45'; ctx.lineWidth = 1.8 * sc; ctx.stroke();
-  // Exhaust stacks on back
-  for(let ex of [-8 * sc, 8 * sc]){
-    ctx.fillStyle = '#0e1014';
-    ctx.fillRect(ex - 2 * sc, -24 * sc, 4 * sc, 10 * sc);
-    // Industrial exhaust fumes / heat waves
-    if(Math.random() < 0.35){
-      popParticles(a.x + ex, a.y - 26 * sc, 'rgba(200, 160, 120, 0.4)', 1);
-    }
-  }
-
-  // 2. MASSIVE HEAVY TREAD COMBAT BOOTS & HYDRAULIC PILLAR LEGS
-  ctx.strokeStyle = '#221e1a';
-  ctx.lineWidth = 6.5 * sc;
-  // Left leg
-  ctx.beginPath(); ctx.moveTo(-6 * sc, 8 * sc);
-  ctx.lineTo(-6 * sc - Math.sin(legSwing) * 7 * sc, 18 * sc); ctx.stroke();
-  // Right leg
-  ctx.beginPath(); ctx.moveTo(6 * sc, 8 * sc);
-  ctx.lineTo(6 * sc + Math.sin(legSwing) * 7 * sc, 18 * sc); ctx.stroke();
-  // Exposed chrome hydraulic pistons on thighs
-  ctx.strokeStyle = '#b0b8c2'; ctx.lineWidth = 2 * sc;
-  ctx.beginPath(); ctx.moveTo(-8 * sc, 10 * sc); ctx.lineTo(-4 * sc, 17 * sc); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(4 * sc, 10 * sc); ctx.lineTo(8 * sc, 17 * sc); ctx.stroke();
-  // Enormous flat industrial tread boots
-  ctx.fillStyle = '#14161a';
-  ctx.fillRect(-9 * sc - Math.sin(legSwing) * 7 * sc, 18 * sc, 8 * sc, 4.5 * sc);
-  ctx.fillRect(1 * sc + Math.sin(legSwing) * 7 * sc, 18 * sc, 8 * sc, 4.5 * sc);
-
-  // 3. OCHRE / HAZARD-ORANGE BOILER CHASSIS (Curved Heavy Plating with Rivets)
-  const bg = ctx.createLinearGradient(-12 * sc, -14 * sc, 12 * sc, 10 * sc);
-  bg.addColorStop(0, '#e07a1b');
-  bg.addColorStop(0.45, '#bd5a11');
-  bg.addColorStop(1, '#662f08');
-  ctx.fillStyle = bg;
-  roundPath(-12 * sc, -15 * sc, 24 * sc, 25 * sc, 4 * sc); ctx.fill();
-  ctx.strokeStyle = '#3d1c05'; ctx.lineWidth = 2 * sc; ctx.stroke();
-
-  // Horizontal structural boiler reinforcement rings
-  ctx.strokeStyle = '#4a260d'; ctx.lineWidth = 1.5 * sc;
-  ctx.beginPath(); ctx.moveTo(-11 * sc, -4 * sc); ctx.lineTo(11 * sc, -4 * sc); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(-11 * sc, 4 * sc); ctx.lineTo(11 * sc, 4 * sc); ctx.stroke();
-
-  // 4. THE ICONIC CHEST BADGE: WHITE SQUARE + GREEN SAFETY CROSS (Anzen Hyoshiki)
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(-4.5 * sc, -11 * sc, 9 * sc, 9 * sc);
-  ctx.strokeStyle = '#222'; ctx.lineWidth = 1 * sc; ctx.strokeRect(-4.5 * sc, -11 * sc, 9 * sc, 9 * sc);
-  // Vibrant Green Cross
-  ctx.fillStyle = '#1eb846';
-  ctx.fillRect(-1.2 * sc, -9.5 * sc, 2.4 * sc, 6 * sc); // Vertical bar
-  ctx.fillRect(-3 * sc, -7.7 * sc, 6 * sc, 2.4 * sc);   // Horizontal bar
-
-  // Central dark recessed mounting nozzle/reactor beneath cross
-  ctx.fillStyle = '#181410';
-  ctx.beginPath(); ctx.arc(0, 1 * sc, 3.5 * sc, 0, Math.PI * 2); ctx.fill();
-  ctx.strokeStyle = '#e07a1b'; ctx.lineWidth = 1.5 * sc; ctx.stroke();
-  ctx.fillStyle = '#ff7a1b'; ctx.beginPath(); ctx.arc(0, 1 * sc, 1.5 * sc, 0, Math.PI * 2); ctx.fill();
-
-  // Heavy neck collar ring with safety railing
-  ctx.fillStyle = '#22272e';
-  roundPath(-7 * sc, -18 * sc, 14 * sc, 4 * sc, 2 * sc); ctx.fill();
-  ctx.strokeStyle = '#ffd35c'; ctx.lineWidth = 1 * sc; ctx.stroke();
-
-  // 5. THE 3D CONICAL MACHINE-TURNED STEEL DRILL HEAD (Replacing humanoid head)
+  // --- AMBIENT OCCLUSION & VOLUMETRIC GROUND SHADOW ---
   ctx.save();
-  ctx.translate(2 * sc, -23 * sc);
-  // Drill base mounting bracket
-  ctx.fillStyle = '#1c2026';
-  roundPath(-6 * sc, -4 * sc, 12 * sc, 8 * sc, 2 * sc); ctx.fill();
-  // Heavy conical drill bit pointing forward
-  const hDrillLen = 22 * sc;
-  const headSpin = (now * 0.04) % (Math.PI * 2);
-  const hg = ctx.createLinearGradient(0, -7 * sc, hDrillLen, 7 * sc);
-  hg.addColorStop(0, '#4a535e');
-  hg.addColorStop(0.35, '#dbe2eb');
-  hg.addColorStop(0.7, '#8b96a4');
-  hg.addColorStop(1, '#ffffff');
-  ctx.fillStyle = hg;
-  ctx.beginPath();
-  ctx.moveTo(0, -7 * sc);
-  ctx.lineTo(hDrillLen, 0); // Sharp drill point
-  ctx.lineTo(0, 7 * sc);
-  ctx.closePath();
-  ctx.fill();
-  ctx.strokeStyle = '#22272e'; ctx.lineWidth = 1.6 * sc; ctx.stroke();
-  // Turn-milled concentric steel spirals
-  ctx.strokeStyle = '#181b20'; ctx.lineWidth = 2 * sc;
-  for(let sp = 3 * sc; sp < hDrillLen - 3 * sc; sp += 4.5 * sc){
-    const off = Math.sin(headSpin + sp) * 3 * sc;
-    ctx.beginPath();
-    ctx.moveTo(sp, -5.5 * sc + off);
-    ctx.lineTo(sp + 3 * sc, 5.5 * sc - off);
-    ctx.stroke();
-  }
-  // Drill spark
-  if(Math.random() < 0.3){
-    ctx.fillStyle = '#fff4a3';
-    ctx.beginPath(); ctx.arc(hDrillLen + (Math.random()-0.5)*3, (Math.random()-0.5)*3, 2.5 * sc, 0, Math.PI * 2); ctx.fill();
+  const groundShadow = ctx.createRadialGradient(0, 18 * sc, 4 * sc, 0, 18 * sc, 26 * sc);
+  groundShadow.addColorStop(0, 'rgba(0,0,0,0.85)');
+  groundShadow.addColorStop(0.5, 'rgba(5,10,7,0.5)');
+  groundShadow.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = groundShadow;
+  ctx.beginPath(); ctx.ellipse(0, 19 * sc, 28 * sc, 9 * sc, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+
+  // 1. REAR HEAVY INDUSTRIAL GENERATOR & TWIN STEAM CHIMNEYS
+  ctx.save();
+  const backpackGrad = ctx.createLinearGradient(-14 * sc, -18 * sc, 14 * sc, 12 * sc);
+  backpackGrad.addColorStop(0, '#2a313a');
+  backpackGrad.addColorStop(0.3, '#1c2228');
+  backpackGrad.addColorStop(0.8, '#0d1114');
+  backpackGrad.addColorStop(1, '#050709');
+  ctx.fillStyle = backpackGrad;
+  roundPath(-13 * sc, -18 * sc, 26 * sc, 28 * sc, 4 * sc); ctx.fill();
+  ctx.strokeStyle = '#3e4956'; ctx.lineWidth = 1.8 * sc; ctx.stroke();
+  
+  // Dual Heavy Smoke Stacks with Interior Furnace Glow
+  for(let ex of [-9 * sc, 9 * sc]){
+    const pipeGrad = ctx.createLinearGradient(ex - 3 * sc, 0, ex + 3 * sc, 0);
+    pipeGrad.addColorStop(0, '#1a2026');
+    pipeGrad.addColorStop(0.4, '#3d4855');
+    pipeGrad.addColorStop(1, '#0e1216');
+    ctx.fillStyle = pipeGrad;
+    ctx.fillRect(ex - 2.5 * sc, -26 * sc, 5 * sc, 11 * sc);
+    ctx.strokeStyle = '#4f5c6d'; ctx.lineWidth = 1 * sc; ctx.strokeRect(ex - 2.5 * sc, -26 * sc, 5 * sc, 11 * sc);
+    // Interior glowing furnace ember
+    ctx.fillStyle = '#ff6a00';
+    ctx.shadowColor = '#ff6a00'; ctx.shadowBlur = 8;
+    ctx.beginPath(); ctx.ellipse(ex, -26 * sc, 2.2 * sc, 1 * sc, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+    // Volumetric smoke particle plume
+    if(Math.random() < 0.35){
+      popParticles(a.x + ex, a.y - 28 * sc, 'rgba(180, 140, 100, 0.45)', 1);
+    }
   }
   ctx.restore();
 
-  // 6. DOME PAULDRONS WITH RED HAZARD STRIPES & MASSIVE ROTATING ARM DRILLS
+  // 2. MASSIVE HEAVY TREAD COMBAT BOOTS & ARTICULATED HYDRAULIC LEGS
+  for(let side of [-1, 1]){
+    const sw = side === -1 ? -legSwing : legSwing;
+    const footX = side * 6.5 * sc + Math.sin(sw) * 7 * sc;
+    const footY = 18 * sc;
+
+    // Heavy Industrial Thigh & Shin Casing (3D Cylindrical lighting)
+    ctx.save();
+    const legGrad = ctx.createLinearGradient(side * 6.5 * sc - 4 * sc, 0, side * 6.5 * sc + 4 * sc, 0);
+    legGrad.addColorStop(0, '#1a1410');
+    legGrad.addColorStop(0.35, '#543d2c');
+    legGrad.addColorStop(0.7, '#2e2016');
+    legGrad.addColorStop(1, '#0f0b08');
+    ctx.strokeStyle = legGrad;
+    ctx.lineWidth = 7 * sc;
+    ctx.beginPath(); ctx.moveTo(side * 6.5 * sc, 7 * sc);
+    ctx.lineTo(footX, footY); ctx.stroke();
+
+    // High-pressure Chrome Hydraulic Piston Shafts
+    ctx.strokeStyle = '#d0d8e2'; ctx.lineWidth = 2 * sc;
+    ctx.beginPath(); ctx.moveTo(side * 7.5 * sc, 9 * sc); ctx.lineTo(footX - side * 1 * sc, footY - 2 * sc); ctx.stroke();
+    // Piston reflection line
+    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 0.8 * sc;
+    ctx.beginPath(); ctx.moveTo(side * 7.5 * sc, 10 * sc); ctx.lineTo(footX - side * 1 * sc, footY - 4 * sc); ctx.stroke();
+
+    // Industrial Cast-Iron Cleat Boots
+    const bootGrad = ctx.createLinearGradient(footX - 5 * sc, footY, footX + 5 * sc, footY + 5 * sc);
+    bootGrad.addColorStop(0, '#2d333b');
+    bootGrad.addColorStop(0.5, '#181d22');
+    bootGrad.addColorStop(1, '#0a0d10');
+    ctx.fillStyle = bootGrad;
+    roundPath(footX - 4.5 * sc, footY, 9 * sc, 5 * sc, 2 * sc); ctx.fill();
+    ctx.strokeStyle = '#444e59'; ctx.lineWidth = 1 * sc; ctx.stroke();
+    // Heavy grip tread notches
+    ctx.fillStyle = '#080a0c';
+    for(let bx = footX - 3.5 * sc; bx <= footX + 2.5 * sc; bx += 2.2 * sc){
+      ctx.fillRect(bx, footY + 3.8 * sc, 1.2 * sc, 1.4 * sc);
+    }
+    ctx.restore();
+  }
+
+  // 3. OCHRE / HAZARD-ORANGE BOILER CHASSIS (Curved 3D Cast Armor with Rivets & Weathering)
+  ctx.save();
+  const boilerGrad = ctx.createLinearGradient(-13 * sc, -16 * sc, 13 * sc, 12 * sc);
+  boilerGrad.addColorStop(0, '#f08924');
+  boilerGrad.addColorStop(0.25, '#d46e13');
+  boilerGrad.addColorStop(0.65, '#994605');
+  boilerGrad.addColorStop(1, '#4a2002');
+  ctx.fillStyle = boilerGrad;
+  roundPath(-12.5 * sc, -16 * sc, 25 * sc, 26 * sc, 5 * sc); ctx.fill();
+  ctx.strokeStyle = '#2d1301'; ctx.lineWidth = 2 * sc; ctx.stroke();
+
+  // Heavy 3D Cast Iron Reinforcement Rings with Embossed Highlights
+  for(let ry of [-5 * sc, 4 * sc]){
+    ctx.strokeStyle = 'rgba(255, 170, 80, 0.4)'; ctx.lineWidth = 1.2 * sc;
+    ctx.beginPath(); ctx.moveTo(-11 * sc, ry - 1 * sc); ctx.lineTo(11 * sc, ry - 1 * sc); ctx.stroke();
+    ctx.strokeStyle = '#2a1102'; ctx.lineWidth = 1.8 * sc;
+    ctx.beginPath(); ctx.moveTo(-11 * sc, ry + 1 * sc); ctx.lineTo(11 * sc, ry + 1 * sc); ctx.stroke();
+  }
+
+  // Industrial Bolt Rivets along Armor Plates
+  ctx.fillStyle = '#261204';
+  for(let by of [-12 * sc, -3 * sc, 6 * sc]){
+    for(let bx of [-10 * sc, 10 * sc]){
+      ctx.beginPath(); ctx.arc(bx, by, 1.2 * sc, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(255,200,140,0.6)';
+      ctx.fillRect(bx - 0.5 * sc, by - 0.5 * sc, 1 * sc, 1 * sc);
+      ctx.fillStyle = '#261204';
+    }
+  }
+
+  // 4. EMBOSSED JAPANESE GREEN SAFETY CROSS (Anzen Hyōshiki)
+  // White safety plaque with beveled border
+  ctx.fillStyle = '#ffffff';
+  roundPath(-4.5 * sc, -11.5 * sc, 9 * sc, 9 * sc, 1.5 * sc); ctx.fill();
+  ctx.strokeStyle = '#181a1c'; ctx.lineWidth = 1.2 * sc; ctx.stroke();
+  // Vibrant Safety Green Cross
+  ctx.fillStyle = '#16a83d';
+  ctx.fillRect(-1.2 * sc, -10 * sc, 2.4 * sc, 6 * sc);
+  ctx.fillRect(-3 * sc, -8.2 * sc, 6 * sc, 2.4 * sc);
+  // Kanji Text Stencil "安全" (Safety)
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+  ctx.font = 'bold ' + Math.round(3 * sc) + 'px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('安全', 0, -0.5 * sc);
+
+  // Central Core Intake Nozzle
+  ctx.fillStyle = '#14110e';
+  ctx.beginPath(); ctx.arc(0, 4.5 * sc, 3.8 * sc, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#e07a1b'; ctx.lineWidth = 1.5 * sc; ctx.stroke();
+  ctx.fillStyle = '#ff7a1b'; ctx.shadowColor = '#ff7a1b'; ctx.shadowBlur = 10;
+  ctx.beginPath(); ctx.arc(0, 4.5 * sc, 1.8 * sc, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.restore();
+
+  // 5. 3D MACHINE-TURNED CONICAL STEEL DRILL HEAD (TRUE VOLUMETRIC HELIX)
+  ctx.save();
+  ctx.translate(2.5 * sc, -24 * sc);
+  // Heavy Gearbox Housing
+  const gearGrad = ctx.createLinearGradient(-7 * sc, -5 * sc, 7 * sc, 5 * sc);
+  gearGrad.addColorStop(0, '#3a4450');
+  gearGrad.addColorStop(0.5, '#1e242b');
+  gearGrad.addColorStop(1, '#0d1013');
+  ctx.fillStyle = gearGrad;
+  roundPath(-6.5 * sc, -5 * sc, 13 * sc, 10 * sc, 3 * sc); ctx.fill();
+  ctx.strokeStyle = '#4e5b6c'; ctx.lineWidth = 1.6 * sc; ctx.stroke();
+
+  // CONICAL 3D DRILL BIT WITH FULL HELICAL ROTATION
+  const hDrillLen = 25 * sc;
+  const headSpin = (now * 0.045) % (Math.PI * 2);
+
+  // 3D Metallic Specular Shading across the cone
+  const coneGrad = ctx.createLinearGradient(0, -8 * sc, 0, 8 * sc);
+  coneGrad.addColorStop(0, '#505a66');
+  coneGrad.addColorStop(0.2, '#f0f5fa'); // Sharp Chrome Highlight
+  coneGrad.addColorStop(0.5, '#a4b0bd');
+  coneGrad.addColorStop(0.8, '#46505c');
+  coneGrad.addColorStop(1, '#1b2026');
+  ctx.fillStyle = coneGrad;
+
+  ctx.beginPath();
+  ctx.moveTo(0, -8 * sc);
+  ctx.lineTo(hDrillLen, 0); // Sharp tungsten-carbide tip
+  ctx.lineTo(0, 8 * sc);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = '#181e24'; ctx.lineWidth = 1.8 * sc; ctx.stroke();
+
+  // Helical 3D Spiral Flutes with Dynamic Lighting
+  for(let sp = 2 * sc; sp < hDrillLen - 3 * sc; sp += 4.2 * sc){
+    const spinFrac = (headSpin + (sp / hDrillLen) * Math.PI * 3);
+    const waveY = Math.sin(spinFrac) * (7.5 * sc * (1 - sp / hDrillLen));
+    const isFront = Math.cos(spinFrac) > 0;
+    
+    // Deep groove shadow
+    ctx.strokeStyle = '#0d1115';
+    ctx.lineWidth = 2.4 * sc;
+    ctx.beginPath();
+    ctx.moveTo(sp, waveY);
+    ctx.lineTo(sp + 3.2 * sc, waveY + (isFront ? 3 * sc : -3 * sc));
+    ctx.stroke();
+
+    // Polished cutting edge specular highlight
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.lineWidth = 1 * sc;
+    ctx.beginPath();
+    ctx.moveTo(sp, waveY - 0.8 * sc);
+    ctx.lineTo(sp + 3 * sc, waveY + (isFront ? 2.2 * sc : -3.8 * sc));
+    ctx.stroke();
+  }
+
+  // Grinding Kinetic Friction Sparks at Tip
+  if(Math.random() < 0.45){
+    ctx.fillStyle = '#fff4a3';
+    ctx.shadowColor = '#ffe27c'; ctx.shadowBlur = 12;
+    ctx.beginPath(); ctx.arc(hDrillLen + (Math.random()-0.3)*4, (Math.random()-0.5)*5, 3 * sc, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+  ctx.restore();
+
+  // 6. DOME PAULDRONS & DUAL 3D ARM ROTATING DRILLS
   const atk = a.attackAnim > 0 ? (a.attackAnim / 16) * Math.PI : 0;
   for(let side of [-1, 1]){
     ctx.save();
-    ctx.translate(side * 15 * sc, -8 * sc);
-    // Rounded dome pauldron
-    ctx.fillStyle = '#c96414';
-    ctx.beginPath(); ctx.arc(0, -4 * sc, 7.5 * sc, Math.PI, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#3d1c05'; ctx.lineWidth = 1.8 * sc; ctx.stroke();
-    // Red horizontal safety stripe along upper rim
-    ctx.strokeStyle = '#e62222'; ctx.lineWidth = 2 * sc;
-    ctx.beginPath(); ctx.arc(0, -4 * sc, 6.5 * sc, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke();
-    // Circular pivot hinge cap
-    ctx.fillStyle = '#1c2026';
-    ctx.beginPath(); ctx.arc(0, -4 * sc, 2.8 * sc, 0, Math.PI * 2); ctx.fill();
+    ctx.translate(side * 16 * sc, -8 * sc);
 
-    // Arm assembly angled downward or slamming
-    ctx.rotate(side * (0.2 + (a.attackAnim > 0 ? 0.3 : 0)) + (side === 1 ? atk * 1.1 : -atk * 1.1));
-    // Upper segmented cylinder
-    ctx.fillStyle = '#a64f0f';
-    roundPath(-3.5 * sc, -2 * sc, 7 * sc, 12 * sc, 2 * sc); ctx.fill();
+    // 3D Spherical Pauldron with Specular Highlight
+    const pauldronGrad = ctx.createRadialGradient(-side * 2 * sc, -6 * sc, 1 * sc, 0, -4 * sc, 9 * sc);
+    pauldronGrad.addColorStop(0, '#f28e2b');
+    pauldronGrad.addColorStop(0.4, '#c25e10');
+    pauldronGrad.addColorStop(1, '#421c02');
+    ctx.fillStyle = pauldronGrad;
+    ctx.beginPath(); ctx.arc(0, -4 * sc, 8.5 * sc, Math.PI, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#2d1301'; ctx.lineWidth = 2 * sc; ctx.stroke();
 
-    // Massive Conical Arm Drill Hand (Heavy industrial diamond/steel bit)
-    ctx.translate(0, 10 * sc);
-    const aDrillLen = 26 * sc + (a.attackAnim > 0 ? 6 * sc : 0);
-    const armSpin = (now * 0.05 + side) % (Math.PI * 2);
-    const ag = ctx.createLinearGradient(-7 * sc, 0, 7 * sc, aDrillLen);
-    ag.addColorStop(0, '#3a414a');
-    ag.addColorStop(0.3, '#d8e0eb');
-    ag.addColorStop(0.7, '#828d9c');
-    ag.addColorStop(1, '#ffffff');
-    ctx.fillStyle = ag;
+    // Red Safety Rim Stripe
+    ctx.strokeStyle = '#e62222'; ctx.lineWidth = 2.2 * sc;
+    ctx.beginPath(); ctx.arc(0, -4 * sc, 7.5 * sc, Math.PI * 1.08, Math.PI * 1.92); ctx.stroke();
+    // Heavy Rotary Hinge Pin
+    ctx.fillStyle = '#1c2229';
+    ctx.beginPath(); ctx.arc(0, -4 * sc, 3.2 * sc, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#5a6878'; ctx.lineWidth = 1 * sc; ctx.stroke();
+
+    // Arm Rotation & Slam Animation
+    ctx.rotate(side * (0.2 + (a.attackAnim > 0 ? 0.35 : 0)) + (side === 1 ? atk * 1.15 : -atk * 1.15));
+
+    // Hydraulic Forearm Cylinder
+    const foreGrad = ctx.createLinearGradient(-4 * sc, 0, 4 * sc, 0);
+    foreGrad.addColorStop(0, '#1f150e');
+    foreGrad.addColorStop(0.4, '#8a430c');
+    foreGrad.addColorStop(1, '#2e1402');
+    ctx.fillStyle = foreGrad;
+    roundPath(-4 * sc, -2 * sc, 8 * sc, 13 * sc, 2.5 * sc); ctx.fill();
+
+    // Massive 3D Conical Arm Drill
+    ctx.translate(0, 11 * sc);
+    const aDrillLen = 28 * sc + (a.attackAnim > 0 ? 8 * sc : 0);
+    const armSpin = (now * 0.055 + side * 2.1) % (Math.PI * 2);
+
+    const aConeGrad = ctx.createLinearGradient(-7 * sc, 0, 7 * sc, 0);
+    aConeGrad.addColorStop(0, '#2d353d');
+    aConeGrad.addColorStop(0.25, '#e6effa');
+    aConeGrad.addColorStop(0.55, '#8c9aa8');
+    aConeGrad.addColorStop(1, '#1b2026');
+    ctx.fillStyle = aConeGrad;
+
     ctx.beginPath();
-    ctx.moveTo(-6.5 * sc, 0);
-    ctx.lineTo(0, aDrillLen); // Sharp tip
-    ctx.lineTo(6.5 * sc, 0);
+    ctx.moveTo(-7 * sc, 0);
+    ctx.lineTo(0, aDrillLen); // Sharp point
+    ctx.lineTo(7 * sc, 0);
     ctx.closePath();
     ctx.fill();
-    ctx.strokeStyle = '#181c22'; ctx.lineWidth = 1.8 * sc; ctx.stroke();
-    // Spiral grooves on arm drills
-    ctx.strokeStyle = '#101316'; ctx.lineWidth = 2.2 * sc;
+    ctx.strokeStyle = '#12161b'; ctx.lineWidth = 2 * sc; ctx.stroke();
+
+    // Realistic Helical Cutting Threads along Arm Drills
     for(let asp = 3 * sc; asp < aDrillLen - 4 * sc; asp += 5 * sc){
-      const aoff = Math.sin(armSpin + asp) * 3 * sc;
+      const aoff = Math.sin(armSpin + asp) * 3.5 * sc;
+      ctx.strokeStyle = '#0e1216'; ctx.lineWidth = 2.4 * sc;
       ctx.beginPath();
-      ctx.moveTo(-5 * sc + aoff, asp);
-      ctx.lineTo(5 * sc - aoff, asp + 3 * sc);
+      ctx.moveTo(-5.5 * sc + aoff, asp);
+      ctx.lineTo(5.5 * sc - aoff, asp + 3.2 * sc);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)'; ctx.lineWidth = 0.9 * sc;
+      ctx.beginPath();
+      ctx.moveTo(-5.5 * sc + aoff, asp - 0.6 * sc);
+      ctx.lineTo(5.5 * sc - aoff, asp + 2.6 * sc);
       ctx.stroke();
     }
-    // Impact sparks on slam
+
+    // Impact Seismic Sparks & Ground Dust
     if(a.attackAnim > 0){
       ctx.fillStyle = '#ffe27c';
-      ctx.shadowColor = '#ffe27c'; ctx.shadowBlur = 14;
-      ctx.beginPath(); ctx.arc(0, aDrillLen + (Math.random()-0.5)*4, 4 * sc, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowColor = '#ff9d4d'; ctx.shadowBlur = 18;
+      ctx.beginPath(); ctx.arc(0, aDrillLen + (Math.random()-0.5)*5, 5 * sc, 0, Math.PI * 2); ctx.fill();
       ctx.shadowBlur = 0;
     }
     ctx.restore();
   }
 
-  // 7. Tactical Overhead Label
-  drawLabel('TITAN DRILLMAN (3D)', 0, -40 * sc, '#ff8a1b');
+  // Overhead Tactical High-Vis Plate
+  drawLabel('TITAN DRILLMAN [3D OVERHAUL]', 0, -42 * sc, '#ff9d4d');
 }
 
 function drawCameraMechHound(a, now){
