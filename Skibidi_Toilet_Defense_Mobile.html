@@ -1412,6 +1412,146 @@ function drawRagdolls(now){
   }
 }
 
+function drawTitanSpeakerman2(a, now){
+  const sc = 1.65;
+  const legSwing = Math.sin(a.walkCycle) * 0.45;
+  const flightHover = Math.sin(now * 0.005 + a.id) * 3.5;
+  ctx.translate(0, flightHover);
+
+  // 1. DUAL INDUSTRIAL JETPACK THRUSTERS & EXHAUST
+  for(let j of [-14 * sc, 14 * sc]){
+    // Jetpack turbine housing
+    ctx.fillStyle = '#1c1f24';
+    roundPath(j - 5 * sc, -18 * sc, 10 * sc, 28 * sc, 3 * sc); ctx.fill();
+    ctx.strokeStyle = '#2d333b'; ctx.lineWidth = 1.5 * sc; ctx.stroke();
+    // Crimson jet exhaust flame
+    const fLen = 14 * sc + Math.random() * 10 * sc;
+    const fg = ctx.createLinearGradient(j, 10 * sc, j, 10 * sc + fLen);
+    fg.addColorStop(0, '#ffffff');
+    fg.addColorStop(0.2, '#ff3333');
+    fg.addColorStop(0.6, '#ff8800');
+    fg.addColorStop(1, 'rgba(255, 30, 0, 0)');
+    ctx.fillStyle = fg;
+    ctx.beginPath();
+    ctx.moveTo(j - 4 * sc, 10 * sc);
+    ctx.lineTo(j, 10 * sc + fLen);
+    ctx.lineTo(j + 4 * sc, 10 * sc);
+    ctx.closePath(); ctx.fill();
+  }
+
+  // 2. MASSIVE MULTI-TIERED SHOULDER SPEAKER WINGS (Angled speaker towers)
+  for(let side of [-1, 1]){
+    ctx.save();
+    ctx.translate(side * 18 * sc, -16 * sc);
+    ctx.rotate(side * 0.18); // Angled outward like armored wings
+    // Main speaker tower box
+    ctx.fillStyle = '#141619';
+    roundPath(-6 * sc, -24 * sc, 12 * sc, 38 * sc, 4 * sc); ctx.fill();
+    ctx.strokeStyle = '#2a2f38'; ctx.lineWidth = 2 * sc; ctx.stroke();
+    // Glowing Crimson Subwoofers on speaker tower
+    for(let sy of [-16 * sc, -4 * sc, 8 * sc]){
+      ctx.fillStyle = '#0c0d0f';
+      ctx.beginPath(); ctx.arc(0, sy, 4.2 * sc, 0, Math.PI * 2); ctx.fill();
+      // Glowing pulsating red cone
+      const conePulse = 1 + (a.attackAnim > 0 ? 0.25 : Math.sin(now * 0.01 + sy) * 0.1);
+      ctx.fillStyle = '#ff2222';
+      ctx.shadowColor = '#ff2222'; ctx.shadowBlur = 10;
+      ctx.beginPath(); ctx.arc(0, sy, 2.8 * sc * conePulse, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+      // Center silver dust cap
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(0, sy, 1 * sc, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // 3. CHARCOAL COMBAT PANTS & ARMORED LEGS
+  ctx.strokeStyle = '#1a1d21';
+  ctx.lineWidth = 5.5 * sc;
+  // Left leg
+  ctx.beginPath(); ctx.moveTo(-6 * sc, 8 * sc);
+  ctx.lineTo(-6 * sc - Math.sin(legSwing) * 7 * sc, 18 * sc); ctx.stroke();
+  // Right leg
+  ctx.beginPath(); ctx.moveTo(6 * sc, 8 * sc);
+  ctx.lineTo(6 * sc + Math.sin(legSwing) * 7 * sc, 18 * sc); ctx.stroke();
+  // Reinforced shin guards / leg exoskeleton
+  ctx.strokeStyle = '#3a424d'; ctx.lineWidth = 2 * sc;
+  ctx.beginPath(); ctx.moveTo(-8 * sc, 12 * sc); ctx.lineTo(-4 * sc, 18 * sc); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(4 * sc, 12 * sc); ctx.lineTo(8 * sc, 18 * sc); ctx.stroke();
+
+  // 4. CRIMSON RED DRESS SHIRT / TUNIC (Athletic muscular titan torso)
+  const tg = ctx.createLinearGradient(-11 * sc, -14 * sc, 11 * sc, 12 * sc);
+  tg.addColorStop(0, '#e62222');
+  tg.addColorStop(0.5, '#b81414');
+  tg.addColorStop(1, '#7a0a0a');
+  ctx.fillStyle = tg;
+  roundPath(-11 * sc, -15 * sc, 22 * sc, 24 * sc, 4 * sc); ctx.fill();
+  ctx.strokeStyle = '#1c0808'; ctx.lineWidth = 1.8 * sc; ctx.stroke();
+
+  // 5. CHEST CORE REACTOR (Pulsing fiery red energy core with vents)
+  ctx.fillStyle = '#1c1f24';
+  roundPath(-7 * sc, -7 * sc, 14 * sc, 12 * sc, 3 * sc); ctx.fill();
+  ctx.strokeStyle = '#3d4652'; ctx.lineWidth = 1.5 * sc; ctx.stroke();
+  // Glowing Red Core
+  ctx.fillStyle = '#ff2222';
+  ctx.shadowColor = '#ff2222'; ctx.shadowBlur = 18;
+  ctx.beginPath(); ctx.arc(0, -1 * sc, 4.5 * sc, 0, Math.PI * 2); ctx.fill();
+  // Core center white heat
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.arc(0, -1 * sc, 2 * sc, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // 6. CENTRAL RECTANGULAR HEAD SPEAKER UNIT
+  ctx.fillStyle = '#141619';
+  roundPath(-8 * sc, -30 * sc, 16 * sc, 15 * sc, 3 * sc); ctx.fill();
+  ctx.strokeStyle = '#2d333d'; ctx.lineWidth = 2 * sc; ctx.stroke();
+  // Glowing red ocular speaker cones
+  for(let sx of [-3.5 * sc, 3.5 * sc]){
+    ctx.fillStyle = '#ff2222';
+    ctx.shadowColor = '#ff2222'; ctx.shadowBlur = 12;
+    ctx.beginPath(); ctx.arc(sx, -22.5 * sc, 2.5 * sc, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(sx, -22.5 * sc, 0.9 * sc, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // 7. DUAL HEAVY ARM PLASMA CANNONS WITH UNDER-BARREL COMBAT BLADES
+  const atk = a.attackAnim > 0 ? (a.attackAnim / 12) * Math.PI : 0;
+  for(let side of [-1, 1]){
+    ctx.save();
+    ctx.translate(side * 14 * sc, -6 * sc);
+    ctx.rotate(side * (0.15 + (a.attackAnim > 0 ? 0.2 : 0)) + (side === 1 ? atk * 0.8 : -atk * 0.8));
+    // Cannon arm bracket
+    ctx.fillStyle = '#1c2026';
+    roundPath(-4 * sc, -6 * sc, 8 * sc, 22 * sc, 3 * sc); ctx.fill();
+    // Dual plasma cannon barrels
+    ctx.fillStyle = '#0f1114';
+    ctx.fillRect(-3 * sc, 16 * sc, 6 * sc, 8 * sc);
+    // Glowing red power conduits along the arm
+    ctx.strokeStyle = '#ff3333'; ctx.lineWidth = 2 * sc;
+    ctx.beginPath(); ctx.moveTo(-2 * sc, -2 * sc); ctx.lineTo(-2 * sc, 16 * sc); ctx.stroke();
+    // Under-barrel Combat Dagger / Bayonet Blade
+    ctx.fillStyle = '#dbe4ed';
+    ctx.beginPath();
+    ctx.moveTo(side * 2 * sc, 12 * sc);
+    ctx.lineTo(side * 7 * sc, 26 * sc); // Sharp blade tip
+    ctx.lineTo(side * 1 * sc, 21 * sc);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#7c8896'; ctx.lineWidth = 1 * sc; ctx.stroke();
+    // Muzzle flash when firing
+    if(a.attackAnim > 0){
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = '#ff3333'; ctx.shadowBlur = 16;
+      ctx.beginPath(); ctx.arc(0, 24 * sc, 4 * sc, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+    ctx.restore();
+  }
+
+  // 8. Label
+  drawLabel('UPGRADED TITAN SPEAKER 2.0', 0, -42 * sc, '#ff3d3d');
+}
+
 function drawSimpCameraman2(a, now){
   const sc = 1.2;
   const legSwing = Math.sin(a.walkCycle) * 0.65;
@@ -1740,6 +1880,8 @@ function openRelicModal(){
    comes from ALLY_STATS and runs through the shared generic AI/draw branches, so
    adding a character is one compact entry. */
 const ALLY_STATS = {
+  titanSpeaker2: { role:'plasmaArtillery', name:'UPGRADED TITAN SPEAKERMAN (2.0)', cat:'LEGENDARY ELITE', desc:'TITAN 2.0 OVERHAUL! Fitted with crimson dress shirt, charcoal combat pants, dual heavy shoulder speaker wing-towers, industrial jetpack thrusters, red core reactor, and twin heavy forearm plasma blasters with under-barrel combat blades. Unleashes massive rapid twin crimson plasma bursts and devastating sonic shockwaves!', cost:6, max:1, icon:'🔊', r:1.65, body:'#b82424', head:'#141414', lens:'#ff2222', label:'UPGRADED TITAN SPEAKER 2.0', labelCol:'#ff3d3d', speed:2.8, cd:12, dmg:28, knockback:120, stun:40, range:520, rad:140 },
+
   simp2:       { role:'chadRusher',  name:'SIMP CAMERAMAN 2.0',   cat:'LEGENDARY ELITE', desc:'CH4D UPGRADE! Rolled-up sky-blue sleeves, iconic yellow-purple striped tie, heavy cybernetic exoskeleton, high-powered turbine thruster, and dual neon-cyan energy forearm blades! Closes in with supersonic speed and shreds toilet vanguards.', cost:4, max:2, icon:'🦾', r:1.2, body:'#1e2830', head:'#1a2228', lens:'#00f0ff', label:'CH4D SIMP 2.0', labelCol:'#00f0ff', speed:3.9, cd:14, dmg:16, knockback:65, stun:25, range:450, atkDist:48 },
 
   titanDrill:  { role:'drillSmasher', name:'TITAN DRILLMAN',        cat:'LEGENDARY ELITE', desc:'SEISMIC TITAN! Revs a massive diamond-tipped drill into the floor, sending devastating shockwave fissures through toilet lines.', cost:6, max:1, icon:'🔩', r:1.6, body:'#b86a1a', head:'#3a2210', lens:'#ffe27c', label:'TITAN DRILL', labelCol:'#ffe27c', speed:1.4, cd:80, dmg:34, knockback:240, stun:75, range:480, atkDist:75 },
@@ -1857,6 +1999,7 @@ function spawnAllyEntity(type){
   else if(type === 'titanSpeaker') speed = 2.5;
   else if(type === 'titanTv') speed = 1.4;
   else if(type === 'simp2') speed = 3.9;
+  else if(type === 'titanSpeaker2') speed = 2.8;
   else if(ALLY_STATS[type]) speed = ALLY_STATS[type].speed || 2.2;
 
   deployedAllies.push({
@@ -1998,7 +2141,7 @@ function updateHiredAllies(dt, now){
     if(a.attackAnim > 0) a.attackAnim -= dt;
 
     // Free 2D movement: hoverers roam the sky band, walkers roam the whole battlefield
-    const isHover = (a.type.startsWith('titan') && a.type !== 'titanDrill') || a.type === 'astro' || a.type === 'gmini' || a.type === 'overseer' || a.type === 'jetpackCam';
+    const isHover = (a.type.startsWith('titan') && a.type !== 'titanDrill') || a.type === 'astro' || a.type === 'gmini' || a.type === 'overseer' || a.type === 'jetpackCam' || a.type === 'titanSpeaker2';
     a.isHover = isHover;
     a.yMin = isHover ? H * 0.08 : H * 0.40;
     a.yMax = isHover ? (a.type === 'titanCamera' ? H * 0.76 : H * 0.72) : Math.max(H * 0.45, Math.min((a.baseY !== undefined ? a.baseY : H - 62) + 8, H - 24));
@@ -2439,8 +2582,16 @@ function updateHiredAllies(dt, now){
         if(a.attackTimer <= 0){
           a.attackTimer = S.cd;
           a.attackAnim = 10;
-          if((S.role === 'rapid' || S.role === 'sniper' || S.role === 'strafer') && target){
-            if(S.role === 'strafer'){
+          if((S.role === 'rapid' || S.role === 'sniper' || S.role === 'strafer' || S.role === 'plasmaArtillery') && target){
+            if(S.role === 'plasmaArtillery'){
+              const tdx = target.x - a.x, tdy = target.y - (a.y - 12);
+              const len = Math.max(1, Math.hypot(tdx, tdy));
+              // Dual Heavy Plasma Cannon Bolts with AoE
+              bullets.push({ x: a.x - 18, y: a.y - 8, vx: (tdx / len) * 14, vy: (tdy / len) * 14, r: 5, dmg: S.dmg, kind: 'rocket', rad: S.rad || 120 });
+              bullets.push({ x: a.x + 18, y: a.y - 8, vx: (tdx / len) * 14, vy: (tdy / len) * 14, r: 5, dmg: S.dmg, kind: 'rocket', rad: S.rad || 120 });
+              sfx.laserFire();
+              shake = Math.min(14, shake + 3);
+            } else if(S.role === 'strafer'){
               const tdx = target.x - a.x, tdy = target.y - (a.y + 4);
               const len = Math.max(1, Math.hypot(tdx, tdy));
               bullets.push({ x: a.x - 8, y: a.y + 4, vx: (tdx / len) * 12, vy: (tdy / len) * 12, r: 3, dmg: S.dmg, kind: 'minigun', rad: 0 });
@@ -2530,6 +2681,7 @@ function updateHiredAllies(dt, now){
 }
 
 function drawGenericAlly(a, now){
+  if(a.type === 'titanSpeaker2'){ drawTitanSpeakerman2(a, now); return; }
   if(a.type === 'simp2'){ drawSimpCameraman2(a, now); return; }
   if(a.type === 'titanDrill'){ drawTitanDrillman(a, now); return; }
   if(a.type === 'mechDog'){ drawCameraMechHound(a, now); return; }
