@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://athallajovian9-cyber.github.io/Skibidi_Toilet_Defense-PC/sitemap.xml
