@@ -5507,14 +5507,21 @@ canvas.addEventListener('touchstart', (e)=>{
 }, {passive:false});
 
 canvas.addEventListener('pointerdown', (e)=>{
-  if(e.pointerType === 'touch') return; // Handled by touchstart for multi-touch
+  if(e.pointerType === 'touch') return;
   if(state !== 'playing' || paused) return;
   if(e.button !== 0) return;
   ensureAudio();
-  e.preventDefault();
   const p = canvasPoint(e);
   handleCanvasTap(p.x, p.y);
-}, {passive:false});
+}, {passive:true});
+
+// Extra redundant click listener for mouse
+canvas.addEventListener('click', (e)=>{
+  if(state !== 'playing' || paused) return;
+  ensureAudio();
+  const p = canvasPoint(e);
+  handleCanvasTap(p.x, p.y);
+});
 canvas.addEventListener('contextmenu', (e)=> {
   e.preventDefault();
   if(activeTrapArm){
