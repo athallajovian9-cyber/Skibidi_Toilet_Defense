@@ -84,9 +84,8 @@
     z-index:5;pointer-events:none;flex-wrap:wrap;gap:4px;
   }
   #hud .stat{color:var(--sigma);text-shadow:0 0 6px rgba(139,255,92,.5);}
-  #sigmaMeterWrap{position:absolute;top:calc(38px + env(safe-area-inset-top));left:max(16px, env(safe-area-inset-left));right:max(16px, env(safe-area-inset-right));height:8px;background:#10160d;border:1px solid var(--pipe);z-index:5;}
+  /* Meter styling handled cleanly inside modernHud */
   #sigmaMeterFill{height:100%;width:0%;background:linear-gradient(90deg,var(--sigma),var(--alert));transition:width .1s linear;}
-  #bossBarWrap{position:absolute;top:calc(54px + env(safe-area-inset-top));left:max(16px, env(safe-area-inset-left));right:max(16px, env(safe-area-inset-right));height:10px;background:#10160d;border:1px solid var(--alert);z-index:5;display:none;}
   #bossBarFill{height:100%;width:100%;background:linear-gradient(90deg,var(--alert),#ff9d4d);}
   #waveBanner{
     position:absolute;top:38%;left:0;right:0;text-align:center;z-index:8;
@@ -816,7 +815,7 @@
         </div>
         <div class="hudDivider"></div>
         <div class="hudMetric skillMetric" id="quickBarracksTrigger" title="Press [H] for Barracks">
-          <span class="hudIcon">⚡</span>
+          <span class="hudIcon">⭐</span>
           <span class="hudVal highlight" id="skillPtsHud">0</span>
           <span class="hudBadge" id="barracksAlertBadge">HIRE [H]</span>
         </div>
@@ -860,9 +859,9 @@
   <!-- LEFT THUMB POD: TRAP ARSENAL -->
   <div id="trapBar" class="thumbPod leftPod">
     <div class="podHeader">🪤 TRAPS</div>
-    <button id="trapBouncerBtn" class="trapBtn" data-trap="spring">🪠 SPRING 15⚡</button>
-    <button id="trapAcidBtn" class="trapBtn" data-trap="acid">🧪 ACID 20⚡</button>
-    <button id="trapBarrelBtn" class="trapBtn" data-trap="barrel">🛢️ BARREL 25⚡</button>
+    <button id="trapBouncerBtn" class="trapBtn" data-trap="spring">🪠 SPRING 15%</button>
+    <button id="trapAcidBtn" class="trapBtn" data-trap="acid">🧪 ACID 20%</button>
+    <button id="trapBarrelBtn" class="trapBtn" data-trap="barrel">🛢️ BARREL 25%</button>
   </div>
 
   <!-- RIGHT THUMB POD: ABILITIES & OPS -->
@@ -890,8 +889,8 @@
     <div id="relicChoices" style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;max-width:880px;"></div>
   </div>
 
-  <button id="musicBtn">🎵 MUSIC ON</button>
-  <button id="muteBtn">🔊 SFX ON</button>
+  <button id="musicBtn" style="display:none;">🎵 MUSIC ON</button>
+  <button id="muteBtn" style="display:none;">🔊 SFX ON</button>
   <div id="pauseOverlay">
     <h2>GAME PAUSED</h2>
     <div class="pauseStats" id="pauseStats">Run stats frozen.</div>
@@ -5124,7 +5123,7 @@ function handleCanvasTap(mx, my){
         updateHud();
         return true;
       } else {
-        showToast('NOT ENOUGH SIGMA CHARGE (NEED ' + cost + '⚡)!');
+        showToast('NOT ENOUGH SIGMA CHARGE (NEED ' + cost + '%)!');
       }
     } else {
       showToast('MUST PLACE ON SEWER FLOOR!');
