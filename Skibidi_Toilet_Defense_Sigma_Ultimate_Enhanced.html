@@ -93,8 +93,8 @@
   }
   #waveBanner .big{font-size:clamp(24px,5vw,44px);color:var(--gold);text-shadow:0 0 20px rgba(255,211,92,.6);letter-spacing:2px;}
   #waveBanner .small{font-size:13px;color:#c8d6c2;margin-top:6px;}
-  canvas{
-    display:block;background:#0a0c10;
+  canvas#game{
+    display:block;background:transparent;
     touch-action:none;
     width:100%;height:100%;
   }
@@ -760,7 +760,19 @@
     .gridRow { display: contents; }
   }
 
+
+  #three3dCanvas {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    z-index: 1; pointer-events: none; display: block;
+  }
+  canvas#game {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    z-index: 2; display: block; background: transparent;
+    touch-action: none;
+  }
+
 </style>
+<script src="three.min.js"></script>
 </head>
 <body>
 
@@ -852,6 +864,7 @@
   </div>
   <div id="toast"></div>
   <div id="waveBanner"><div class="big" id="waveBannerBig">WAVE 1</div><div class="small" id="waveBannerSmall"></div></div>
+  <canvas id="three3dCanvas"></canvas>
   <canvas id="game"></canvas>
   
   
@@ -996,6 +1009,181 @@ let speedMultiplier = Number(storage.get('skibidiSpeed', 1)); // 1 or 2
 let chosenDifficultyKey = storage.get('skibidiLastDifficulty', 'normal');
 
 /* ================= SOUND & PROCEDURAL BGM ENGINE ================= */
+
+/* ================= HIGH-PERFORMANCE THREE.JS GPU ENGINE ================= */
+let gl3dRenderer = null, gl3dScene = null, gl3dCamera = null;
+let gl3dSewerTunnel = null, gl3dWaterMesh = null, gl3dSpotlights = [];
+let gl3dUnitMeshes = new Map();
+let gl3dDynLight = null;
+
+function initThreeEngine(){
+  if(typeof THREE === 'undefined') return;
+  try {
+    const threeCv = document.getElementById('three3dCanvas');
+    if(!threeCv) return;
+
+    // High-Performance WebGL 2.0 Renderer utilizing Dedicated GPU (NVIDIA GTX)
+    gl3dRenderer = new THREE.WebGLRenderer({
+      canvas: threeCv,
+      antialias: true,
+      alpha: false,
+      powerPreference: 'high-performance'
+    });
+    gl3dRenderer.setSize(window.innerWidth, window.innerHeight);
+    gl3dRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    gl3dRenderer.shadowMap.enabled = true;
+    gl3dRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    gl3dRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+    gl3dRenderer.toneMappingExposure = 1.15;
+
+    // 3D Scene with Atmospheric Sewer Fog
+    gl3dScene = new THREE.Scene();
+    gl3dScene.background = new THREE.Color(0x0a0f0d);
+    gl3dScene.fog = new THREE.FogExp2(0x0a1410, 0.018);
+
+    // Perspective Camera Looking Down the Sewer Alley
+    gl3dCamera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 500);
+    gl3dCamera.position.set(0, 14, 22);
+    gl3dCamera.lookAt(0, 0, -12);
+
+    // Ambient & Hemisphere Lighting (GI bounce)
+    const hemiLight = new THREE.HemisphereLight(0x283b32, 0x0c1410, 0.65);
+    gl3dScene.add(hemiLight);
+
+    const ambientLight = new THREE.AmbientLight(0x18241e, 0.45);
+    gl3dScene.add(ambientLight);
+
+    // Dynamic Combat Light (illuminates tunnel on shots/blasts)
+    gl3dDynLight = new THREE.PointLight(0xff5533, 0, 45, 1.8);
+    gl3dDynLight.position.set(0, 6, 0);
+    gl3dScene.add(gl3dDynLight);
+
+    // 3D SEWER ENVIRONMENT (FLOOR, WALLS, ARCHWAYS & WATER CANAL)
+    build3dSewerEnvironment();
+
+    console.log("HIGH-PERFORMANCE THREE.JS GPU ENGINE INITIALIZED ON NVIDIA!");
+  } catch(e){
+    console.warn("Three.js engine init fallback:", e);
+  }
+}
+
+function build3dSewerEnvironment(){
+  // 1. Tiled Wet Concrete / Sewer Floor with PBR Reflection
+  const floorGeo = new THREE.PlaneGeometry(36, 90, 36, 90);
+  const floorMat = new THREE.MeshStandardMaterial({
+    color: 0x121c17,
+    roughness: 0.28,
+    metalness: 0.45
+  });
+  const floorMesh = new THREE.Mesh(floorGeo, floorMat);
+  floorMesh.rotation.x = -Math.PI / 2;
+  floorMesh.position.set(0, 0, -15);
+  floorMesh.receiveShadow = true;
+  gl3dScene.add(floorMesh);
+
+  // 2. Vaulted Curved Brick Walls (Left & Right)
+  const wallMat = new THREE.MeshStandardMaterial({
+    color: 0x1e2620,
+    roughness: 0.72,
+    metalness: 0.2
+  });
+  for(let side of [-1, 1]){
+    const wallGeo = new THREE.BoxGeometry(1.5, 16, 90);
+    const wallMesh = new THREE.Mesh(wallGeo, wallMat);
+    wallMesh.position.set(side * 14, 8, -15);
+    wallMesh.receiveShadow = true;
+    gl3dScene.add(wallMesh);
+  }
+
+  // 3. Central Toxic Sludge Water Canal (Animated PBR Water)
+  const waterGeo = new THREE.PlaneGeometry(6, 90, 12, 45);
+  const waterMat = new THREE.MeshStandardMaterial({
+    color: 0x1a4a3e,
+    roughness: 0.08,
+    metalness: 0.85
+  });
+  gl3dWaterMesh = new THREE.Mesh(waterGeo, waterMat);
+  gl3dWaterMesh.rotation.x = -Math.PI / 2;
+  gl3dWaterMesh.position.set(0, 0.04, -15);
+  gl3dWaterMesh.receiveShadow = true;
+  gl3dScene.add(gl3dWaterMesh);
+
+  // 4. Overhead Industrial Lamps with Real Dynamic Shadows
+  const lampPositions = [-30, -10, 10];
+  lampPositions.forEach((lz, idx) => {
+    // Lamp Fixture
+    const lampGeo = new THREE.CylinderGeometry(0.6, 1.2, 0.8, 12);
+    const lampMat = new THREE.MeshStandardMaterial({ color: 0x333b35, metalness: 0.8 });
+    const lamp = new THREE.Mesh(lampGeo, lampMat);
+    lamp.position.set(0, 11, lz);
+    gl3dScene.add(lamp);
+
+    // Spotlight with Soft Shadows
+    const spot = new THREE.SpotLight(0xffe2a4, 2.4, 38, Math.PI / 3.5, 0.45, 1.5);
+    spot.position.set(0, 10.8, lz);
+    spot.target.position.set(0, 0, lz);
+    spot.castShadow = true;
+    spot.shadow.mapSize.width = 1024;
+    spot.shadow.mapSize.height = 1024;
+    spot.shadow.bias = -0.001;
+    gl3dScene.add(spot);
+    gl3dScene.add(spot.target);
+    gl3dSpotlights.push(spot);
+  });
+
+  // 5. Floating Spore Dust Field
+  const particleCount = 120;
+  const particleGeo = new THREE.BufferGeometry();
+  const positions = new Float32Array(particleCount * 3);
+  for(let p = 0; p < particleCount * 3; p += 3){
+    positions[p] = (Math.random() - 0.5) * 24;
+    positions[p + 1] = Math.random() * 12 + 1;
+    positions[p + 2] = (Math.random() - 0.5) * 80;
+  }
+  particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const particleMat = new THREE.PointsMaterial({
+    color: 0x74e5b1,
+    size: 0.22,
+    transparent: true,
+    opacity: 0.65
+  });
+  const sporeField = new THREE.Points(particleGeo, particleMat);
+  gl3dScene.add(sporeField);
+}
+
+function renderThreeEngine(now){
+  if(!gl3dRenderer || !gl3dScene || !gl3dCamera) return;
+
+  const t = now * 0.001;
+
+  // Animated Water Caustic Ripple
+  if(gl3dWaterMesh){
+    gl3dWaterMesh.position.y = 0.04 + Math.sin(t * 2.5) * 0.015;
+  }
+
+  // Dynamic Lamp Flicker
+  gl3dSpotlights.forEach((sp, idx) => {
+    sp.intensity = 2.2 + Math.sin(t * 6 + idx * 2.5) * 0.35 + (Math.random() < 0.08 ? -0.4 : 0);
+  });
+
+  // Decay Dynamic Combat Light
+  if(gl3dDynLight && gl3dDynLight.intensity > 0){
+    gl3dDynLight.intensity = Math.max(0, gl3dDynLight.intensity - 0.08);
+  }
+
+  // Camera subtle breathing motion
+  gl3dCamera.position.x = Math.sin(t * 0.5) * 0.25;
+
+  gl3dRenderer.render(gl3dScene, gl3dCamera);
+}
+
+function flash3dCombatLight(colorHex, intensity){
+  if(gl3dDynLight){
+    gl3dDynLight.color.setHex(colorHex || 0xff5533);
+    gl3dDynLight.intensity = intensity || 3.5;
+  }
+}
+
 let audioCtx = null;
 let soundOn = storage.get('skibidiSoundOn', '1') !== '0';
 let musicOn = storage.get('skibidiMusicOn', '1') !== '0';
@@ -1315,6 +1503,7 @@ function showDifficulty(){
           difficultyScreen.style.display = 'none';
           gameWrap.style.display = 'block';
           resize();
+initThreeEngine();
           resetGame();
           // Restore saved stats
           wave = cp.wave;
@@ -3158,6 +3347,7 @@ function updateHiredAllies(dt, now){
         a.attackTimer = 40;
         a.attackAnim = 12;
         sfx.laserFire();
+  flash3dCombatLight(0x6ad7ff, 2.5);
         popParticles(target.x, target.y, '#6ad7ff', 12);
         if(target !== boss){
           popOneToilet(toilets.indexOf(target), {source:'TITAN_CAMERAMAN', dmg: 7});
@@ -4613,6 +4803,11 @@ function resize(){
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
+  if(gl3dRenderer && gl3dCamera){
+    gl3dRenderer.setSize(W, H);
+    gl3dCamera.aspect = W / H;
+    gl3dCamera.updateProjectionMatrix();
+  }
 }
 window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', ()=> setTimeout(resize, 120));
@@ -6141,7 +6336,8 @@ function loop(ts){
   lastFrame=now;
   ctx.clearRect(0,0,W,H);
   if(shake>0){ctx.save();ctx.translate((Math.random()-0.5)*shake,(Math.random()-0.5)*shake);}
-  drawWorld(now);
+  renderThreeEngine(now);
+drawWorld(now);
   if(state==='playing'){
     if(comboTimer>0) comboTimer-=dt;
     else if(combo>0){ combo=Math.max(0,combo-0.10*dt); streak=0; if(combo<0.05) combo=0; }
