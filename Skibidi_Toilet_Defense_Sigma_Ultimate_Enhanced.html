@@ -639,6 +639,41 @@
     box-shadow: 0 0 14px rgba(255,211,92,0.4);
   }
 
+
+  /* RESPONSIVE MOBILE ACTION DOCK */
+  #trapBar {
+    position: absolute; bottom: calc(64px + env(safe-area-inset-bottom));
+    left: 50%; transform: translateX(-50%);
+    display: flex; gap: 6px; align-items: center; justify-content: center;
+    width: min(96%, 460px);
+    background: rgba(11, 16, 14, 0.94); border: 1px solid rgba(80, 120, 95, 0.4);
+    border-radius: 8px; padding: 4px 6px; z-index: 8;
+  }
+  .trapBtn {
+    flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    font-size: 11px; padding: 6px 4px; text-align: center;
+  }
+  #actionBar {
+    position: absolute; left: 50%; bottom: calc(8px + env(safe-area-inset-bottom));
+    transform: translateX(-50%); z-index: 8;
+    display: flex; gap: 4px; align-items: center; justify-content: center;
+    width: min(98%, 520px); flex-wrap: nowrap; overflow-x: auto;
+    background: rgba(11, 16, 14, 0.94); border: 1px solid rgba(80, 120, 95, 0.4);
+    border-radius: 8px; padding: 4px 6px;
+  }
+  #actionBar::-webkit-scrollbar { display: none; }
+  .miniBtn {
+    flex: 1 0 auto; min-width: 0; white-space: nowrap;
+    padding: 6px 8px; min-height: 38px; font-size: 11px; text-align: center;
+  }
+  @media (max-width: 480px) {
+    .hudCard { padding: 4px 8px; }
+    .hudVal { font-size: 14px; }
+    .waveNumber { font-size: 13px; }
+    .trapBtn { font-size: 10px; padding: 5px 2px; }
+    .miniBtn { font-size: 10px; padding: 5px 6px; }
+  }
+
 </style>
 </head>
 <body>
@@ -734,20 +769,23 @@
   <canvas id="game"></canvas>
   
   
+  <!-- CLEAN RESPONSIVE BOTTOM ACTION DOCK -->
   <div id="trapBar">
-    <button id="trapBouncerBtn" class="trapBtn" data-trap="spring">🪠 SPRING [1] 15⚡</button>
-    <button id="trapAcidBtn" class="trapBtn" data-trap="acid">🧪 ACID [2] 20⚡</button>
-    <button id="trapBarrelBtn" class="trapBtn" data-trap="barrel">🛢️ BARREL [3] 25⚡</button>
+    <button id="trapBouncerBtn" class="trapBtn" data-trap="spring">🪠 SPRING 15⚡</button>
+    <button id="trapAcidBtn" class="trapBtn" data-trap="acid">🧪 ACID 20⚡</button>
+    <button id="trapBarrelBtn" class="trapBtn" data-trap="barrel">🛢️ BARREL 25⚡</button>
   </div>
 
   <div id="actionBar">
-    <button id="abilityBtn" class="miniBtn">💥 BLAST [SPACE] 0%</button>
-    <button id="tvHypnoBtn" class="miniBtn">📺 HYPNO [V] 0%</button>
-    <button id="bassBlastBtn" class="miniBtn">🔊 BASS [B]</button>
-    <button id="hireBtn" class="miniBtn">⚔️ HIRE [H]</button>
-    <button id="shopBtn" class="miniBtn">🛒 SHOP [S]</button>
-    <button id="inGameTutBtn" class="miniBtn" style="border-color:var(--gold);color:var(--gold);">📖 GUIDE [T]</button>
-    <button id="fsMobileBtn" class="miniBtn" style="border-color:#6ad7ff;color:#6ad7ff;">⛶ FULL</button>
+    <button id="abilityBtn" class="miniBtn">💥 BLAST 0%</button>
+    <button id="tvHypnoBtn" class="miniBtn">📺 HYPNO 0%</button>
+    <button id="bassBlastBtn" class="miniBtn">🔊 BASS</button>
+    <button id="hireBtn" class="miniBtn">⚔️ HIRE</button>
+    <button id="shopBtn" class="miniBtn">🛒 SHOP</button>
+    <button id="inGameTutBtn" class="miniBtn">📖 GUIDE</button>
+    <button id="pauseBtn" class="miniBtn">⏸️ PAUSE</button>
+    <button id="modsBtn" class="miniBtn" style="display:none;">⚙️</button>
+    <button id="fsMobileBtn" class="miniBtn" style="border-color:#6ad7ff;color:#6ad7ff;">⛶</button>
   </div>
 
   <div id="relicModal" class="screen" style="display:none;z-index:25;background:rgba(5,8,6,0.96);">
@@ -5046,7 +5084,7 @@ document.getElementById('trapBarrelBtn').addEventListener('click', () => selectT
 document.getElementById('abilityBtn').addEventListener('click', useSigmaBlast);
 document.getElementById('tvHypnoBtn').addEventListener('click', useTvHypno);
 document.getElementById('bassBlastBtn').addEventListener('click', useBassBlast);
-document.getElementById('pauseBtn').addEventListener('click', togglePause);
+const pBtn = document.getElementById('pauseBtn'); if(pBtn) pBtn.addEventListener('click', togglePause);
 
 const fsBtn = document.getElementById('fsMobileBtn');
 if(fsBtn){
