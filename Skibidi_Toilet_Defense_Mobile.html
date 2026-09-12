@@ -158,8 +158,8 @@
   .skillNode:focus{outline:3px solid rgba(255,211,92,0.08);}
 
   #continueBtn{margin-top:14px;}
-  #actionBar{position:absolute;left:50%;bottom:calc(10px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:7;display:flex;gap:8px;align-items:center;}
-  .miniBtn{background:rgba(10,16,12,.88);border:1px solid var(--pipe);color:var(--porcelain);padding:8px 12px;min-height:40px;margin:0;box-shadow:none;font-size:11px;}
+  /* cleaned */
+  /* cleaned */
   .miniBtn.ready{border-color:var(--gold);color:var(--gold);box-shadow:0 0 14px rgba(255,211,92,.28);}
   #abilityBtn{min-width:138px;}
   #pauseBtn{min-width:74px;}
@@ -349,21 +349,9 @@
   #hireCloseBtn:hover{background:#9fe3ff;}
 
 
-  #trapBar {
-    position:absolute;bottom:calc(54px + env(safe-area-inset-bottom));
-    left:50%;transform:translateX(-50%);
-    display:flex;gap:8px;align-items:center;
-    background:rgba(12, 16, 14, 0.90);border:1px solid var(--pipe);
-    border-radius:8px;padding:4px 10px;z-index:6;backdrop-filter:blur(4px);
-    box-shadow:0 4px 16px rgba(0,0,0,0.5);
-  }
+  /* cleaned */
   .trapLabel { font-size:11px;color:#8fa385;font-weight:bold;letter-spacing:0.5px; }
-  .trapBtn {
-    background:#141f17;border:1px solid #3a523a;color:#d8f7cf;
-    font-size:11px;font-weight:bold;padding:6px 10px;min-height:30px;border-radius:4px;
-    cursor:pointer;font-family:inherit;transition:all 0.15s;
-    box-shadow:none;margin-top:0;
-  }
+  /* cleaned */
   .trapBtn:hover { border-color:var(--sigma);color:#fff;box-shadow:0 0 8px rgba(139,255,92,0.3); }
   .trapBtn.active { border-color:var(--gold);background:#262412;color:var(--gold);box-shadow:0 0 10px rgba(255,211,92,0.4); }
   .trapCost { font-size:9px;color:#8bff5c;margin-left:4px; }
@@ -396,47 +384,14 @@
     #howto { display: none; }
 
     /* Touch Action Dock */
-    #actionBar {
-      position: absolute;
-      left: 0; right: 0;
-      bottom: calc(6px + env(safe-area-inset-bottom));
-      transform: none;
-      display: flex;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      overflow-y: hidden;
-      -webkit-overflow-scrolling: touch;
-      padding: 4px 10px;
-      gap: 6px;
-      justify-content: flex-start;
-      background: rgba(8, 12, 10, 0.88);
-      backdrop-filter: blur(6px);
-      border-top: 1px solid rgba(139, 255, 92, 0.2);
-    }
+    /* cleaned */
     #actionBar::-webkit-scrollbar { display: none; }
-    .miniBtn {
-      flex: 0 0 auto;
-      font-size: 10px;
-      padding: 6px 10px;
-      min-height: 38px;
-      border-radius: 6px;
-    }
+    /* cleaned */
 
     /* Compact Floating Trap Bar */
-    #trapBar {
-      bottom: calc(52px + env(safe-area-inset-bottom));
-      width: calc(100% - 20px);
-      max-width: 420px;
-      padding: 3px 6px;
-      gap: 4px;
-      justify-content: space-around;
-    }
+    /* cleaned */
     .trapLabel { font-size: 9px; }
-    .trapBtn {
-      font-size: 10px;
-      padding: 5px 6px;
-      min-height: 32px;
-    }
+    /* cleaned */
 
     /* Modal dialogs touch-friendly scrolling */
     #hireScreen, #upgradeScreen, #modsPanel, #pauseOverlay {
@@ -548,134 +503,20 @@
   }
 
 
-  /* === CLEAN MODERN ESPORTS / TACTICAL HUD === */
-  #modernHud {
-    position: absolute; top: calc(8px + env(safe-area-inset-top));
-    left: max(12px, env(safe-area-inset-left)); right: max(12px, env(safe-area-inset-right));
-    display: flex; justify-content: space-between; align-items: flex-start;
-    pointer-events: none; z-index: 10; gap: 8px;
-  }
-  .hudCard {
-    background: rgba(11, 16, 14, 0.88);
-    border: 1px solid rgba(80, 120, 95, 0.35);
-    border-radius: 8px;
-    padding: 6px 12px;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    box-shadow: 0 4px 16px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
-    pointer-events: auto;
-    display: flex; flex-direction: column; justify-content: center;
-  }
-  .hudLeft { min-width: 110px; }
-  .hudCenter { max-width: 320px; 
-    flex: 1; max-width: 480px; align-items: center; text-align: center;
-    padding: 6px 16px;
-  }
-  .hudRight { min-width: 130px; }
-  .hudRow { display: flex; align-items: center; gap: 10px; }
-  .hudDivider { width: 1px; height: 26px; background: rgba(255,255,255,0.12); }
-  .hudMetric { display: flex; align-items: center; gap: 8px; }
-  .hudIcon { font-size: 16px; filter: drop-shadow(0 0 6px rgba(255,255,255,0.4)); }
-  .hudData { display: flex; flex-direction: column; text-align: left; }
-  .hudLabel { font-size: 9px; color: #8fa385; font-weight: bold; letter-spacing: 0.8px; }
-  .hudVal { font-size: 16px; font-weight: 800; color: #ffffff; font-family: monospace; }
-  .hudVal.highlight { color: var(--gold); text-shadow: 0 0 10px rgba(255,211,92,0.6); }
-  .skillMetric { cursor: pointer; transition: transform 0.15s; }
-  .skillMetric:hover { transform: scale(1.04); }
-  .hudBadge {
-    background: linear-gradient(135deg, #ffd35c, #ff9d4d);
-    color: #121810; font-size: 9px; font-weight: 900;
-    padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;
-    box-shadow: 0 0 8px rgba(255,211,92,0.5);
-  }
-  .waveHeader { display: flex; align-items: center; gap: 8px; justify-content: center; width: 100%; margin-bottom: 4px; }
-  .waveTag { font-size: 9px; color: #8fa385; font-weight: bold; letter-spacing: 1px; }
-  .waveNumber { font-size: 15px; font-weight: 900; color: var(--sigma); text-shadow: 0 0 8px rgba(139,255,92,0.5); letter-spacing: 1px; }
-  .speedTag { font-size: 9px; background: #1c261e; border: 1px solid #3d5440; color: #d8f7cf; padding: 1px 6px; border-radius: 3px; }
-  #objectiveHud { font-size: 10px; color: #b0c2a8; letter-spacing: 0.5px; margin-top: 4px; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
-  #waveProgressWrap { width: 100%; height: 6px; background: rgba(0,0,0,0.6); border: 1px solid rgba(80,120,95,0.4); border-radius: 3px; overflow: hidden; }
-  #waveProgressFill { height: 100%; width: 0%; background: linear-gradient(90deg, #4ade80, #22c55e); transition: width 0.15s ease-out; }
-  #sigmaMeterWrap { width: 100%; height: 5px; background: rgba(0,0,0,0.6); border: 1px solid var(--pipe); border-radius: 3px; margin-top: 4px; overflow: hidden; }
-  #sigmaMeterFill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--sigma), #ffd35c); }
-  #bossBarWrap { width: 100%; height: 8px; background: rgba(0,0,0,0.6); border: 1px solid var(--alert); border-radius: 3px; margin-top: 4px; display: none; overflow: hidden; }
-  #bossBarFill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--alert), #ff9d4d); }
-  .comboVal { font-size: 13px; color: #6ad7ff; text-shadow: 0 0 8px rgba(106,215,255,0.5); }
-  .comboVal.hot { color: #ff9d4d; text-shadow: 0 0 12px rgba(255,157,77,0.7); }
-  .hudActionBtn {
-    background: #17221b; border: 1px solid #3c5442; color: #ffffff;
-    padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 13px;
-    transition: background 0.15s, border-color 0.15s;
-  }
-  .hudActionBtn:hover { background: #233529; border-color: var(--sigma); }
-
-  /* Redesigned Clean Dock for Traps and Abilities */
-  #trapBar {
-    position: absolute; bottom: calc(58px + env(safe-area-inset-bottom));
-    left: 50%; transform: translateX(-50%);
-    display: flex; gap: 8px; align-items: center;
-    background: rgba(11, 16, 14, 0.92); border: 1px solid rgba(80, 120, 95, 0.4);
-    border-radius: 8px; padding: 5px 12px; z-index: 8;
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.6);
-  }
-  #actionBar {
-    position: absolute; left: 50%; bottom: calc(8px + env(safe-area-inset-bottom));
-    transform: translateX(-50%); z-index: 8; display: flex; gap: 6px; align-items: center;
-    background: rgba(11, 16, 14, 0.92); border: 1px solid rgba(80, 120, 95, 0.4);
-    border-radius: 8px; padding: 4px 8px;
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.6);
-  }
-  .miniBtn {
-    background: #151e18; border: 1px solid #354a3a; color: #eef5ea;
-    border-radius: 6px; padding: 6px 12px; min-height: 38px; font-size: 11px;
-    font-weight: 700; letter-spacing: 0.5px; cursor: pointer;
-    transition: all 0.15s;
-  }
-  .miniBtn:hover { background: #202d24; border-color: var(--sigma); color: #ffffff; }
-  .miniBtn.ready {
-    border-color: #ffd35c; color: #ffd35c; background: rgba(255,211,92,0.12);
-    box-shadow: 0 0 14px rgba(255,211,92,0.4);
-  }
-
-
-  /* RESPONSIVE MOBILE ACTION DOCK */
-  #trapBar {
-    position: absolute; bottom: calc(64px + env(safe-area-inset-bottom));
-    left: 50%; transform: translateX(-50%);
-    display: flex; gap: 6px; align-items: center; justify-content: center;
-    width: min(96%, 460px);
-    background: rgba(11, 16, 14, 0.94); border: 1px solid rgba(80, 120, 95, 0.4);
-    border-radius: 8px; padding: 4px 6px; z-index: 8;
-  }
-  .trapBtn {
-    flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    font-size: 11px; padding: 6px 4px; text-align: center;
-  }
-  #actionBar {
-    position: absolute; left: 50%; bottom: calc(8px + env(safe-area-inset-bottom));
-    transform: translateX(-50%); z-index: 8;
-    display: flex; gap: 4px; align-items: center; justify-content: center;
-    width: min(98%, 520px); flex-wrap: nowrap; overflow-x: auto;
-    background: rgba(11, 16, 14, 0.94); border: 1px solid rgba(80, 120, 95, 0.4);
-    border-radius: 8px; padding: 4px 6px;
-  }
-  #actionBar::-webkit-scrollbar { display: none; }
-  .miniBtn {
-    flex: 1 0 auto; min-width: 0; white-space: nowrap;
-    padding: 6px 8px; min-height: 38px; font-size: 11px; text-align: center;
-  }
-  @media (max-width: 480px) {
-    .hudCard { padding: 4px 8px; }
-    .hudVal { font-size: 14px; }
-    .waveNumber { font-size: 13px; }
-    .trapBtn { font-size: 10px; padding: 5px 2px; }
-    .miniBtn { font-size: 10px; padding: 5px 6px; }
-  }
-
-
   
-  /* === BULLETPROOF MODERN HUD & ACTION DOCK === */
+
+  /* ================= UNIFIED TACTICAL HUD & ACTION DOCK ================= */
+  #three3dCanvas {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    z-index: 1; pointer-events: none; display: block;
+  }
+  canvas#game {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    z-index: 2; display: block; background: transparent;
+    touch-action: none;
+  }
+
+  /* TOP HUD */
   #modernHud {
     position: absolute; top: calc(8px + env(safe-area-inset-top));
     left: max(10px, env(safe-area-inset-left)); right: max(10px, env(safe-area-inset-right));
@@ -683,10 +524,10 @@
     pointer-events: none; z-index: 10; gap: 8px;
   }
   .hudCard {
-    background: rgba(8, 12, 10, 0.90);
-    border: 1px solid rgba(80, 140, 105, 0.4);
+    background: rgba(8, 12, 10, 0.92);
+    border: 1px solid rgba(80, 140, 105, 0.45);
     border-radius: 8px;
-    padding: 6px 10px;
+    padding: 6px 12px;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     box-shadow: 0 4px 16px rgba(0,0,0,0.6);
@@ -696,7 +537,7 @@
   .hudLeft { min-width: 140px; }
   .hudCenter {
     flex: 1; max-width: 380px; justify-content: center; flex-direction: column;
-    padding: 4px 12px;
+    padding: 4px 14px;
   }
   .hudRight { min-width: 140px; justify-content: flex-end; }
   .hudRow { display: flex; align-items: center; gap: 8px; }
@@ -723,62 +564,136 @@
     padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;
   }
 
-  /* Ergonomic Bottom Pods */
-  .thumbPod {
-    background: rgba(8, 12, 10, 0.92);
-    border: 1px solid rgba(80, 140, 105, 0.45);
-    border-radius: 10px; padding: 6px;
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.65);
-    z-index: 12;
+  /* BASE BUTTON STYLES (NEVER SQUISHED) */
+  .miniBtn, .trapBtn {
+    background: #151e18;
+    border: 1px solid #354a3a;
+    color: #eef5ea;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    transition: background 0.15s, border-color 0.15s, transform 0.1s;
   }
-  .podHeader {
-    font-size: 9px; font-weight: 800; color: #8fa385; letter-spacing: 1px;
-    text-align: center; margin-bottom: 4px; text-transform: uppercase;
+  .miniBtn:hover, .trapBtn:hover {
+    background: #223226;
+    border-color: var(--sigma);
+    color: #ffffff;
   }
-  .gridRow { display: flex; gap: 4px; width: 100%; margin-top: 4px; }
-  .gridRow .miniBtn { flex: 1; min-width: 0; }
-  .compactRow { gap: 3px; }
-  .primaryAbility { width: 100%; min-height: 40px; font-size: 12px; font-weight: 900; border-color: var(--gold); color: #ffffff; }
+  .miniBtn:active, .trapBtn:active { transform: scale(0.97); }
+  .trapBtn.active {
+    border-color: var(--gold);
+    background: #2a2512;
+    color: var(--gold);
+    box-shadow: 0 0 10px rgba(255,211,92,0.4);
+  }
+  .primaryAbility {
+    border-color: var(--gold);
+    color: #ffffff;
+    font-weight: 900;
+  }
+  .primaryAbility.ready {
+    background: rgba(255,211,92,0.18);
+    box-shadow: 0 0 14px rgba(255,211,92,0.5);
+  }
   .highlightBtn { border-color: var(--sigma); color: var(--sigma); font-weight: 800; }
-  .subtleBtn { padding: 4px; font-size: 10px; min-height: 28px; }
+  .subtleBtn { padding: 6px 10px; }
 
-  /* Responsive Rules */
-  @media (max-width: 700px) {
-    #trapBar.leftPod {
-      position: absolute; left: max(8px, env(safe-area-inset-left));
-      bottom: calc(10px + env(safe-area-inset-bottom));
-      width: 108px; display: flex; flex-direction: column; gap: 4px;
-    }
-    #trapBar .trapBtn { width: 100%; min-height: 36px; font-size: 10px; font-weight: 800; padding: 6px 4px; }
-    #actionBar.rightPod {
-      position: absolute; right: max(8px, env(safe-area-inset-right)); left: auto;
-      bottom: calc(10px + env(safe-area-inset-bottom));
-      width: 154px; display: flex; flex-direction: column; gap: 3px;
-    }
-    #actionBar .miniBtn { font-size: 10px; font-weight: 700; padding: 5px 4px; text-align: center; }
-    .hudLeft { min-width: 90px; }
-    .hudCenter { max-width: 160px; }
-    .hudRight { min-width: 90px; }
-  }
-
-  @media (min-width: 701px) {
+  /* ================= PC / DESKTOP SCREEN (> 720px) ================= */
+  @media (min-width: 721px) {
     #trapBar {
-      position: absolute; bottom: calc(64px + env(safe-area-inset-bottom));
-      left: 50%; transform: translateX(-50%);
-      display: flex; gap: 8px; align-items: center; justify-content: center;
-      width: auto;
-    }
-    .podHeader { display: none; }
-    #actionBar {
-      position: absolute; left: 50%; bottom: calc(8px + env(safe-area-inset-bottom));
+      position: absolute;
+      left: 50%;
+      bottom: calc(56px + env(safe-area-inset-bottom));
       transform: translateX(-50%);
-      display: flex; gap: 6px; align-items: center; justify-content: center;
-      width: auto;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: center;
+      background: rgba(8, 12, 10, 0.92);
+      border: 1px solid rgba(80, 140, 105, 0.45);
+      border-radius: 8px;
+      padding: 5px 12px;
+      z-index: 12;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.6);
     }
-    .gridRow { display: contents; }
+    #trapBar .podHeader { display: none; }
+    #trapBar .trapBtn { min-width: 120px; height: 36px; font-size: 11px; }
+
+    #actionBar {
+      position: absolute;
+      left: 50%;
+      bottom: calc(10px + env(safe-area-inset-bottom));
+      transform: translateX(-50%);
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      justify-content: center;
+      background: rgba(8, 12, 10, 0.92);
+      border: 1px solid rgba(80, 140, 105, 0.45);
+      border-radius: 8px;
+      padding: 5px 10px;
+      z-index: 12;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+    }
+    #actionBar .gridRow { display: contents; }
+    #actionBar .miniBtn { min-width: 90px; height: 38px; font-size: 11px; }
+    #actionBar .primaryAbility { min-width: 125px; }
   }
 
+  /* ================= MOBILE / NARROW SCREEN (<= 720px) ================= */
+  @media (max-width: 720px) {
+    .hudLeft { min-width: 90px; padding: 4px 6px; }
+    .hudCenter { max-width: 160px; padding: 4px 6px; }
+    .hudRight { min-width: 90px; padding: 4px 6px; }
+
+    /* Left Corner Pod for Left Thumb */
+    #trapBar.leftPod {
+      position: absolute;
+      left: max(8px, env(safe-area-inset-left));
+      bottom: calc(10px + env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      width: 116px;
+      background: rgba(8, 12, 10, 0.94);
+      border: 1px solid rgba(80, 140, 105, 0.45);
+      border-radius: 10px;
+      padding: 6px;
+      z-index: 12;
+    }
+    #trapBar .podHeader {
+      font-size: 9px; font-weight: 800; color: #8fa385;
+      text-align: center; margin-bottom: 2px;
+    }
+    #trapBar .trapBtn { width: 100%; min-height: 38px; font-size: 10px; }
+
+    /* Right Corner Pod for Right Thumb */
+    #actionBar.rightPod {
+      position: absolute;
+      right: max(8px, env(safe-area-inset-right));
+      bottom: calc(10px + env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      width: 172px;
+      background: rgba(8, 12, 10, 0.94);
+      border: 1px solid rgba(80, 140, 105, 0.45);
+      border-radius: 10px;
+      padding: 6px;
+      z-index: 12;
+    }
+    #actionBar .primaryAbility { width: 100%; min-height: 40px; font-size: 11px; }
+    #actionBar .gridRow { display: flex; gap: 4px; width: 100%; }
+    #actionBar .gridRow .miniBtn { flex: 1; min-width: 0; padding: 6px 2px; font-size: 10px; text-align: center; }
+  }
 </style>
 <script src="three.min.js"></script>
 </head>
