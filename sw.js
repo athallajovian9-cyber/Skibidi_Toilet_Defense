@@ -1,7 +1,8 @@
-const CACHE_NAME = 'skibidi-defense-v1';
+const CACHE_NAME = 'skibidi-defense-v2';
 const ASSETS = [
   './',
   './index.html',
+  './Skibidi_Toilet_Defense_Mobile.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'

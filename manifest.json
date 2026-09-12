@@ -1,12 +1,14 @@
 {
   "name": "Skibidi Toilet Defense: Sigma Edition",
   "short_name": "Skibidi Defense",
-  "start_url": "index.html",
+  "start_url": "/Skibidi_Toilet_Defense-PC/Skibidi_Toilet_Defense_Mobile.html",
+  "scope": "/Skibidi_Toilet_Defense-PC/",
+  "id": "/Skibidi_Toilet_Defense-PC/",
   "display": "standalone",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "background_color": "#070a08",
   "theme_color": "#070a08",
-  "description": "High-octane 2.5D physical defense game with walking Titan allies and floor traps.",
+  "description": "High-octane 2.5D physical defense arcade game featuring walking Titan allies, destructible enemy armor, and ground physics traps.",
   "categories": ["games", "action", "arcade"],
   "icons": [
     {
