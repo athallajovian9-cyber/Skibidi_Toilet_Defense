@@ -1962,62 +1962,175 @@ function drawSimpCameraman2(a, now){
 }
 
 function drawTitanDrillman(a, now){
-  const sc = 1.6;
-  const legSwing = Math.sin(a.walkCycle) * 0.45;
-  ctx.translate(0, Math.abs(Math.sin(a.walkCycle)) * -3 * sc);
+  const sc = 1.7;
+  const legSwing = Math.sin(a.walkCycle) * 0.42;
+  const heavyThud = Math.abs(Math.sin(a.walkCycle)) * -4 * sc;
+  ctx.translate(0, heavyThud);
 
-  ctx.strokeStyle = '#221810';
-  ctx.lineWidth = 7;
-  ctx.beginPath(); ctx.moveTo(-6 * sc, 5 * sc); ctx.lineTo(-6 * sc - Math.sin(legSwing) * 8 * sc, 14 * sc); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(6 * sc, 5 * sc); ctx.lineTo(6 * sc + Math.sin(legSwing) * 8 * sc, 14 * sc); ctx.stroke();
-
-  ctx.fillStyle = '#8a5220';
-  roundPath(-10 * sc, -12 * sc, 20 * sc, 20 * sc, 4); ctx.fill();
-  ctx.strokeStyle = '#3a200e'; ctx.lineWidth = 2; ctx.stroke();
-  ctx.fillStyle = '#ffe27c'; ctx.shadowColor = '#ffe27c'; ctx.shadowBlur = 14;
-  ctx.beginPath(); ctx.arc(0, -3 * sc, 4.5 * sc, 0, Math.PI * 2); ctx.fill();
-  ctx.shadowBlur = 0;
-
-  ctx.fillStyle = '#3a2210';
-  roundPath(-9 * sc, -26 * sc, 18 * sc, 12 * sc, 3); ctx.fill();
-  ctx.fillStyle = '#ffb042';
-  ctx.fillRect(-6 * sc, -23 * sc, 12 * sc, 4 * sc);
-
-  ctx.save();
-  ctx.translate(14 * sc, -6 * sc);
-  if(a.attackAnim > 0){
-    ctx.rotate(Math.PI / 4 + Math.sin(now * 0.05) * 0.15);
+  // 1. REAR HEAVY INDUSTRIAL GENERATOR BACKPACK & EXHAUST VENTS
+  ctx.fillStyle = '#1c1f24';
+  roundPath(-12 * sc, -16 * sc, 24 * sc, 26 * sc, 4 * sc); ctx.fill();
+  ctx.strokeStyle = '#323a45'; ctx.lineWidth = 1.8 * sc; ctx.stroke();
+  // Exhaust stacks on back
+  for(let ex of [-8 * sc, 8 * sc]){
+    ctx.fillStyle = '#0e1014';
+    ctx.fillRect(ex - 2 * sc, -24 * sc, 4 * sc, 10 * sc);
+    // Industrial exhaust fumes / heat waves
+    if(Math.random() < 0.35){
+      popParticles(a.x + ex, a.y - 26 * sc, 'rgba(200, 160, 120, 0.4)', 1);
+    }
   }
-  const drillLen = 32 * sc;
-  const spinPhase = (now * 0.03) % (Math.PI * 2);
-  const dg = ctx.createLinearGradient(0, -8 * sc, drillLen, 8 * sc);
-  dg.addColorStop(0, '#5a4530');
-  dg.addColorStop(0.5, '#e0a855');
-  dg.addColorStop(1, '#ffd35c');
-  ctx.fillStyle = dg;
+
+  // 2. MASSIVE HEAVY TREAD COMBAT BOOTS & HYDRAULIC PILLAR LEGS
+  ctx.strokeStyle = '#221e1a';
+  ctx.lineWidth = 6.5 * sc;
+  // Left leg
+  ctx.beginPath(); ctx.moveTo(-6 * sc, 8 * sc);
+  ctx.lineTo(-6 * sc - Math.sin(legSwing) * 7 * sc, 18 * sc); ctx.stroke();
+  // Right leg
+  ctx.beginPath(); ctx.moveTo(6 * sc, 8 * sc);
+  ctx.lineTo(6 * sc + Math.sin(legSwing) * 7 * sc, 18 * sc); ctx.stroke();
+  // Exposed chrome hydraulic pistons on thighs
+  ctx.strokeStyle = '#b0b8c2'; ctx.lineWidth = 2 * sc;
+  ctx.beginPath(); ctx.moveTo(-8 * sc, 10 * sc); ctx.lineTo(-4 * sc, 17 * sc); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(4 * sc, 10 * sc); ctx.lineTo(8 * sc, 17 * sc); ctx.stroke();
+  // Enormous flat industrial tread boots
+  ctx.fillStyle = '#14161a';
+  ctx.fillRect(-9 * sc - Math.sin(legSwing) * 7 * sc, 18 * sc, 8 * sc, 4.5 * sc);
+  ctx.fillRect(1 * sc + Math.sin(legSwing) * 7 * sc, 18 * sc, 8 * sc, 4.5 * sc);
+
+  // 3. OCHRE / HAZARD-ORANGE BOILER CHASSIS (Curved Heavy Plating with Rivets)
+  const bg = ctx.createLinearGradient(-12 * sc, -14 * sc, 12 * sc, 10 * sc);
+  bg.addColorStop(0, '#e07a1b');
+  bg.addColorStop(0.45, '#bd5a11');
+  bg.addColorStop(1, '#662f08');
+  ctx.fillStyle = bg;
+  roundPath(-12 * sc, -15 * sc, 24 * sc, 25 * sc, 4 * sc); ctx.fill();
+  ctx.strokeStyle = '#3d1c05'; ctx.lineWidth = 2 * sc; ctx.stroke();
+
+  // Horizontal structural boiler reinforcement rings
+  ctx.strokeStyle = '#4a260d'; ctx.lineWidth = 1.5 * sc;
+  ctx.beginPath(); ctx.moveTo(-11 * sc, -4 * sc); ctx.lineTo(11 * sc, -4 * sc); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-11 * sc, 4 * sc); ctx.lineTo(11 * sc, 4 * sc); ctx.stroke();
+
+  // 4. THE ICONIC CHEST BADGE: WHITE SQUARE + GREEN SAFETY CROSS (Anzen Hyoshiki)
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(-4.5 * sc, -11 * sc, 9 * sc, 9 * sc);
+  ctx.strokeStyle = '#222'; ctx.lineWidth = 1 * sc; ctx.strokeRect(-4.5 * sc, -11 * sc, 9 * sc, 9 * sc);
+  // Vibrant Green Cross
+  ctx.fillStyle = '#1eb846';
+  ctx.fillRect(-1.2 * sc, -9.5 * sc, 2.4 * sc, 6 * sc); // Vertical bar
+  ctx.fillRect(-3 * sc, -7.7 * sc, 6 * sc, 2.4 * sc);   // Horizontal bar
+
+  // Central dark recessed mounting nozzle/reactor beneath cross
+  ctx.fillStyle = '#181410';
+  ctx.beginPath(); ctx.arc(0, 1 * sc, 3.5 * sc, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#e07a1b'; ctx.lineWidth = 1.5 * sc; ctx.stroke();
+  ctx.fillStyle = '#ff7a1b'; ctx.beginPath(); ctx.arc(0, 1 * sc, 1.5 * sc, 0, Math.PI * 2); ctx.fill();
+
+  // Heavy neck collar ring with safety railing
+  ctx.fillStyle = '#22272e';
+  roundPath(-7 * sc, -18 * sc, 14 * sc, 4 * sc, 2 * sc); ctx.fill();
+  ctx.strokeStyle = '#ffd35c'; ctx.lineWidth = 1 * sc; ctx.stroke();
+
+  // 5. THE 3D CONICAL MACHINE-TURNED STEEL DRILL HEAD (Replacing humanoid head)
+  ctx.save();
+  ctx.translate(2 * sc, -23 * sc);
+  // Drill base mounting bracket
+  ctx.fillStyle = '#1c2026';
+  roundPath(-6 * sc, -4 * sc, 12 * sc, 8 * sc, 2 * sc); ctx.fill();
+  // Heavy conical drill bit pointing forward
+  const hDrillLen = 22 * sc;
+  const headSpin = (now * 0.04) % (Math.PI * 2);
+  const hg = ctx.createLinearGradient(0, -7 * sc, hDrillLen, 7 * sc);
+  hg.addColorStop(0, '#4a535e');
+  hg.addColorStop(0.35, '#dbe2eb');
+  hg.addColorStop(0.7, '#8b96a4');
+  hg.addColorStop(1, '#ffffff');
+  ctx.fillStyle = hg;
   ctx.beginPath();
-  ctx.moveTo(0, -9 * sc);
-  ctx.lineTo(drillLen, 0);
-  ctx.lineTo(0, 9 * sc);
+  ctx.moveTo(0, -7 * sc);
+  ctx.lineTo(hDrillLen, 0); // Sharp drill point
+  ctx.lineTo(0, 7 * sc);
   ctx.closePath();
   ctx.fill();
-  ctx.strokeStyle = '#221508'; ctx.lineWidth = 2.5;
-  for(let sp = 4 * sc; sp < drillLen - 4 * sc; sp += 7 * sc){
-    const off = Math.sin(spinPhase + sp) * 4 * sc;
+  ctx.strokeStyle = '#22272e'; ctx.lineWidth = 1.6 * sc; ctx.stroke();
+  // Turn-milled concentric steel spirals
+  ctx.strokeStyle = '#181b20'; ctx.lineWidth = 2 * sc;
+  for(let sp = 3 * sc; sp < hDrillLen - 3 * sc; sp += 4.5 * sc){
+    const off = Math.sin(headSpin + sp) * 3 * sc;
     ctx.beginPath();
-    ctx.moveTo(sp, -7 * sc + off);
-    ctx.lineTo(sp + 4 * sc, 7 * sc - off);
+    ctx.moveTo(sp, -5.5 * sc + off);
+    ctx.lineTo(sp + 3 * sc, 5.5 * sc - off);
     ctx.stroke();
   }
-  if(a.attackAnim > 0 || Math.random() < 0.25){
+  // Drill spark
+  if(Math.random() < 0.3){
     ctx.fillStyle = '#fff4a3';
-    ctx.beginPath();
-    ctx.arc(drillLen + (Math.random()-0.5)*4, (Math.random()-0.5)*4, 4 * sc, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.beginPath(); ctx.arc(hDrillLen + (Math.random()-0.5)*3, (Math.random()-0.5)*3, 2.5 * sc, 0, Math.PI * 2); ctx.fill();
   }
   ctx.restore();
 
-  drawLabel('TITAN DRILLMAN', 0, -36 * sc, '#ffe27c');
+  // 6. DOME PAULDRONS WITH RED HAZARD STRIPES & MASSIVE ROTATING ARM DRILLS
+  const atk = a.attackAnim > 0 ? (a.attackAnim / 16) * Math.PI : 0;
+  for(let side of [-1, 1]){
+    ctx.save();
+    ctx.translate(side * 15 * sc, -8 * sc);
+    // Rounded dome pauldron
+    ctx.fillStyle = '#c96414';
+    ctx.beginPath(); ctx.arc(0, -4 * sc, 7.5 * sc, Math.PI, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#3d1c05'; ctx.lineWidth = 1.8 * sc; ctx.stroke();
+    // Red horizontal safety stripe along upper rim
+    ctx.strokeStyle = '#e62222'; ctx.lineWidth = 2 * sc;
+    ctx.beginPath(); ctx.arc(0, -4 * sc, 6.5 * sc, Math.PI * 1.1, Math.PI * 1.9); ctx.stroke();
+    // Circular pivot hinge cap
+    ctx.fillStyle = '#1c2026';
+    ctx.beginPath(); ctx.arc(0, -4 * sc, 2.8 * sc, 0, Math.PI * 2); ctx.fill();
+
+    // Arm assembly angled downward or slamming
+    ctx.rotate(side * (0.2 + (a.attackAnim > 0 ? 0.3 : 0)) + (side === 1 ? atk * 1.1 : -atk * 1.1));
+    // Upper segmented cylinder
+    ctx.fillStyle = '#a64f0f';
+    roundPath(-3.5 * sc, -2 * sc, 7 * sc, 12 * sc, 2 * sc); ctx.fill();
+
+    // Massive Conical Arm Drill Hand (Heavy industrial diamond/steel bit)
+    ctx.translate(0, 10 * sc);
+    const aDrillLen = 26 * sc + (a.attackAnim > 0 ? 6 * sc : 0);
+    const armSpin = (now * 0.05 + side) % (Math.PI * 2);
+    const ag = ctx.createLinearGradient(-7 * sc, 0, 7 * sc, aDrillLen);
+    ag.addColorStop(0, '#3a414a');
+    ag.addColorStop(0.3, '#d8e0eb');
+    ag.addColorStop(0.7, '#828d9c');
+    ag.addColorStop(1, '#ffffff');
+    ctx.fillStyle = ag;
+    ctx.beginPath();
+    ctx.moveTo(-6.5 * sc, 0);
+    ctx.lineTo(0, aDrillLen); // Sharp tip
+    ctx.lineTo(6.5 * sc, 0);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#181c22'; ctx.lineWidth = 1.8 * sc; ctx.stroke();
+    // Spiral grooves on arm drills
+    ctx.strokeStyle = '#101316'; ctx.lineWidth = 2.2 * sc;
+    for(let asp = 3 * sc; asp < aDrillLen - 4 * sc; asp += 5 * sc){
+      const aoff = Math.sin(armSpin + asp) * 3 * sc;
+      ctx.beginPath();
+      ctx.moveTo(-5 * sc + aoff, asp);
+      ctx.lineTo(5 * sc - aoff, asp + 3 * sc);
+      ctx.stroke();
+    }
+    // Impact sparks on slam
+    if(a.attackAnim > 0){
+      ctx.fillStyle = '#ffe27c';
+      ctx.shadowColor = '#ffe27c'; ctx.shadowBlur = 14;
+      ctx.beginPath(); ctx.arc(0, aDrillLen + (Math.random()-0.5)*4, 4 * sc, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+    ctx.restore();
+  }
+
+  // 7. Tactical Overhead Label
+  drawLabel('TITAN DRILLMAN (3D)', 0, -40 * sc, '#ff8a1b');
 }
 
 function drawCameraMechHound(a, now){
@@ -2134,7 +2247,7 @@ const ALLY_STATS = {
 
   simp2:       { role:'chadRusher',  name:'SIMP CAMERAMAN 2.0',   cat:'LEGENDARY ELITE', desc:'CH4D UPGRADE! Rolled-up sky-blue sleeves, iconic yellow-purple striped tie, heavy cybernetic exoskeleton, high-powered turbine thruster, and dual neon-cyan energy forearm blades! Closes in with supersonic speed and shreds toilet vanguards.', cost:4, max:2, icon:'🦾', r:1.2, body:'#1e2830', head:'#1a2228', lens:'#00f0ff', label:'CH4D SIMP 2.0', labelCol:'#00f0ff', speed:3.9, cd:14, dmg:16, knockback:65, stun:25, range:450, atkDist:48 },
 
-  titanDrill:  { role:'drillSmasher', name:'TITAN DRILLMAN',        cat:'LEGENDARY ELITE', desc:'SEISMIC TITAN! Revs a massive diamond-tipped drill into the floor, sending devastating shockwave fissures through toilet lines.', cost:6, max:1, icon:'🔩', r:1.6, body:'#b86a1a', head:'#3a2210', lens:'#ffe27c', label:'TITAN DRILL', labelCol:'#ffe27c', speed:1.4, cd:80, dmg:34, knockback:240, stun:75, range:480, atkDist:75 },
+  titanDrill:  { role:'drillSmasher', name:'TITAN DRILLMAN (3D)',   cat:'LEGENDARY ELITE', desc:'DOM STUDIO 3D OVERHAUL! Machine-turned conical drill head, hazard-orange boiler chassis with Japanese green safety cross (Anzen Hyoshiki), dome pauldrons, and massive dual rotating arm drills that slam the sewer bedrock to unleash seismic shockwave fissures!', cost:6, max:1, icon:'🔩', r:1.7, body:'#bd5a11', head:'#4a535e', lens:'#ff7a1b', label:'TITAN DRILLMAN (3D)', labelCol:'#ff8a1b', speed:1.5, cd:75, dmg:38, knockback:260, stun:80, range:500, atkDist:80 },
   mechDog:     { role:'pouncer',      name:'CAMERA MECH-HOUND',     cat:'SUPPORT OPS', desc:'Rapid quadruped robotic hound! Runs along the floor, pounces onto toilets, clamps with electrified jaws to pin them in place.', cost:3, max:3, icon:'🐕', r:0.9, body:'#2a3a35', head:'#1a2622', lens:'#6ad7ff', label:'MECH HOUND', labelCol:'#6ad7ff', speed:3.8, cd:22, dmg:8, knockback:35, range:450, atkDist:36 },
   jetpackCam:  { role:'strafer',      name:'JETPACK DUAL-UZI',      cat:'FIELD INFANTRY', desc:'Rocket-powered low-altitude commando! Strafes back and forth above the floor spraying twin uzis and dropping cluster mini-bombs.', cost:3, max:3, icon:'🚀', r:0.95, body:'#3a4a5a', head:'#1e2832', lens:'#ff9d4d', label:'JETPACK UZI', labelCol:'#ff9d4d', speed:3.2, cd:12, dmg:3 },
 
