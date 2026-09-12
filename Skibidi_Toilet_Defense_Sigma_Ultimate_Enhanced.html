@@ -1075,20 +1075,29 @@ function initThreeEngine(){
     gl3dRenderer.toneMappingExposure = 1.25;
 
     gl3dScene = new THREE.Scene();
-    gl3dScene.background = new THREE.Color(0x0a100d);
-    gl3dScene.fog = new THREE.FogExp2(0x0a1410, 0.016);
+    // Bright High-Visibility Arena Sky & Subtle Atmospheric Fog
+    gl3dScene.background = new THREE.Color(0x18241d);
+    gl3dScene.fog = new THREE.FogExp2(0x18241d, 0.005); // Much lighter fog so everything is crystal clear
 
     gl3dCamera = new THREE.PerspectiveCamera(54, window.innerWidth / window.innerHeight, 0.1, 500);
     gl3dCamera.position.set(0, 16, 26);
     gl3dCamera.lookAt(0, 0, -10);
 
-    const hemiLight = new THREE.HemisphereLight(0x384f42, 0x0c1410, 0.85);
+    // Bright Crisp Studio & Overhead Lighting
+    const mainSun = new THREE.DirectionalLight(0xfff7e6, 2.5);
+    mainSun.position.set(5, 25, 15);
+    mainSun.castShadow = true;
+    mainSun.shadow.mapSize.width = 1024;
+    mainSun.shadow.mapSize.height = 1024;
+    gl3dScene.add(mainSun);
+
+    const hemiLight = new THREE.HemisphereLight(0x8bcfa8, 0x334438, 1.4);
     gl3dScene.add(hemiLight);
 
-    const ambientLight = new THREE.AmbientLight(0x22332a, 0.6);
+    const ambientLight = new THREE.AmbientLight(0xd4edd8, 0.95);
     gl3dScene.add(ambientLight);
 
-    gl3dDynLight = new THREE.PointLight(0xff5533, 0, 50, 1.8);
+    gl3dDynLight = new THREE.PointLight(0xff5533, 0, 50, 2.5);
     gl3dDynLight.position.set(0, 8, 0);
     gl3dScene.add(gl3dDynLight);
 
@@ -1102,7 +1111,7 @@ function initThreeEngine(){
 function build3dSewerEnvironment(){
   // 1. Wet Sewer Floor with PBR Reflection
   const floorGeo = new THREE.PlaneGeometry(40, 100, 40, 100);
-  const floorMat = new THREE.MeshStandardMaterial({ color: 0x141f19, roughness: 0.25, metalness: 0.5 });
+  const floorMat = new THREE.MeshStandardMaterial({ color: 0x2b3d32, roughness: 0.22, metalness: 0.35 });
   const floorMesh = new THREE.Mesh(floorGeo, floorMat);
   floorMesh.rotation.x = -Math.PI / 2;
   floorMesh.position.set(0, 0, -15);
@@ -1110,7 +1119,7 @@ function build3dSewerEnvironment(){
   gl3dScene.add(floorMesh);
 
   // 2. Vaulted Curved Brick Walls (Left & Right)
-  const wallMat = new THREE.MeshStandardMaterial({ color: 0x1f2b23, roughness: 0.75, metalness: 0.2 });
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0x3d4f43, roughness: 0.65, metalness: 0.15 });
   for(let side of [-1, 1]){
     const wallGeo = new THREE.BoxGeometry(2, 20, 100);
     const wall = new THREE.Mesh(wallGeo, wallMat);
@@ -1325,6 +1334,15 @@ function renderThreeEngine(now){
       const worldZ = (1 - normY) * 48 - 28;
 
       mesh.position.set(worldX, 0, worldZ);
+      mesh.userData.toiletIdx = i;
+
+      // Project 3D coordinate back to 2D screen coordinates so 2D click fallback also matches 100%
+      if(gl3dCamera){
+        const v = new THREE.Vector3(worldX, 1.8, worldZ);
+        v.project(gl3dCamera);
+        ent.screenX = ((v.x + 1) * W) / 2;
+        ent.screenY = ((-v.y + 1) * H) / 2;
+      }
       mesh.rotation.y = Math.PI;
       mesh.rotation.z = Math.sin(ent.wobble || 0) * 0.12;
 
@@ -5274,6 +5292,33 @@ function tapSlop(){
 }
 function tryPopAt(mx,my){
   const slop = tapSlop();
+
+  // 1. HIGH-PRECISION 3D RAYCASTING (Direct 3D Toilet Mesh Hit Detection)
+  if(typeof THREE !== 'undefined' && gl3dCamera && gl3dToiletPool.length > 0){
+    try {
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2((mx / W) * 2 - 1, -(my / H) * 2 + 1);
+      raycaster.setFromCamera(mouse, gl3dCamera);
+      
+      const activeMeshes = gl3dToiletPool.filter(m => m.visible);
+      const intersects = raycaster.intersectObjects(activeMeshes, true);
+      if(intersects.length > 0){
+        // Find which group in activeMeshes was hit
+        let hitObj = intersects[0].object;
+        while(hitObj.parent && !hitObj.userData.toiletIdx !== undefined && hitObj !== gl3dScene){
+          if(hitObj.userData && hitObj.userData.toiletIdx !== undefined) break;
+          hitObj = hitObj.parent;
+        }
+        if(hitObj && hitObj.userData && hitObj.userData.toiletIdx !== undefined){
+          const tIdx = hitObj.userData.toiletIdx;
+          if(toilets[tIdx]){
+            popOneToilet(tIdx, {source:'CLICK'});
+            return true;
+          }
+        }
+      }
+    } catch(e){}
+  }
   if(boss){
     const d = Math.hypot(mx-boss.x,my-boss.y);
     if(d < boss.r + slop){
@@ -5284,7 +5329,9 @@ function tryPopAt(mx,my){
   let best=-1, bestD=Infinity;
   for(let i=0;i<toilets.length;i++){
     const t=toilets[i];
-    const d=Math.hypot(mx-t.x,my-t.y);
+    const targetX = t.screenX !== undefined ? t.screenX : t.x;
+    const targetY = t.screenY !== undefined ? t.screenY : t.y;
+    const d = Math.hypot(mx - targetX, my - targetY);
     const hitR=t.r+player.clickRadiusBonus+slop+(megaPlungerTimer > 0 ? 65 : 0);
     if(d<hitR && d<bestD){best=i;bestD=d;}
   }
