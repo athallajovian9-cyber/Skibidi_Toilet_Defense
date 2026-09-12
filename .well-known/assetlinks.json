@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "io.github.athallajovian9_cyber.twa",
+        "sha256_cert_fingerprints": ["F7:04:16:02:C8:59:BE:ED:9D:B3:36:19:48:E4:0A:29:75:51:37:F9:B5:F1:C9:05:32:4D:24:6C:6F:A7:3B:8D"]
+      }
+    }]
