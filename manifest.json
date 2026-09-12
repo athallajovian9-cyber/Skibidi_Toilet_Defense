@@ -9,16 +9,20 @@
   "background_color": "#070a08",
   "theme_color": "#070a08",
   "description": "High-octane 2.5D physical defense arcade game featuring walking Titan allies, destructible enemy armor, and ground physics traps.",
-  "categories": ["games", "action", "arcade"],
+  "categories": [
+    "games",
+    "action",
+    "arcade"
+  ],
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "https://athallajovian9-cyber.github.io/Skibidi_Toilet_Defense-PC/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon-512.png",
+      "src": "https://athallajovian9-cyber.github.io/Skibidi_Toilet_Defense-PC/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
