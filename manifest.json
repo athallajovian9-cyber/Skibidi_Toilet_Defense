@@ -27,5 +27,21 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "screenshots": [
+    {
+      "src": "https://athallajovian9-cyber.github.io/Skibidi_Toilet_Defense-PC/screenshot1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Skibidi Toilet Defense Mobile Arcade Action"
+    },
+    {
+      "src": "https://athallajovian9-cyber.github.io/Skibidi_Toilet_Defense-PC/screenshot2.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "2.5D Physical Lane Defense Arena with Titan Allies"
+    }
   ]
 }
