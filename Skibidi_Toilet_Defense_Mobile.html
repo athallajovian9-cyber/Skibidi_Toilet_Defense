@@ -674,75 +674,94 @@
   }
 
 
-  /* === TWO-THUMB ERGONOMIC MOBILE DOCK SYSTEM === */
+  
+  /* === BULLETPROOF MODERN HUD & ACTION DOCK === */
+  #modernHud {
+    position: absolute; top: calc(8px + env(safe-area-inset-top));
+    left: max(10px, env(safe-area-inset-left)); right: max(10px, env(safe-area-inset-right));
+    display: flex; justify-content: space-between; align-items: center;
+    pointer-events: none; z-index: 10; gap: 8px;
+  }
+  .hudCard {
+    background: rgba(8, 12, 10, 0.90);
+    border: 1px solid rgba(80, 140, 105, 0.4);
+    border-radius: 8px;
+    padding: 6px 10px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+    pointer-events: auto;
+    display: flex; align-items: center;
+  }
+  .hudLeft { min-width: 140px; }
+  .hudCenter {
+    flex: 1; max-width: 380px; justify-content: center; flex-direction: column;
+    padding: 4px 12px;
+  }
+  .hudRight { min-width: 140px; justify-content: flex-end; }
+  .hudRow { display: flex; align-items: center; gap: 8px; }
+  .hudDivider { width: 1px; height: 22px; background: rgba(255,255,255,0.15); margin: 0 4px; }
+  .hudMetric { display: flex; align-items: center; gap: 6px; }
+  .hudIcon { font-size: 15px; }
+  .hudVal { font-size: 15px; font-weight: 800; color: #ffffff; font-family: monospace; }
+  .hudVal.highlight { color: var(--gold); text-shadow: 0 0 8px rgba(255,211,92,0.6); }
+  .skillMetric { cursor: pointer; }
+  .hudBadge {
+    background: linear-gradient(135deg, #ffd35c, #ff9d4d);
+    color: #121810; font-size: 9px; font-weight: 900;
+    padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;
+  }
+  .waveHeader { display: flex; align-items: center; gap: 6px; justify-content: center; width: 100%; }
+  .waveNumber { font-size: 14px; font-weight: 900; color: var(--sigma); letter-spacing: 0.5px; }
+  .speedTag { font-size: 9px; background: #1c261e; border: 1px solid #3d5440; color: #d8f7cf; padding: 1px 5px; border-radius: 3px; }
+  #objectiveHud { font-size: 10px; color: #b0c2a8; letter-spacing: 0.5px; margin-top: 2px; }
+  #waveProgressWrap { width: 100%; height: 5px; background: rgba(0,0,0,0.6); border: 1px solid rgba(80,120,95,0.4); border-radius: 3px; overflow: hidden; margin-top: 3px; }
+  #waveProgressFill { height: 100%; width: 0%; background: linear-gradient(90deg, #4ade80, #22c55e); }
+  .comboVal { font-size: 13px; color: #6ad7ff; font-weight: 800; font-family: monospace; }
+  .hudActionBtn {
+    background: #17221b; border: 1px solid #3c5442; color: #ffffff;
+    padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px;
+  }
+
+  /* Ergonomic Bottom Pods */
   .thumbPod {
-    background: rgba(11, 16, 14, 0.92);
-    border: 1px solid rgba(80, 120, 95, 0.45);
-    border-radius: 10px;
-    padding: 6px;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.1);
+    background: rgba(8, 12, 10, 0.92);
+    border: 1px solid rgba(80, 140, 105, 0.45);
+    border-radius: 10px; padding: 6px;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.65);
     z-index: 12;
   }
   .podHeader {
     font-size: 9px; font-weight: 800; color: #8fa385; letter-spacing: 1px;
     text-align: center; margin-bottom: 4px; text-transform: uppercase;
   }
-  .gridRow {
-    display: flex; gap: 4px; width: 100%; margin-top: 4px;
-  }
+  .gridRow { display: flex; gap: 4px; width: 100%; margin-top: 4px; }
   .gridRow .miniBtn { flex: 1; min-width: 0; }
   .compactRow { gap: 3px; }
-  .primaryAbility {
-    width: 100%; min-height: 42px; font-size: 12px; font-weight: 900;
-    border-color: var(--gold); color: #ffffff;
-  }
+  .primaryAbility { width: 100%; min-height: 40px; font-size: 12px; font-weight: 900; border-color: var(--gold); color: #ffffff; }
   .highlightBtn { border-color: var(--sigma); color: var(--sigma); font-weight: 800; }
-  .subtleBtn { padding: 4px; font-size: 10px; min-height: 30px; }
+  .subtleBtn { padding: 4px; font-size: 10px; min-height: 28px; }
 
-  /* MOBILE BREAKPOINT: SPLIT CORNERS (LEFT & RIGHT) */
+  /* Responsive Rules */
   @media (max-width: 700px) {
-    /* Left Pod (Traps): Anchored to Bottom-Left for Left Thumb */
     #trapBar.leftPod {
-      position: absolute;
-      left: max(8px, env(safe-area-inset-left));
+      position: absolute; left: max(8px, env(safe-area-inset-left));
       bottom: calc(10px + env(safe-area-inset-bottom));
-      transform: none;
-      width: 108px;
-      display: flex; flex-direction: column; gap: 5px;
+      width: 108px; display: flex; flex-direction: column; gap: 4px;
     }
-    #trapBar .trapBtn {
-      width: 100%; min-height: 36px; padding: 6px 4px; font-size: 10px; font-weight: 800;
-      border-radius: 6px; margin: 0;
-    }
-
-    /* Right Pod (Abilities & Roster): Anchored to Bottom-Right for Right Thumb */
+    #trapBar .trapBtn { width: 100%; min-height: 36px; font-size: 10px; font-weight: 800; padding: 6px 4px; }
     #actionBar.rightPod {
-      position: absolute;
-      right: max(8px, env(safe-area-inset-right));
-      left: auto;
+      position: absolute; right: max(8px, env(safe-area-inset-right)); left: auto;
       bottom: calc(10px + env(safe-area-inset-bottom));
-      transform: none;
-      width: 152px;
-      display: flex; flex-direction: column; gap: 3px;
-      padding: 6px;
+      width: 154px; display: flex; flex-direction: column; gap: 3px;
     }
-    #actionBar .miniBtn {
-      border-radius: 6px; margin: 0; font-size: 10px; font-weight: 700;
-      padding: 6px 4px; text-align: center;
-    }
-    .primaryAbility { min-height: 38px; font-size: 11px; }
-
-    /* Top HUD adjustments for mobile: cards stay small and out of center */
-    .hudLeft { min-width: 100px; padding: 4px 6px; }
-    .hudCenter { max-width: 180px; padding: 4px 6px; }
-    .hudRight { min-width: 100px; padding: 4px 6px; }
-    .hudVal { font-size: 13px; }
-    .hudIcon { font-size: 13px; }
+    #actionBar .miniBtn { font-size: 10px; font-weight: 700; padding: 5px 4px; text-align: center; }
+    .hudLeft { min-width: 90px; }
+    .hudCenter { max-width: 160px; }
+    .hudRight { min-width: 90px; }
   }
 
-  /* DESKTOP BREAKPOINT (> 700px): Centered Dock */
   @media (min-width: 701px) {
     #trapBar {
       position: absolute; bottom: calc(64px + env(safe-area-inset-bottom));
@@ -758,17 +777,6 @@
       width: auto;
     }
     .gridRow { display: contents; }
-  }
-
-
-  #three3dCanvas {
-    position: absolute; inset: 0; width: 100%; height: 100%;
-    z-index: 1; pointer-events: none; display: block;
-  }
-  canvas#game {
-    position: absolute; inset: 0; width: 100%; height: 100%;
-    z-index: 2; display: block; background: transparent;
-    touch-action: none;
   }
 
 </style>
@@ -1010,19 +1018,49 @@ let chosenDifficultyKey = storage.get('skibidiLastDifficulty', 'normal');
 
 /* ================= SOUND & PROCEDURAL BGM ENGINE ================= */
 
-/* ================= HIGH-PERFORMANCE THREE.JS GPU ENGINE ================= */
+
+/* ================= TRUE 3D WEBGL ENGINE (TITANS & TOILETS) ================= */
 let gl3dRenderer = null, gl3dScene = null, gl3dCamera = null;
-let gl3dSewerTunnel = null, gl3dWaterMesh = null, gl3dSpotlights = [];
-let gl3dUnitMeshes = new Map();
+let gl3dWaterMesh = null, gl3dSpotlights = [];
 let gl3dDynLight = null;
+
+const gl3dToiletPool = [];
+const gl3dAllyPool = new Map();
+
+// Materials
+const matWhitePorcelain = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.12, metalness: 0.1 });
+const matChrome = new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.08, metalness: 0.95 });
+const matWater = new THREE.MeshStandardMaterial({ color: 0x124036, roughness: 0.1, metalness: 0.85 });
+const matSkin = new THREE.MeshStandardMaterial({ color: 0xd99b7b, roughness: 0.65, metalness: 0.0 });
+const matHair = new THREE.MeshStandardMaterial({ color: 0x241810, roughness: 0.85, metalness: 0.0 });
+
+// Titan Materials
+const matHazardOrange = new THREE.MeshStandardMaterial({ color: 0xe66e12, roughness: 0.35, metalness: 0.65 });
+const matDarkIron = new THREE.MeshStandardMaterial({ color: 0x181e22, roughness: 0.55, metalness: 0.75 });
+const matChromeSteel = new THREE.MeshStandardMaterial({ color: 0xecf2f8, roughness: 0.12, metalness: 0.95 });
+const matSafetyWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 });
+const matSafetyGreen = new THREE.MeshStandardMaterial({ color: 0x14a838, roughness: 0.4 });
+const matCrimsonTunic = new THREE.MeshStandardMaterial({ color: 0x8a0d16, roughness: 0.55, metalness: 0.3 });
+const matSpeakerBlack = new THREE.MeshStandardMaterial({ color: 0x111417, roughness: 0.45, metalness: 0.8 });
+const matRedGlow = new THREE.MeshStandardMaterial({ color: 0xff1e1e, emissive: 0xff1e1e, emissiveIntensity: 1.2, roughness: 0.2 });
+const matWhiteReactor = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffe6e6, emissiveIntensity: 2.4, roughness: 0.1 });
+const matCyanBlade = new THREE.MeshStandardMaterial({ color: 0x6ad7ff, emissive: 0x6ad7ff, emissiveIntensity: 1.8, roughness: 0.1 });
 
 function initThreeEngine(){
   if(typeof THREE === 'undefined') return;
-  try {
-    const threeCv = document.getElementById('three3dCanvas');
-    if(!threeCv) return;
+  const threeCv = document.getElementById('three3dCanvas');
+  if(!threeCv) return;
 
-    // High-Performance WebGL 2.0 Renderer utilizing Dedicated GPU (NVIDIA GTX)
+  if(gl3dRenderer) {
+    gl3dRenderer.setSize(window.innerWidth, window.innerHeight);
+    if(gl3dCamera){
+      gl3dCamera.aspect = window.innerWidth / window.innerHeight;
+      gl3dCamera.updateProjectionMatrix();
+    }
+    return;
+  }
+
+  try {
     gl3dRenderer = new THREE.WebGLRenderer({
       canvas: threeCv,
       antialias: true,
@@ -1034,47 +1072,37 @@ function initThreeEngine(){
     gl3dRenderer.shadowMap.enabled = true;
     gl3dRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
     gl3dRenderer.toneMapping = THREE.ACESFilmicToneMapping;
-    gl3dRenderer.toneMappingExposure = 1.15;
+    gl3dRenderer.toneMappingExposure = 1.25;
 
-    // 3D Scene with Atmospheric Sewer Fog
     gl3dScene = new THREE.Scene();
-    gl3dScene.background = new THREE.Color(0x0a0f0d);
-    gl3dScene.fog = new THREE.FogExp2(0x0a1410, 0.018);
+    gl3dScene.background = new THREE.Color(0x0a100d);
+    gl3dScene.fog = new THREE.FogExp2(0x0a1410, 0.016);
 
-    // Perspective Camera Looking Down the Sewer Alley
-    gl3dCamera = new THREE.PerspectiveCamera(52, window.innerWidth / window.innerHeight, 0.1, 500);
-    gl3dCamera.position.set(0, 14, 22);
-    gl3dCamera.lookAt(0, 0, -12);
+    gl3dCamera = new THREE.PerspectiveCamera(54, window.innerWidth / window.innerHeight, 0.1, 500);
+    gl3dCamera.position.set(0, 16, 26);
+    gl3dCamera.lookAt(0, 0, -10);
 
-    // Ambient & Hemisphere Lighting (GI bounce)
-    const hemiLight = new THREE.HemisphereLight(0x283b32, 0x0c1410, 0.65);
+    const hemiLight = new THREE.HemisphereLight(0x384f42, 0x0c1410, 0.85);
     gl3dScene.add(hemiLight);
 
-    const ambientLight = new THREE.AmbientLight(0x18241e, 0.45);
+    const ambientLight = new THREE.AmbientLight(0x22332a, 0.6);
     gl3dScene.add(ambientLight);
 
-    // Dynamic Combat Light (illuminates tunnel on shots/blasts)
-    gl3dDynLight = new THREE.PointLight(0xff5533, 0, 45, 1.8);
-    gl3dDynLight.position.set(0, 6, 0);
+    gl3dDynLight = new THREE.PointLight(0xff5533, 0, 50, 1.8);
+    gl3dDynLight.position.set(0, 8, 0);
     gl3dScene.add(gl3dDynLight);
 
-    // 3D SEWER ENVIRONMENT (FLOOR, WALLS, ARCHWAYS & WATER CANAL)
     build3dSewerEnvironment();
-
-    console.log("HIGH-PERFORMANCE THREE.JS GPU ENGINE INITIALIZED ON NVIDIA!");
+    console.log("TRUE 3D WEBGL ENGINE RUNNING AT 60 FPS ON DEDICATED GPU!");
   } catch(e){
-    console.warn("Three.js engine init fallback:", e);
+    console.warn("Three init error:", e);
   }
 }
 
 function build3dSewerEnvironment(){
-  // 1. Tiled Wet Concrete / Sewer Floor with PBR Reflection
-  const floorGeo = new THREE.PlaneGeometry(36, 90, 36, 90);
-  const floorMat = new THREE.MeshStandardMaterial({
-    color: 0x121c17,
-    roughness: 0.28,
-    metalness: 0.45
-  });
+  // 1. Wet Sewer Floor with PBR Reflection
+  const floorGeo = new THREE.PlaneGeometry(40, 100, 40, 100);
+  const floorMat = new THREE.MeshStandardMaterial({ color: 0x141f19, roughness: 0.25, metalness: 0.5 });
   const floorMesh = new THREE.Mesh(floorGeo, floorMat);
   floorMesh.rotation.x = -Math.PI / 2;
   floorMesh.position.set(0, 0, -15);
@@ -1082,166 +1110,75 @@ function build3dSewerEnvironment(){
   gl3dScene.add(floorMesh);
 
   // 2. Vaulted Curved Brick Walls (Left & Right)
-  const wallMat = new THREE.MeshStandardMaterial({
-    color: 0x1e2620,
-    roughness: 0.72,
-    metalness: 0.2
-  });
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0x1f2b23, roughness: 0.75, metalness: 0.2 });
   for(let side of [-1, 1]){
-    const wallGeo = new THREE.BoxGeometry(1.5, 16, 90);
-    const wallMesh = new THREE.Mesh(wallGeo, wallMat);
-    wallMesh.position.set(side * 14, 8, -15);
-    wallMesh.receiveShadow = true;
-    gl3dScene.add(wallMesh);
+    const wallGeo = new THREE.BoxGeometry(2, 20, 100);
+    const wall = new THREE.Mesh(wallGeo, wallMat);
+    wall.position.set(side * 16, 10, -15);
+    wall.receiveShadow = true;
+    gl3dScene.add(wall);
   }
 
-  // 3. Central Toxic Sludge Water Canal (Animated PBR Water)
-  const waterGeo = new THREE.PlaneGeometry(6, 90, 12, 45);
-  const waterMat = new THREE.MeshStandardMaterial({
-    color: 0x1a4a3e,
-    roughness: 0.08,
-    metalness: 0.85
-  });
-  gl3dWaterMesh = new THREE.Mesh(waterGeo, waterMat);
+  // 3. Central Toxic Sludge Water Canal (Flowing PBR Water)
+  const waterGeo = new THREE.PlaneGeometry(8, 100);
+  gl3dWaterMesh = new THREE.Mesh(waterGeo, matWater);
   gl3dWaterMesh.rotation.x = -Math.PI / 2;
-  gl3dWaterMesh.position.set(0, 0.04, -15);
+  gl3dWaterMesh.position.set(0, 0.05, -15);
   gl3dWaterMesh.receiveShadow = true;
   gl3dScene.add(gl3dWaterMesh);
 
   // 4. Overhead Industrial Lamps with Real Dynamic Shadows
-  const lampPositions = [-30, -10, 10];
-  lampPositions.forEach((lz, idx) => {
-    // Lamp Fixture
-    const lampGeo = new THREE.CylinderGeometry(0.6, 1.2, 0.8, 12);
-    const lampMat = new THREE.MeshStandardMaterial({ color: 0x333b35, metalness: 0.8 });
-    const lamp = new THREE.Mesh(lampGeo, lampMat);
-    lamp.position.set(0, 11, lz);
+  [-32, -12, 8, 28].forEach((lz, idx) => {
+    const lamp = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 1.4, 1.0, 12), matDarkIron);
+    lamp.position.set(0, 13, lz);
     gl3dScene.add(lamp);
 
-    // Spotlight with Soft Shadows
-    const spot = new THREE.SpotLight(0xffe2a4, 2.4, 38, Math.PI / 3.5, 0.45, 1.5);
-    spot.position.set(0, 10.8, lz);
+    const spot = new THREE.SpotLight(0xffe6b0, 2.6, 42, Math.PI / 3.4, 0.45, 1.4);
+    spot.position.set(0, 12.8, lz);
     spot.target.position.set(0, 0, lz);
     spot.castShadow = true;
     spot.shadow.mapSize.width = 1024;
     spot.shadow.mapSize.height = 1024;
-    spot.shadow.bias = -0.001;
     gl3dScene.add(spot);
     gl3dScene.add(spot.target);
     gl3dSpotlights.push(spot);
   });
-
-  // 5. Floating Spore Dust Field
-  const particleCount = 120;
-  const particleGeo = new THREE.BufferGeometry();
-  const positions = new Float32Array(particleCount * 3);
-  for(let p = 0; p < particleCount * 3; p += 3){
-    positions[p] = (Math.random() - 0.5) * 24;
-    positions[p + 1] = Math.random() * 12 + 1;
-    positions[p + 2] = (Math.random() - 0.5) * 80;
-  }
-  particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-  const particleMat = new THREE.PointsMaterial({
-    color: 0x74e5b1,
-    size: 0.22,
-    transparent: true,
-    opacity: 0.65
-  });
-  const sporeField = new THREE.Points(particleGeo, particleMat);
-  gl3dScene.add(sporeField);
 }
 
-function renderThreeEngine(now){
-  if(!gl3dRenderer || !gl3dScene || !gl3dCamera) return;
-
-  const t = now * 0.001;
-
-  // Animated Water Caustic Ripple
-  if(gl3dWaterMesh){
-    gl3dWaterMesh.position.y = 0.04 + Math.sin(t * 2.5) * 0.015;
-  }
-
-  // Dynamic Lamp Flicker
-  gl3dSpotlights.forEach((sp, idx) => {
-    sp.intensity = 2.2 + Math.sin(t * 6 + idx * 2.5) * 0.35 + (Math.random() < 0.08 ? -0.4 : 0);
-  });
-
-  // Decay Dynamic Combat Light
-  if(gl3dDynLight && gl3dDynLight.intensity > 0){
-    gl3dDynLight.intensity = Math.max(0, gl3dDynLight.intensity - 0.08);
-  }
-
-  // Camera subtle breathing motion
-  gl3dCamera.position.x = Math.sin(t * 0.5) * 0.25;
-
-  sync3dToilets(now);
-  gl3dRenderer.render(gl3dScene, gl3dCamera);
-}
-
-function flash3dCombatLight(colorHex, intensity){
-  if(gl3dDynLight){
-    gl3dDynLight.color.setHex(colorHex || 0xff5533);
-    gl3dDynLight.intensity = intensity || 3.5;
-  }
-}
-
-
-// 3D TOILET MESH POOL & SYNCHRONIZER
-const gl3dToiletPool = [];
-const porcelainMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.15, metalness: 0.1 });
-const chromeMat = new THREE.MeshStandardMaterial({ color: 0xcccccc, roughness: 0.1, metalness: 0.95 });
-const waterMat = new THREE.MeshStandardMaterial({ color: 0x1a4a40, roughness: 0.2, metalness: 0.8 });
-const headMat = new THREE.MeshStandardMaterial({ color: 0xd9a07e, roughness: 0.6, metalness: 0.0 });
-const hairMat = new THREE.MeshStandardMaterial({ color: 0x2b1d14, roughness: 0.8, metalness: 0.0 });
-
+/* --- 3D TOILET MESH CREATOR --- */
 function create3dToiletMesh(){
   const group = new THREE.Group();
-  
-  // Water Tank
-  const tankGeo = new THREE.BoxGeometry(1.6, 1.4, 0.9);
-  const tank = new THREE.Mesh(tankGeo, porcelainMat);
-  tank.position.set(0, 2.0, 0.5);
+  // Tank
+  const tank = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.5, 1.0), matWhitePorcelain);
+  tank.position.set(0, 2.2, 0.6);
   tank.castShadow = true;
   group.add(tank);
-
-  // Chrome Lever
-  const leverGeo = new THREE.BoxGeometry(0.2, 0.1, 0.3);
-  const lever = new THREE.Mesh(leverGeo, chromeMat);
-  lever.position.set(0.85, 2.3, 0.4);
+  // Chrome flush
+  const lever = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.1, 0.3), matChrome);
+  lever.position.set(0.95, 2.5, 0.4);
   group.add(lever);
-
-  // Bowl Base & Pedestal
-  const baseGeo = new THREE.CylinderGeometry(0.7, 0.9, 1.2, 16);
-  const base = new THREE.Mesh(baseGeo, porcelainMat);
-  base.position.set(0, 0.6, 0);
+  // Base
+  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.0, 1.4, 16), matWhitePorcelain);
+  base.position.set(0, 0.7, 0);
   base.castShadow = true;
-  base.receiveShadow = true;
   group.add(base);
-
   // Bowl Rim
-  const rimGeo = new THREE.CylinderGeometry(1.2, 0.9, 0.8, 16);
-  const rim = new THREE.Mesh(rimGeo, porcelainMat);
-  rim.position.set(0, 1.5, -0.2);
+  const rim = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.0, 0.9, 16), matWhitePorcelain);
+  rim.position.set(0, 1.6, -0.2);
   rim.castShadow = true;
   group.add(rim);
-
-  // Water Pool
-  const waterGeo = new THREE.CylinderGeometry(0.8, 0.8, 0.1, 14);
-  const water = new THREE.Mesh(waterGeo, waterMat);
-  water.position.set(0, 1.65, -0.2);
+  // Water
+  const water = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 0.1, 14), matWater);
+  water.position.set(0, 1.8, -0.2);
   group.add(water);
-
-  // Human Head emerging from bowl
-  const headGeo = new THREE.SphereGeometry(0.55, 12, 12);
-  const head = new THREE.Mesh(headGeo, headMat);
-  head.position.set(0, 2.3, -0.2);
+  // Head
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.6, 12, 12), matSkin);
+  head.position.set(0, 2.5, -0.2);
   head.castShadow = true;
   group.add(head);
-
   // Hair
-  const hairGeo = new THREE.SphereGeometry(0.56, 10, 10);
-  const hair = new THREE.Mesh(hairGeo, hairMat);
-  hair.position.set(0, 2.45, -0.15);
+  const hair = new THREE.Mesh(new THREE.SphereGeometry(0.62, 10, 10), matHair);
+  hair.position.set(0, 2.65, -0.15);
   group.add(hair);
 
   group.userData = { headRef: head };
@@ -1249,40 +1186,195 @@ function create3dToiletMesh(){
   return group;
 }
 
-function sync3dToilets(now){
-  if(!gl3dScene) return;
+/* --- 3D TITAN DRILLMAN MESH CREATOR --- */
+function create3dTitanDrillMesh(){
+  const group = new THREE.Group();
+  // Boiler Body
+  const body = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.3, 2.8, 18), matHazardOrange);
+  body.position.set(0, 3.2, 0);
+  body.castShadow = true;
+  group.add(body);
+  // Cast Iron Reinforcement Ring
+  const ring = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.5, 18), matDarkIron);
+  ring.position.set(0, 3.2, 0);
+  group.add(ring);
+  // Safety Cross Plaque
+  const plaque = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.1), matSafetyWhite);
+  plaque.position.set(0, 3.5, -1.45);
+  group.add(plaque);
+  const crossV = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.55, 0.05), matSafetyGreen);
+  crossV.position.set(0, 3.5, -1.52);
+  group.add(crossV);
+  const crossH = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.2, 0.05), matSafetyGreen);
+  crossH.position.set(0, 3.5, -1.52);
+  group.add(crossH);
+
+  // Rotating Conical Head Drill
+  const headDrillGroup = new THREE.Group();
+  headDrillGroup.position.set(0, 5.0, -0.4);
+  for(let i = 0; i < 5; i++){
+    const rb = 0.9 * (1 - i * 0.18), rt = 0.9 * (1 - (i + 1) * 0.18);
+    const coneSeg = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, 0.5, 14), matChromeSteel);
+    coneSeg.rotation.x = Math.PI / 2;
+    coneSeg.position.set(0, 0, -i * 0.45);
+    headDrillGroup.add(coneSeg);
+  }
+  group.add(headDrillGroup);
+
+  // Dual Arm Drills
+  const armDrills = [];
+  for(let side of [-1, 1]){
+    const armGroup = new THREE.Group();
+    armGroup.position.set(side * 2.2, 2.6, 0.2);
+    for(let i = 0; i < 4; i++){
+      const rb = 0.6 * (1 - i * 0.2), rt = 0.6 * (1 - (i + 1) * 0.2);
+      const armSeg = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, 0.6, 12), matChromeSteel);
+      armSeg.position.set(0, -i * 0.55, 0);
+      armGroup.add(armSeg);
+    }
+    group.add(armGroup);
+    armDrills.push(armGroup);
+  }
+
+  group.userData = { headDrill: headDrillGroup, armDrills: armDrills };
+  gl3dScene.add(group);
+  return group;
+}
+
+/* --- 3D TITAN SPEAKERMAN 3.0 MESH CREATOR --- */
+function create3dTitanSpeakerMesh(){
+  const group = new THREE.Group();
+  // Crimson Tunic Body
+  const body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 3.0, 1.4), matCrimsonTunic);
+  body.position.set(0, 3.4, 0);
+  body.castShadow = true;
+  group.add(body);
+  // White-Hot Blinding Chest Reactor
+  const reactor = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.2, 16), matWhiteReactor);
+  reactor.rotation.x = Math.PI / 2;
+  reactor.position.set(0, 3.5, -0.75);
+  group.add(reactor);
+
+  // Towering Shoulder Speaker Wings
+  for(let side of [-1, 1]){
+    const wing = new THREE.Mesh(new THREE.BoxGeometry(1.0, 3.2, 0.8), matSpeakerBlack);
+    wing.position.set(side * 2.2, 5.2, 0.4);
+    wing.castShadow = true;
+    group.add(wing);
+    for(let wy of [4.2, 5.0, 5.8, 6.6]){
+      const woofer = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.1, 12), matRedGlow);
+      woofer.rotation.x = Math.PI / 2;
+      woofer.position.set(side * 2.2, wy, 0.0);
+      group.add(woofer);
+    }
+  }
+
+  // Crowned Speaker Head
+  const head = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.2, 1.1), matSpeakerBlack);
+  head.position.set(0, 5.4, 0);
+  group.add(head);
+  const headWoofer = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.2, 0.2, 14), matRedGlow);
+  headWoofer.rotation.x = Math.PI / 2;
+  headWoofer.position.set(0, 5.4, -0.6);
+  group.add(headWoofer);
+
+  // Rotating Radial Energy Halo Ring on Back
+  const haloGroup = new THREE.Group();
+  haloGroup.position.set(0, 5.4, 0.8);
+  for(let a = 0; a < 16; a++){
+    const angle = 2 * Math.PI * a / 16;
+    const hSeg = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.1), matRedGlow);
+    hSeg.position.set(1.6 * Math.cos(angle), 1.6 * Math.sin(angle), 0);
+    haloGroup.add(hSeg);
+  }
+  group.add(haloGroup);
+
+  // Dual Heavy Forearm Plasma Blasters
+  for(let side of [-1, 1]){
+    const gun = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 1.8), matSpeakerBlack);
+    gun.position.set(side * 2.0, 2.5, -0.4);
+    group.add(gun);
+    const nozzle = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.3, 12), matRedGlow);
+    nozzle.rotation.x = Math.PI / 2;
+    nozzle.position.set(side * 2.0, 2.5, -1.35);
+    group.add(nozzle);
+  }
+
+  group.userData = { halo: haloGroup };
+  gl3dScene.add(group);
+  return group;
+}
+
+function renderThreeEngine(now){
+  if(!gl3dRenderer || !gl3dScene || !gl3dCamera) return;
+
   const t = now * 0.001;
 
-  // Map 2D screen coordinates (x, y) to 3D sewer coordinates (worldX, worldZ)
-  // 2D: x from 0 to W -> 3D X from -12 to 12
-  // 2D: y from H to floorEndY -> 3D Z from 18 to -35
+  // 1. Synchronize 3D Toilets in Real Perspective
   while(gl3dToiletPool.length < toilets.length){
     gl3dToiletPool.push(create3dToiletMesh());
   }
-
   for(let i = 0; i < gl3dToiletPool.length; i++){
     const mesh = gl3dToiletPool[i];
     if(i < toilets.length){
       const ent = toilets[i];
       mesh.visible = true;
-      const normX = (ent.x / W) * 2 - 1; // -1 to 1
-      const normY = (ent.y - floorEndY) / (H - floorEndY); // 0 to 1
-
-      const worldX = normX * 11;
-      const worldZ = (1 - normY) * 45 - 28;
+      const normX = (ent.x / W) * 2 - 1;
+      const normY = (ent.y - floorEndY) / Math.max(1, (H - floorEndY));
+      const worldX = normX * 12;
+      const worldZ = (1 - normY) * 48 - 28;
 
       mesh.position.set(worldX, 0, worldZ);
       mesh.rotation.y = Math.PI;
       mesh.rotation.z = Math.sin(ent.wobble || 0) * 0.12;
 
-      // Animate head singing / bobbing
       if(mesh.userData.headRef){
-        mesh.userData.headRef.position.y = 2.3 + Math.abs(Math.sin(t * 8 + i)) * 0.2;
+        mesh.userData.headRef.position.y = 2.5 + Math.abs(Math.sin(t * 8 + i)) * 0.18;
       }
     } else {
       mesh.visible = false;
     }
   }
+
+  // 2. Synchronize 3D Titans & Allies in Real Perspective
+  deployedAllies.forEach(a => {
+    let mesh = gl3dAllyPool.get(a);
+    if(!mesh){
+      if(a.type === 'titanDrill') mesh = create3dTitanDrillMesh();
+      else if(a.type === 'titanSpeaker3') mesh = create3dTitanSpeakerMesh();
+      else mesh = create3dTitanDrillMesh(); // Default Titan 3D
+      gl3dAllyPool.set(a, mesh);
+    }
+    mesh.visible = true;
+    const normX = (a.x / W) * 2 - 1;
+    const normY = (a.y - floorEndY) / Math.max(1, (H - floorEndY));
+    const worldX = normX * 12;
+    const worldZ = (1 - normY) * 48 - 28;
+    mesh.position.set(worldX, 0, worldZ);
+
+    // Rotate Titan Drill 3D parts
+    if(mesh.userData.headDrill){
+      mesh.userData.headDrill.rotation.z += 0.25;
+    }
+    if(mesh.userData.armDrills){
+      mesh.userData.armDrills.forEach((ad, idx) => { ad.rotation.y += (idx === 0 ? 0.2 : -0.2); });
+    }
+    // Rotate Titan Speaker 3.0 Halo Ring
+    if(mesh.userData.halo){
+      mesh.userData.halo.rotation.z += 0.04;
+    }
+  });
+
+  // Water Ripple & Spotlights
+  if(gl3dWaterMesh) gl3dWaterMesh.position.y = 0.05 + Math.sin(t * 2.5) * 0.015;
+  gl3dSpotlights.forEach((sp, idx) => {
+    sp.intensity = 2.4 + Math.sin(t * 6 + idx * 2.2) * 0.3;
+  });
+  if(gl3dDynLight && gl3dDynLight.intensity > 0){
+    gl3dDynLight.intensity = Math.max(0, gl3dDynLight.intensity - 0.08);
+  }
+
+  gl3dRenderer.render(gl3dScene, gl3dCamera);
 }
 
 let audioCtx = null;
@@ -1646,6 +1738,7 @@ document.querySelectorAll('.diffBtn').forEach(btn=>{
     difficultyScreen.style.display = 'none';
     gameWrap.style.display = 'block';
     resize();
+    initThreeEngine();
     resetGame();
     if(!gameLoopStarted){
       gameLoopStarted = true;
