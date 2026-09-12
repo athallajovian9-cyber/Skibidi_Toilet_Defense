@@ -548,6 +548,97 @@
     display: inline-block;
   }
 
+
+  /* === CLEAN MODERN ESPORTS / TACTICAL HUD === */
+  #modernHud {
+    position: absolute; top: calc(8px + env(safe-area-inset-top));
+    left: max(12px, env(safe-area-inset-left)); right: max(12px, env(safe-area-inset-right));
+    display: flex; justify-content: space-between; align-items: flex-start;
+    pointer-events: none; z-index: 10; gap: 8px;
+  }
+  .hudCard {
+    background: rgba(11, 16, 14, 0.88);
+    border: 1px solid rgba(80, 120, 95, 0.35);
+    border-radius: 8px;
+    padding: 6px 12px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1);
+    pointer-events: auto;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .hudLeft { min-width: 170px; }
+  .hudCenter {
+    flex: 1; max-width: 480px; align-items: center; text-align: center;
+    padding: 6px 16px;
+  }
+  .hudRight { min-width: 200px; }
+  .hudRow { display: flex; align-items: center; gap: 10px; }
+  .hudDivider { width: 1px; height: 26px; background: rgba(255,255,255,0.12); }
+  .hudMetric { display: flex; align-items: center; gap: 8px; }
+  .hudIcon { font-size: 16px; filter: drop-shadow(0 0 6px rgba(255,255,255,0.4)); }
+  .hudData { display: flex; flex-direction: column; text-align: left; }
+  .hudLabel { font-size: 9px; color: #8fa385; font-weight: bold; letter-spacing: 0.8px; }
+  .hudVal { font-size: 16px; font-weight: 800; color: #ffffff; font-family: monospace; }
+  .hudVal.highlight { color: var(--gold); text-shadow: 0 0 10px rgba(255,211,92,0.6); }
+  .skillMetric { cursor: pointer; transition: transform 0.15s; }
+  .skillMetric:hover { transform: scale(1.04); }
+  .hudBadge {
+    background: linear-gradient(135deg, #ffd35c, #ff9d4d);
+    color: #121810; font-size: 9px; font-weight: 900;
+    padding: 2px 6px; border-radius: 4px; letter-spacing: 0.5px;
+    box-shadow: 0 0 8px rgba(255,211,92,0.5);
+  }
+  .waveHeader { display: flex; align-items: center; gap: 8px; justify-content: center; width: 100%; margin-bottom: 4px; }
+  .waveTag { font-size: 9px; color: #8fa385; font-weight: bold; letter-spacing: 1px; }
+  .waveNumber { font-size: 15px; font-weight: 900; color: var(--sigma); text-shadow: 0 0 8px rgba(139,255,92,0.5); letter-spacing: 1px; }
+  .speedTag { font-size: 9px; background: #1c261e; border: 1px solid #3d5440; color: #d8f7cf; padding: 1px 6px; border-radius: 3px; }
+  #objectiveHud { font-size: 10px; color: #b0c2a8; letter-spacing: 0.5px; margin-top: 4px; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
+  #waveProgressWrap { width: 100%; height: 6px; background: rgba(0,0,0,0.6); border: 1px solid rgba(80,120,95,0.4); border-radius: 3px; overflow: hidden; }
+  #waveProgressFill { height: 100%; width: 0%; background: linear-gradient(90deg, #4ade80, #22c55e); transition: width 0.15s ease-out; }
+  #sigmaMeterWrap { width: 100%; height: 5px; background: rgba(0,0,0,0.6); border: 1px solid var(--pipe); border-radius: 3px; margin-top: 4px; overflow: hidden; }
+  #sigmaMeterFill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--sigma), #ffd35c); }
+  #bossBarWrap { width: 100%; height: 8px; background: rgba(0,0,0,0.6); border: 1px solid var(--alert); border-radius: 3px; margin-top: 4px; display: none; overflow: hidden; }
+  #bossBarFill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--alert), #ff9d4d); }
+  .comboVal { font-size: 13px; color: #6ad7ff; text-shadow: 0 0 8px rgba(106,215,255,0.5); }
+  .comboVal.hot { color: #ff9d4d; text-shadow: 0 0 12px rgba(255,157,77,0.7); }
+  .hudActionBtn {
+    background: #17221b; border: 1px solid #3c5442; color: #ffffff;
+    padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 13px;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .hudActionBtn:hover { background: #233529; border-color: var(--sigma); }
+
+  /* Redesigned Clean Dock for Traps and Abilities */
+  #trapBar {
+    position: absolute; bottom: calc(58px + env(safe-area-inset-bottom));
+    left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px; align-items: center;
+    background: rgba(11, 16, 14, 0.92); border: 1px solid rgba(80, 120, 95, 0.4);
+    border-radius: 8px; padding: 5px 12px; z-index: 8;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+  }
+  #actionBar {
+    position: absolute; left: 50%; bottom: calc(8px + env(safe-area-inset-bottom));
+    transform: translateX(-50%); z-index: 8; display: flex; gap: 6px; align-items: center;
+    background: rgba(11, 16, 14, 0.92); border: 1px solid rgba(80, 120, 95, 0.4);
+    border-radius: 8px; padding: 4px 8px;
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+  }
+  .miniBtn {
+    background: #151e18; border: 1px solid #354a3a; color: #eef5ea;
+    border-radius: 6px; padding: 6px 12px; min-height: 38px; font-size: 11px;
+    font-weight: 700; letter-spacing: 0.5px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .miniBtn:hover { background: #202d24; border-color: var(--sigma); color: #ffffff; }
+  .miniBtn.ready {
+    border-color: #ffd35c; color: #ffd35c; background: rgba(255,211,92,0.12);
+    box-shadow: 0 0 14px rgba(255,211,92,0.4);
+  }
+
 </style>
 </head>
 <body>
@@ -592,21 +683,66 @@
   <div id="hypnoOverlay"><div class="hypnoScanlines"></div></div>
   <div id="buffsBar"></div>
 
-  <div id="hud">
-    <div class="stat">SCORE: <span id="scoreVal">0</span></div>
-    <div class="stat">BEST: <span id="bestVal">0</span></div>
-    <div class="stat">LIVES: <span id="livesVal">3</span></div>
-    <div class="stat">SKILL: <span id="skillPtsHud">0</span></div>
-    <div class="stat" id="comboHud">COMBO x1</div>
-    <div class="stat" id="streakHud">STREAK 0</div>
-    <div class="stat">WAVE: <span id="waveVal">1</span></div>
-    <div class="stat">SPEED: <span id="speedHud">1x</span></div>
-    <div class="stat" id="relicsHud" style="display:none;color:var(--gold);">RELICS: <span id="relicsList"></span></div>
+  <!-- CLEAN MODERN TACTICAL HUD -->
+  <div id="modernHud">
+    <!-- LEFT CLUSTER: BASE HEALTH & SKILL BARRACKS -->
+    <div class="hudCard hudLeft">
+      <div class="hudRow">
+        <div class="hudMetric hpMetric">
+          <span class="hudIcon">❤️</span>
+          <div class="hudData">
+            <span class="hudLabel">BASE HP</span>
+            <span class="hudVal" id="livesVal">3</span>
+          </div>
+        </div>
+        <div class="hudDivider"></div>
+        <div class="hudMetric skillMetric" id="quickBarracksTrigger" title="Click or Press [H] to open Barracks">
+          <span class="hudIcon">⚡</span>
+          <div class="hudData">
+            <span class="hudLabel">SKILL PTS</span>
+            <span class="hudVal highlight" id="skillPtsHud">0</span>
+          </div>
+          <span class="hudBadge" id="barracksAlertBadge">RECRUIT [H]</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER CLUSTER: WAVE STATUS & OBJECTIVE PROGRESS -->
+    <div class="hudCard hudCenter">
+      <div class="waveHeader">
+        <span class="waveTag">MISSION WAVE</span>
+        <span class="waveNumber" id="waveVal">1 / 20</span>
+        <span class="speedTag" id="speedHud">1x</span>
+      </div>
+      <div id="waveProgressWrap"><div id="waveProgressFill"></div></div>
+      <div id="objectiveHud">OBJECTIVE: SURVIVE THE WAVE</div>
+      <div id="bossBarWrap"><div id="bossBarFill"></div></div>
+      <div id="sigmaMeterWrap"><div id="sigmaMeterFill"></div></div>
+    </div>
+
+    <!-- RIGHT CLUSTER: TACTICAL SCORE & COMBAT MULTIPLIER -->
+    <div class="hudCard hudRight">
+      <div class="hudRow">
+        <div class="hudMetric scoreMetric">
+          <span class="hudIcon">🏆</span>
+          <div class="hudData">
+            <span class="hudLabel">SCORE</span>
+            <span class="hudVal" id="scoreVal">0</span>
+          </div>
+        </div>
+        <div class="hudDivider"></div>
+        <div class="hudMetric comboMetric">
+          <div class="hudData">
+            <span class="hudLabel" id="streakHud">STREAK 0</span>
+            <span class="hudVal comboVal" id="comboHud">COMBO x1.0</span>
+          </div>
+        </div>
+        <div class="hudDivider"></div>
+        <button id="quickPauseToggle" class="hudActionBtn" title="Pause Game [ESC / P]">⏸️</button>
+      </div>
+      <div id="relicsHud" style="display:none;font-size:10px;color:var(--gold);margin-top:2px;">RELICS: <span id="relicsList"></span></div>
+    </div>
   </div>
-  <div id="sigmaMeterWrap"><div id="sigmaMeterFill"></div></div>
-  <div id="bossBarWrap"><div id="bossBarFill"></div></div>
-  <div id="objectiveHud">OBJECTIVE: SURVIVE THE WAVE</div>
-  <div id="waveProgressWrap"><div id="waveProgressFill"></div></div>
   <div id="toast"></div>
   <div id="waveBanner"><div class="big" id="waveBannerBig">WAVE 1</div><div class="small" id="waveBannerSmall"></div></div>
   <canvas id="game"></canvas>
@@ -5477,55 +5613,109 @@ function drawPorcelainToilet(ent, now, opts){
   ctx.translate(ent.x, ent.y);
   ctx.rotate(Math.sin(ent.wobble || 0) * 0.08);
 
-  ctx.fillStyle = 'rgba(0,0,0,0.38)';
-  ctx.beginPath(); ctx.ellipse(4, r * 0.82, r * 0.9, r * 0.2, 0, 0, Math.PI * 2); ctx.fill();
+  // --- AMBIENT GROUND CONTACT SHADOW & WET FLOOR PUDDLE REFLECTION ---
+  ctx.save();
+  const groundShadow = ctx.createRadialGradient(2, r * 0.85, r * 0.2, 0, r * 0.85, r * 1.15);
+  groundShadow.addColorStop(0, 'rgba(0,0,0,0.85)');
+  groundShadow.addColorStop(0.5, 'rgba(6,12,9,0.55)');
+  groundShadow.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = groundShadow;
+  ctx.beginPath(); ctx.ellipse(0, r * 0.86, r * 1.1, r * 0.28, 0, 0, Math.PI * 2); ctx.fill();
 
-  const tankX = -r * 0.42, tankY = -r * 0.95, tankW = r * 0.84, tankH = r * 0.7;
-  const tank = ctx.createLinearGradient(tankX, tankY, tankX + tankW, tankY + tankH);
-  if(gold){ tank.addColorStop(0, '#fff6d4'); tank.addColorStop(0.35, '#e8c86a'); tank.addColorStop(1, '#8a6a22'); }
-  else if(armored){ tank.addColorStop(0, '#cfd3ce'); tank.addColorStop(0.4, '#8d938c'); tank.addColorStop(1, '#3a403c'); }
-  else { tank.addColorStop(0, '#ffffff'); tank.addColorStop(0.28, '#eef2ec'); tank.addColorStop(0.7, '#c5cdc2'); tank.addColorStop(1, '#7e877c'); }
-  ctx.fillStyle = tank;
-  roundPath(tankX, tankY, tankW, tankH, r * 0.12); ctx.fill();
-  ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 1.5;
-  ctx.beginPath(); ctx.moveTo(tankX + r * 0.1, tankY + r * 0.08); ctx.lineTo(tankX + tankW * 0.55, tankY + r * 0.08); ctx.stroke();
-  ctx.fillStyle = gold ? '#d4b056' : '#b9c0b6';
-  roundPath(tankX + tankW - r * 0.22, tankY + r * 0.18, r * 0.16, r * 0.07, 3); ctx.fill();
+  // Wet Sewer Floor Water Reflection (Faint mirrored silhouette)
+  const wetReflect = ctx.createLinearGradient(0, r * 0.85, 0, r * 1.4);
+  wetReflect.addColorStop(0, 'rgba(180, 210, 200, 0.15)');
+  wetReflect.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = wetReflect;
+  ctx.beginPath(); ctx.ellipse(0, r * 1.05, r * 0.75, r * 0.18, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
 
-  const bowl = ctx.createLinearGradient(-r, 0, r, r);
-  if(gold){ bowl.addColorStop(0, '#f4e4a4'); bowl.addColorStop(0.5, '#c9a44a'); bowl.addColorStop(1, '#6d5318'); }
-  else if(armored){ bowl.addColorStop(0, '#d5d8d4'); bowl.addColorStop(0.5, '#8f958f'); bowl.addColorStop(1, '#2f3431'); }
-  else { bowl.addColorStop(0, '#f7faf6'); bowl.addColorStop(0.45, '#d4dbd2'); bowl.addColorStop(1, '#6f786e'); }
-  ctx.fillStyle = bowl;
-  ctx.beginPath(); ctx.ellipse(0, r * 0.28, r * 0.78, r * 0.48, 0, 0, Math.PI * 2); ctx.fill();
+  // --- 1. PHOTOREALISTIC WATER TANK WITH 3D BEVEL & CERAMIC SPECULAR ---
+  const tankX = -r * 0.44, tankY = -r * 0.98, tankW = r * 0.88, tankH = r * 0.72;
+  const tankGrad = ctx.createLinearGradient(tankX, tankY, tankX + tankW, tankY + tankH);
+  if(gold){
+    tankGrad.addColorStop(0, '#fff6d4'); tankGrad.addColorStop(0.2, '#f5d57a');
+    tankGrad.addColorStop(0.65, '#c29b38'); tankGrad.addColorStop(1, '#664d12');
+  } else if(armored){
+    tankGrad.addColorStop(0, '#dbe0d9'); tankGrad.addColorStop(0.25, '#8c948b');
+    tankGrad.addColorStop(0.7, '#485047'); tankGrad.addColorStop(1, '#1e241e');
+  } else {
+    // Ultra-smooth glazed vitreous china porcelain
+    tankGrad.addColorStop(0, '#ffffff');
+    tankGrad.addColorStop(0.18, '#f5faf3');
+    tankGrad.addColorStop(0.55, '#cfd8cc');
+    tankGrad.addColorStop(0.85, '#99a695');
+    tankGrad.addColorStop(1, '#5e6b5a');
+  }
+  ctx.fillStyle = tankGrad;
+  roundPath(tankX, tankY, tankW, tankH, r * 0.14); ctx.fill();
+  ctx.strokeStyle = armored ? '#1a201b' : 'rgba(70,85,68,0.4)';
+  ctx.lineWidth = 1.4; ctx.stroke();
 
-  ctx.beginPath(); ctx.ellipse(0, r * 0.22, r * 0.52, r * 0.28, 0, 0, Math.PI * 2);
-  const well = ctx.createRadialGradient(-r * 0.1, r * 0.1, 4, 0, r * 0.24, r * 0.5);
-  well.addColorStop(0, 'rgba(70, 130, 150, 0.55)'); well.addColorStop(0.45, '#1a3a42'); well.addColorStop(1, '#0a1618');
-  ctx.fillStyle = well; ctx.fill();
+  // Glazed Ceramic Specular Light Strip (Top-Left Highlight)
+  ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 2.2;
+  ctx.beginPath(); ctx.moveTo(tankX + r * 0.1, tankY + r * 0.08); ctx.lineTo(tankX + tankW * 0.65, tankY + r * 0.08); ctx.stroke();
 
-  ctx.beginPath(); ctx.ellipse(0, r * 0.18, r * 0.46, r * 0.16, 0, 0, Math.PI * 2);
-  ctx.fillStyle = 'rgba(90, 170, 190, 0.28)'; ctx.fill();
-  ctx.strokeStyle = 'rgba(200, 240, 255, 0.25)'; ctx.lineWidth = 1; ctx.stroke();
+  // Chrome Flush Lever with Specular Reflection
+  const flushGrad = ctx.createLinearGradient(tankX + tankW - r * 0.24, 0, tankX + tankW, 0);
+  flushGrad.addColorStop(0, '#33383a'); flushGrad.addColorStop(0.5, '#ffffff'); flushGrad.addColorStop(1, '#687278');
+  ctx.fillStyle = gold ? '#e0b84c' : flushGrad;
+  roundPath(tankX + tankW - r * 0.22, tankY + r * 0.16, r * 0.17, r * 0.08, 3); ctx.fill();
+  ctx.strokeStyle = '#181e22'; ctx.lineWidth = 1; ctx.stroke();
 
-  ctx.beginPath(); ctx.ellipse(0, r * 0.08, r * 0.72, r * 0.2, 0, Math.PI, Math.PI * 2);
-  ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 2; ctx.stroke();
-  ctx.beginPath(); ctx.ellipse(0, r * 0.05, r * 0.7, r * 0.22, 0, 0, Math.PI * 2);
-  ctx.strokeStyle = armored ? 'rgba(40,40,40,0.7)' : 'rgba(230,230,225,0.9)';
+  // --- 2. 3D VITREOUS PORCELAIN BOWL WITH CURVED SPECULAR GLOSS ---
+  const bowlGrad = ctx.createRadialGradient(-r * 0.2, r * 0.1, r * 0.1, 0, r * 0.3, r * 0.9);
+  if(gold){
+    bowlGrad.addColorStop(0, '#fff4cc'); bowlGrad.addColorStop(0.4, '#e0b84c');
+    bowlGrad.addColorStop(0.85, '#99731d'); bowlGrad.addColorStop(1, '#473307');
+  } else if(armored){
+    bowlGrad.addColorStop(0, '#e8ece6'); bowlGrad.addColorStop(0.35, '#9da39b');
+    bowlGrad.addColorStop(0.8, '#4c544a'); bowlGrad.addColorStop(1, '#20261f');
+  } else {
+    bowlGrad.addColorStop(0, '#ffffff');
+    bowlGrad.addColorStop(0.22, '#f0f7ed');
+    bowlGrad.addColorStop(0.65, '#c2ccc0');
+    bowlGrad.addColorStop(1, '#63705f');
+  }
+  ctx.fillStyle = bowlGrad;
+  ctx.beginPath(); ctx.ellipse(0, r * 0.28, r * 0.82, r * 0.50, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = armored ? '#1e241e' : 'rgba(60,75,60,0.35)'; ctx.lineWidth = 1.6; ctx.stroke();
+
+  // Deep Water Basin & Sewer Waste Well
+  ctx.beginPath(); ctx.ellipse(0, r * 0.24, r * 0.54, r * 0.30, 0, 0, Math.PI * 2);
+  const wellGrad = ctx.createRadialGradient(-r * 0.08, r * 0.12, 3, 0, r * 0.26, r * 0.55);
+  wellGrad.addColorStop(0, 'rgba(50, 140, 165, 0.7)');
+  wellGrad.addColorStop(0.4, '#13353b');
+  wellGrad.addColorStop(0.85, '#071618');
+  wellGrad.addColorStop(1, '#020607');
+  ctx.fillStyle = wellGrad; ctx.fill();
+
+  // Water Surface Caustic & Ripple Glow
+  ctx.beginPath(); ctx.ellipse(0, r * 0.20, r * 0.48, r * 0.18, 0, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(110, 200, 220, 0.22)'; ctx.fill();
+  ctx.strokeStyle = 'rgba(210, 245, 255, 0.4)'; ctx.lineWidth = 1.2; ctx.stroke();
+
+  // High-Gloss Ceramic Rim Highlight
+  ctx.beginPath(); ctx.ellipse(0, r * 0.07, r * 0.74, r * 0.22, 0, Math.PI, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 2.4; ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(0, r * 0.05, r * 0.72, r * 0.24, 0, 0, Math.PI * 2);
+  ctx.strokeStyle = armored ? 'rgba(30,35,30,0.85)' : 'rgba(215,225,210,0.95)';
   ctx.lineWidth = Math.max(3, r * 0.08); ctx.stroke();
 
-  
+  // --- SPECIALIZED ENEMY ACCESSORIES ---
   // Juggernaut Front Armor Shield
   if(ent.type === 'juggernaut' && ent.armorShieldHp > 0){
     ctx.save();
     ctx.translate(0, r * 0.15);
-    ctx.fillStyle = '#2b3036';
-    roundPath(-r * 0.75, -r * 0.25, r * 1.5, r * 0.65, 4); ctx.fill();
-    ctx.strokeStyle = '#ffd35c'; ctx.lineWidth = 2.5; ctx.stroke();
-    // Hazard stripes
-    ctx.fillStyle = '#e67e22';
-    for(let hx = -r * 0.6; hx < r * 0.6; hx += 10){
-      ctx.fillRect(hx, -r * 0.2, 5, r * 0.55);
+    const shieldGrad = ctx.createLinearGradient(-r * 0.75, 0, r * 0.75, 0);
+    shieldGrad.addColorStop(0, '#1c2124'); shieldGrad.addColorStop(0.4, '#444d54'); shieldGrad.addColorStop(1, '#181b1e');
+    ctx.fillStyle = shieldGrad;
+    roundPath(-r * 0.78, -r * 0.28, r * 1.56, r * 0.70, 5); ctx.fill();
+    ctx.strokeStyle = '#ffd35c'; ctx.lineWidth = 2.8; ctx.stroke();
+    // Hazard stripes with bevel
+    ctx.fillStyle = '#ff8800';
+    for(let hx = -r * 0.65; hx < r * 0.65; hx += 12){
+      ctx.fillRect(hx, -r * 0.24, 6, r * 0.60);
     }
     ctx.restore();
   }
@@ -5533,48 +5723,52 @@ function drawPorcelainToilet(ent, now, opts){
   // Astro Thruster Glow Ring
   if(ent.type === 'astro'){
     ctx.save();
-    ctx.shadowColor = '#6ad7ff'; ctx.shadowBlur = 14;
-    ctx.strokeStyle = '#6ad7ff'; ctx.lineWidth = 3;
-    ctx.beginPath(); ctx.ellipse(0, r * 0.75, r * 0.95, r * 0.35, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.shadowColor = '#6ad7ff'; ctx.shadowBlur = 18;
+    ctx.strokeStyle = '#6ad7ff'; ctx.lineWidth = 3.5;
+    ctx.beginPath(); ctx.ellipse(0, r * 0.75, r * 0.98, r * 0.38, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.shadowBlur = 0;
     ctx.restore();
   }
 
   // Mutant Multi-Arms
   if(ent.type === 'mutant'){
     ctx.save();
-    ctx.strokeStyle = '#4a2810'; ctx.lineWidth = 5;
+    ctx.strokeStyle = '#3d200d'; ctx.lineWidth = 6;
     for(let side of [-1, 1]){
       ctx.beginPath(); ctx.moveTo(side * r * 0.4, 0);
-      ctx.lineTo(side * r * 1.15, -r * 0.4 + Math.sin(now * 0.006 + side) * 8);
-      ctx.lineTo(side * r * 1.35, -r * 0.1); ctx.stroke();
+      ctx.lineTo(side * r * 1.2, -r * 0.4 + Math.sin(now * 0.006 + side) * 8);
+      ctx.lineTo(side * r * 1.4, -r * 0.1); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(side * r * 0.35, r * 0.3);
-      ctx.lineTo(side * r * 1.05, r * 0.6 + Math.cos(now * 0.007 + side) * 8); ctx.stroke();
+      ctx.lineTo(side * r * 1.1, r * 0.65 + Math.cos(now * 0.007 + side) * 8); ctx.stroke();
     }
     ctx.restore();
   }
 
+  // Realistic Figure / Head
   if(suit) drawSuitedFigure(r, now, opts);
-  else { ctx.save(); ctx.translate(0, -r * 0.12); drawHead(r, ent, now); ctx.restore(); }
+  else { ctx.save(); ctx.translate(0, -r * 0.14); drawHead(r, ent, now); ctx.restore(); }
 
+  // Armored Shell / Rivets
   if(armored){
-    ctx.strokeStyle = '#2a2e32'; ctx.lineWidth = Math.max(3, r * 0.1);
-    ctx.beginPath(); ctx.ellipse(0, r * 0.28, r * 0.8, r * 0.5, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = '#222822'; ctx.lineWidth = Math.max(3.2, r * 0.11);
+    ctx.beginPath(); ctx.ellipse(0, r * 0.28, r * 0.84, r * 0.52, 0, 0, Math.PI * 2); ctx.stroke();
     for(let a = 0; a < 6; a++){
       const ang = a * Math.PI / 3;
-      const bx = Math.cos(ang) * r * 0.72, by = r * 0.28 + Math.sin(ang) * r * 0.42;
-      ctx.fillStyle = '#5a6168'; ctx.beginPath(); ctx.arc(bx, by, r * 0.06, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#8a9298'; ctx.beginPath(); ctx.arc(bx, by, r * 0.025, 0, Math.PI * 2); ctx.fill();
+      const bx = Math.cos(ang) * r * 0.75, by = r * 0.28 + Math.sin(ang) * r * 0.44;
+      ctx.fillStyle = '#68726a'; ctx.beginPath(); ctx.arc(bx, by, r * 0.065, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#d0dcd2'; ctx.beginPath(); ctx.arc(bx, by, r * 0.028, 0, Math.PI * 2); ctx.fill();
     }
-    ctx.fillStyle = 'rgba(80, 10, 10, 0.35)';
-    ctx.beginPath(); ctx.ellipse(0, -r * 0.18, r * 0.38, r * 0.16, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = '#ff4d4d'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.fillStyle = 'rgba(120, 20, 20, 0.45)';
+    ctx.beginPath(); ctx.ellipse(0, -r * 0.18, r * 0.40, r * 0.18, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#ff4d4d'; ctx.lineWidth = 1.2; ctx.stroke();
   }
   if(gold){
-    ctx.strokeStyle = 'rgba(255, 220, 120, 0.7)'; ctx.lineWidth = 2;
-    roundPath(tankX - 2, tankY - 2, tankW + 4, tankH + 4, r * 0.14); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255, 230, 140, 0.85)'; ctx.lineWidth = 2.4;
+    roundPath(tankX - 2, tankY - 2, tankW + 4, tankH + 4, r * 0.16); ctx.stroke();
   }
   ctx.restore();
 }
+
 
 function drawTurret(){
   if(player.turretLevel <= 0) return;
