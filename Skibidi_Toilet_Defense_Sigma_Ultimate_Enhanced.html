@@ -1412,6 +1412,219 @@ function drawRagdolls(now){
   }
 }
 
+function drawTitanSpeakerman3(a, now){
+  const sc = 1.85;
+  const legSwing = Math.sin(a.walkCycle) * 0.45;
+  const flightHover = Math.sin(now * 0.006 + a.id) * 4;
+  ctx.translate(0, flightHover);
+
+  // 1. REAR ROTATING ENERGY HALO DISC (Radial sonic energy ring behind head & back)
+  ctx.save();
+  ctx.translate(0, -18 * sc);
+  ctx.strokeStyle = 'rgba(255, 30, 30, 0.45)';
+  ctx.lineWidth = 3 * sc;
+  ctx.shadowColor = '#ff1a1a';
+  ctx.shadowBlur = 18;
+  ctx.beginPath();
+  ctx.arc(0, 0, 22 * sc, 0, Math.PI * 2);
+  ctx.stroke();
+  // Radiating spikes / halo teeth
+  const haloRot = (now * 0.002) % (Math.PI * 2);
+  ctx.strokeStyle = '#ff3333';
+  ctx.lineWidth = 1.5 * sc;
+  for(let h = 0; h < 12; h++){
+    const ang = haloRot + (h * Math.PI / 6);
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(ang) * 20 * sc, Math.sin(ang) * 20 * sc);
+    ctx.lineTo(Math.cos(ang) * 26 * sc, Math.sin(ang) * 26 * sc);
+    ctx.stroke();
+  }
+  ctx.shadowBlur = 0;
+  ctx.restore();
+
+  // 2. FLOWING CRIMSON BATTLE-CAPE (Draped across shoulders down the back)
+  ctx.save();
+  const capeWave = Math.sin(now * 0.007 + a.walkCycle) * 5 * sc;
+  ctx.fillStyle = '#6b0e14';
+  ctx.strokeStyle = '#380408';
+  ctx.lineWidth = 1.5 * sc;
+  ctx.beginPath();
+  ctx.moveTo(-14 * sc, -14 * sc);
+  ctx.lineTo(14 * sc, -14 * sc);
+  ctx.quadraticCurveTo(18 * sc + capeWave, 10 * sc, 16 * sc + capeWave * 1.5, 26 * sc);
+  ctx.lineTo(-16 * sc + capeWave * 1.5, 26 * sc);
+  ctx.quadraticCurveTo(-18 * sc + capeWave, 10 * sc, -14 * sc, -14 * sc);
+  ctx.closePath();
+  ctx.fill(); ctx.stroke();
+  ctx.restore();
+
+  // 3. QUAD INDUSTRIAL JETPACK THRUSTERS (Upper and lower thruster pods)
+  for(let j of [-16 * sc, 16 * sc]){
+    ctx.fillStyle = '#101216';
+    roundPath(j - 5 * sc, -16 * sc, 10 * sc, 30 * sc, 3 * sc); ctx.fill();
+    ctx.strokeStyle = '#2d333b'; ctx.lineWidth = 1.5 * sc; ctx.stroke();
+    // Glowing red exhaust flames
+    const fLen = 16 * sc + Math.random() * 12 * sc;
+    const fg = ctx.createLinearGradient(j, 14 * sc, j, 14 * sc + fLen);
+    fg.addColorStop(0, '#ffffff');
+    fg.addColorStop(0.2, '#ff1a1a');
+    fg.addColorStop(0.7, '#ff5500');
+    fg.addColorStop(1, 'rgba(255, 20, 0, 0)');
+    ctx.fillStyle = fg;
+    ctx.beginPath();
+    ctx.moveTo(j - 4.5 * sc, 14 * sc);
+    ctx.lineTo(j, 14 * sc + fLen);
+    ctx.lineTo(j + 4.5 * sc, 14 * sc);
+    ctx.closePath(); ctx.fill();
+  }
+
+  // 4. MASSIVE TOWERING SPEAKER WINGS (Heavy 3.0 Angled Speaker Towers with Subwoofers)
+  for(let side of [-1, 1]){
+    ctx.save();
+    ctx.translate(side * 20 * sc, -16 * sc);
+    ctx.rotate(side * 0.22);
+    // Outer chassis plate
+    ctx.fillStyle = '#0e1014';
+    roundPath(-7 * sc, -28 * sc, 14 * sc, 44 * sc, 4 * sc); ctx.fill();
+    ctx.strokeStyle = '#252a33'; ctx.lineWidth = 2 * sc; ctx.stroke();
+    // 4 glowing subwoofers per wing
+    for(let wy of [-20 * sc, -8 * sc, 4 * sc, 14 * sc]){
+      ctx.fillStyle = '#06080a';
+      ctx.beginPath(); ctx.arc(0, wy, 4.5 * sc, 0, Math.PI * 2); ctx.fill();
+      const p = 1 + (a.attackAnim > 0 ? 0.35 : Math.sin(now * 0.012 + wy) * 0.12);
+      ctx.fillStyle = '#ff1a1a';
+      ctx.shadowColor = '#ff1a1a'; ctx.shadowBlur = 12;
+      ctx.beginPath(); ctx.arc(0, wy, 3.2 * sc * p, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(0, wy, 1.1 * sc, 0, Math.PI * 2); ctx.fill();
+    }
+    // Shoulder Clustered Speaker Pod (3 mini subwoofers)
+    ctx.fillStyle = '#181b22';
+    roundPath(-6 * sc, -12 * sc, 12 * sc, 14 * sc, 2 * sc); ctx.fill();
+    for(let sp of [-3 * sc, 3 * sc]){
+      ctx.fillStyle = '#ff2222';
+      ctx.beginPath(); ctx.arc(sp, -5 * sc, 1.8 * sc, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // 5. CHARCOAL HEAVY EXOSKELETON LEGS & ARMORED BOOTS
+  ctx.strokeStyle = '#121418';
+  ctx.lineWidth = 6 * sc;
+  ctx.beginPath(); ctx.moveTo(-6.5 * sc, 9 * sc);
+  ctx.lineTo(-6.5 * sc - Math.sin(legSwing) * 8 * sc, 20 * sc); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(6.5 * sc, 9 * sc);
+  ctx.lineTo(6.5 * sc + Math.sin(legSwing) * 8 * sc, 20 * sc); ctx.stroke();
+  // Metallic armored shin plates
+  ctx.strokeStyle = '#363d47'; ctx.lineWidth = 2.5 * sc;
+  ctx.beginPath(); ctx.moveTo(-8.5 * sc, 12 * sc); ctx.lineTo(-4.5 * sc, 19 * sc); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(4.5 * sc, 12 * sc); ctx.lineTo(8.5 * sc, 19 * sc); ctx.stroke();
+
+  // 6. FORTIFIED 3.0 MECH TORSO & CRIMSON UNDER-TUNIC
+  ctx.fillStyle = '#8a1414';
+  roundPath(-12 * sc, -15 * sc, 24 * sc, 26 * sc, 4 * sc); ctx.fill();
+  // Beveled Titanium Front Chest Armor Plate
+  ctx.fillStyle = '#181b20';
+  roundPath(-10 * sc, -13 * sc, 20 * sc, 22 * sc, 3 * sc); ctx.fill();
+  ctx.strokeStyle = '#2f3642'; ctx.lineWidth = 1.8 * sc; ctx.stroke();
+
+  // Red Chain-Link Energy Collar Band across upper chest
+  ctx.strokeStyle = '#ff2222'; ctx.lineWidth = 2 * sc;
+  ctx.shadowColor = '#ff2222'; ctx.shadowBlur = 8;
+  ctx.beginPath();
+  ctx.moveTo(-9 * sc, -12 * sc);
+  ctx.quadraticCurveTo(0, -9 * sc, 9 * sc, -12 * sc);
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // 7. BLINDING WHITE-HOT CORE REACTOR (Intense multi-layered power generator)
+  ctx.fillStyle = '#0a0c0e';
+  ctx.beginPath(); ctx.arc(0, -1 * sc, 7.5 * sc, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#ff3333'; ctx.lineWidth = 2 * sc; ctx.stroke();
+  // Pulsing crimson corona
+  ctx.fillStyle = '#ff1a1a';
+  ctx.shadowColor = '#ff1a1a'; ctx.shadowBlur = 26;
+  ctx.beginPath(); ctx.arc(0, -1 * sc, 5.5 * sc, 0, Math.PI * 2); ctx.fill();
+  // Blinding white-pink heart
+  ctx.fillStyle = '#ffffff';
+  ctx.shadowColor = '#ffffff'; ctx.shadowBlur = 14;
+  ctx.beginPath(); ctx.arc(0, -1 * sc, 3 * sc, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // Flanking vertical speaker modules beside reactor
+  for(let rx of [-8.5 * sc, 8.5 * sc]){
+    ctx.fillStyle = '#101216';
+    roundPath(rx - 2 * sc, -5 * sc, 4 * sc, 8 * sc, 1 * sc); ctx.fill();
+    ctx.fillStyle = '#ff2222';
+    ctx.beginPath(); ctx.arc(rx, -1 * sc, 1.4 * sc, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // 8. CROWNED 3.0 SPEAKER HEAD (Faceted multi-cone central unit)
+  ctx.fillStyle = '#0c0e12';
+  roundPath(-9 * sc, -34 * sc, 18 * sc, 18 * sc, 3 * sc); ctx.fill();
+  ctx.strokeStyle = '#323945'; ctx.lineWidth = 2 * sc; ctx.stroke();
+  // Head speaker crown / crest
+  ctx.fillStyle = '#1c2028';
+  ctx.beginPath();
+  ctx.moveTo(-10 * sc, -34 * sc);
+  ctx.lineTo(-5 * sc, -38 * sc);
+  ctx.lineTo(0, -35 * sc);
+  ctx.lineTo(5 * sc, -38 * sc);
+  ctx.lineTo(10 * sc, -34 * sc);
+  ctx.closePath();
+  ctx.fill();
+  // Central bright red speaker eye + dual auxiliary cones
+  ctx.fillStyle = '#ff1a1a';
+  ctx.shadowColor = '#ff1a1a'; ctx.shadowBlur = 14;
+  ctx.beginPath(); ctx.arc(0, -25 * sc, 3.8 * sc, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.arc(0, -25 * sc, 1.4 * sc, 0, Math.PI * 2); ctx.fill();
+  for(let hx of [-5.5 * sc, 5.5 * sc]){
+    ctx.fillStyle = '#ff2222';
+    ctx.beginPath(); ctx.arc(hx, -29 * sc, 1.8 * sc, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.shadowBlur = 0;
+
+  // 9. DUAL OVERCHARGED ARM PLASMA CANNONS WITH SERRATED MELEE BLADES
+  const atk = a.attackAnim > 0 ? (a.attackAnim / 10) * Math.PI : 0;
+  for(let side of [-1, 1]){
+    ctx.save();
+    ctx.translate(side * 16 * sc, -6 * sc);
+    ctx.rotate(side * (0.16 + (a.attackAnim > 0 ? 0.25 : 0)) + (side === 1 ? atk * 0.9 : -atk * 0.9));
+    // Cannon gauntlet
+    ctx.fillStyle = '#14171d';
+    roundPath(-5 * sc, -6 * sc, 10 * sc, 26 * sc, 3 * sc); ctx.fill();
+    ctx.strokeStyle = '#2d3440'; ctx.lineWidth = 1.5 * sc; ctx.stroke();
+    // Dual heavy plasma discharge nozzles
+    ctx.fillStyle = '#0a0c0e';
+    ctx.fillRect(-3.5 * sc, 20 * sc, 7 * sc, 9 * sc);
+    // Glowing red power conduits
+    ctx.strokeStyle = '#ff1a1a'; ctx.lineWidth = 2.2 * sc;
+    ctx.beginPath(); ctx.moveTo(-2 * sc, -2 * sc); ctx.lineTo(-2 * sc, 20 * sc); ctx.stroke();
+    // Heavy serrated combat bayonet blade
+    ctx.fillStyle = '#e2ecf7';
+    ctx.beginPath();
+    ctx.moveTo(side * 2.5 * sc, 14 * sc);
+    ctx.lineTo(side * 9 * sc, 32 * sc); // Giant sharp tip
+    ctx.lineTo(side * 1.5 * sc, 26 * sc);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#8a9bb0'; ctx.lineWidth = 1.2 * sc; ctx.stroke();
+    // Blaster muzzle flare when firing
+    if(a.attackAnim > 0){
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = '#ff1a1a'; ctx.shadowBlur = 22;
+      ctx.beginPath(); ctx.arc(0, 29 * sc, 6 * sc, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+    ctx.restore();
+  }
+
+  // 10. Overhead God-Tier Label
+  drawLabel('TITAN SPEAKERMAN 3.0', 0, -46 * sc, '#ff2222');
+}
+
 function drawTitanSpeakerman2(a, now){
   const sc = 1.65;
   const legSwing = Math.sin(a.walkCycle) * 0.45;
@@ -1880,6 +2093,8 @@ function openRelicModal(){
    comes from ALLY_STATS and runs through the shared generic AI/draw branches, so
    adding a character is one compact entry. */
 const ALLY_STATS = {
+  titanSpeaker3: { role:'sonicGod',        name:'TITAN SPEAKERMAN 3.0',       cat:'LEGENDARY ELITE', desc:'THE APEX SOUND COLOSSUS! Version 3.0 EMPEROR Overhaul! Equipped with a crowned multi-cone speaker array, towering quad-pod shoulder acoustic wing towers, glowing red energy halo ring, crimson battle-cape, fortified layered mech-armor, blinding white-hot chest reactor, and dual heavy overcharged plasma-cannon blade gauntlets. Obliterates entire enemy armies with continuous supersonic shockwaves!', cost:7, max:1, icon:'🔊', r:1.85, body:'#121418', head:'#0a0c0e', lens:'#ff1a1a', label:'TITAN SPEAKERMAN 3.0', labelCol:'#ff1a1a', speed:3.1, cd:10, dmg:42, knockback:220, stun:60, range:600, rad:180 },
+
   titanSpeaker2: { role:'plasmaArtillery', name:'UPGRADED TITAN SPEAKERMAN (2.0)', cat:'LEGENDARY ELITE', desc:'TITAN 2.0 OVERHAUL! Fitted with crimson dress shirt, charcoal combat pants, dual heavy shoulder speaker wing-towers, industrial jetpack thrusters, red core reactor, and twin heavy forearm plasma blasters with under-barrel combat blades. Unleashes massive rapid twin crimson plasma bursts and devastating sonic shockwaves!', cost:6, max:1, icon:'🔊', r:1.65, body:'#b82424', head:'#141414', lens:'#ff2222', label:'UPGRADED TITAN SPEAKER 2.0', labelCol:'#ff3d3d', speed:2.8, cd:12, dmg:28, knockback:120, stun:40, range:520, rad:140 },
 
   simp2:       { role:'chadRusher',  name:'SIMP CAMERAMAN 2.0',   cat:'LEGENDARY ELITE', desc:'CH4D UPGRADE! Rolled-up sky-blue sleeves, iconic yellow-purple striped tie, heavy cybernetic exoskeleton, high-powered turbine thruster, and dual neon-cyan energy forearm blades! Closes in with supersonic speed and shreds toilet vanguards.', cost:4, max:2, icon:'🦾', r:1.2, body:'#1e2830', head:'#1a2228', lens:'#00f0ff', label:'CH4D SIMP 2.0', labelCol:'#00f0ff', speed:3.9, cd:14, dmg:16, knockback:65, stun:25, range:450, atkDist:48 },
@@ -2000,6 +2215,7 @@ function spawnAllyEntity(type){
   else if(type === 'titanTv') speed = 1.4;
   else if(type === 'simp2') speed = 3.9;
   else if(type === 'titanSpeaker2') speed = 2.8;
+  else if(type === 'titanSpeaker3') speed = 3.1;
   else if(ALLY_STATS[type]) speed = ALLY_STATS[type].speed || 2.2;
 
   deployedAllies.push({
@@ -2141,7 +2357,7 @@ function updateHiredAllies(dt, now){
     if(a.attackAnim > 0) a.attackAnim -= dt;
 
     // Free 2D movement: hoverers roam the sky band, walkers roam the whole battlefield
-    const isHover = (a.type.startsWith('titan') && a.type !== 'titanDrill') || a.type === 'astro' || a.type === 'gmini' || a.type === 'overseer' || a.type === 'jetpackCam' || a.type === 'titanSpeaker2';
+    const isHover = (a.type.startsWith('titan') && a.type !== 'titanDrill') || a.type === 'astro' || a.type === 'gmini' || a.type === 'overseer' || a.type === 'jetpackCam' || a.type === 'titanSpeaker2' || a.type === 'titanSpeaker3';
     a.isHover = isHover;
     a.yMin = isHover ? H * 0.08 : H * 0.40;
     a.yMax = isHover ? (a.type === 'titanCamera' ? H * 0.76 : H * 0.72) : Math.max(H * 0.45, Math.min((a.baseY !== undefined ? a.baseY : H - 62) + 8, H - 24));
@@ -2582,8 +2798,19 @@ function updateHiredAllies(dt, now){
         if(a.attackTimer <= 0){
           a.attackTimer = S.cd;
           a.attackAnim = 10;
-          if((S.role === 'rapid' || S.role === 'sniper' || S.role === 'strafer' || S.role === 'plasmaArtillery') && target){
-            if(S.role === 'plasmaArtillery'){
+          if((S.role === 'rapid' || S.role === 'sniper' || S.role === 'strafer' || S.role === 'plasmaArtillery' || S.role === 'sonicGod') && target){
+            if(S.role === 'sonicGod'){
+              const tdx = target.x - a.x, tdy = target.y - (a.y - 16);
+              const len = Math.max(1, Math.hypot(tdx, tdy));
+              // Dual Overcharged Plasma Blasts
+              bullets.push({ x: a.x - 22, y: a.y - 10, vx: (tdx / len) * 16, vy: (tdy / len) * 16, r: 6, dmg: S.dmg, kind: 'rocket', rad: S.rad || 180 });
+              bullets.push({ x: a.x + 22, y: a.y - 10, vx: (tdx / len) * 16, vy: (tdy / len) * 16, r: 6, dmg: S.dmg, kind: 'rocket', rad: S.rad || 180 });
+              // Screen-wide concussive shockwave rings
+              sonicRings.push({ x: a.x, y: a.y - 16, life: 28 });
+              sfx.bassDrop();
+              shake = Math.min(18, shake + 5);
+              flash = Math.min(0.20, flash + 0.04);
+            } else if(S.role === 'plasmaArtillery'){
               const tdx = target.x - a.x, tdy = target.y - (a.y - 12);
               const len = Math.max(1, Math.hypot(tdx, tdy));
               // Dual Heavy Plasma Cannon Bolts with AoE
@@ -2681,6 +2908,7 @@ function updateHiredAllies(dt, now){
 }
 
 function drawGenericAlly(a, now){
+  if(a.type === 'titanSpeaker3'){ drawTitanSpeakerman3(a, now); return; }
   if(a.type === 'titanSpeaker2'){ drawTitanSpeakerman2(a, now); return; }
   if(a.type === 'simp2'){ drawSimpCameraman2(a, now); return; }
   if(a.type === 'titanDrill'){ drawTitanDrillman(a, now); return; }
