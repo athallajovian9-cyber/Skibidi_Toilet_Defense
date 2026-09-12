@@ -848,16 +848,16 @@
   </div>
 
   <div id="upgradeScreen">
-    <h2 id="upgradeTitle">SKILL SHOP</h2>
-    <p>Spend skill points down a branch; later nodes stay locked until you buy the one above them. The arsenal above auto-fires once owned — mix direct fire with support gear (burn, freeze, stun, drones, lightning) to survive longer.</p>
-    <div id="weaponShop">
-      <h3>WEAPONS</h3>
+    <h2 id="upgradeTitle">WEAPON ARSENAL SHOP</h2>
+    <div id="skillPtsLine" style="margin: 6px 0 12px; font-size: 15px; color: var(--gold); font-weight: 800; letter-spacing: 1px;">
+      AVAILABLE SKILL POINTS: <span id="skillPtsVal">0</span>⚡
+    </div>
+    <p style="margin: 0 0 16px; font-size: 12px; color: #a4b89e;">Unlock and upgrade automated weapons to defend against incoming toilet waves. Weapons auto-target and auto-fire once purchased.</p>
+    <div id="weaponShop" style="margin-top: 0;">
       <div class="skillTree" id="weaponTree"></div>
     </div>
-    <div id="skillPtsLine">SKILL POINTS: <span id="skillPtsVal">0</span></div>
-    <div class="skillTree" id="skillTree"></div>
-    <button id="continueBtn">CONTINUE</button>
-    <button id="shopCloseBtn" style="display:none;margin-top:10px">RESUME</button>
+    <button id="continueBtn" style="margin-top: 18px; width: 100%; max-width: 320px;">CONTINUE TO NEXT WAVE</button>
+    <button id="shopCloseBtn" style="display:none;margin-top:12px; width: 100%; max-width: 320px;">RESUME DEFENSE</button>
   </div>
 
   <div id="overlay">
@@ -4014,6 +4014,7 @@ function buySkill(skill){
 
 function renderSkillTree(){
   const tree = document.getElementById('skillTree');
+  if(!tree) return;
   const pts = document.getElementById('skillPtsVal');
   if(pts) pts.textContent = skillPoints;
   const groups = { STRIKE:[], HOLD:[], RIG:[] };
