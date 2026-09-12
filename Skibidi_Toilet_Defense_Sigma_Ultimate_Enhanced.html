@@ -293,6 +293,33 @@
   #hireScreen h2{color:#6ad7ff;text-shadow:0 0 16px rgba(106,215,255,0.6);margin-bottom:4px;}
   #hireScreen p{max-width:760px;font-size:12px;color:#a8c4b8;margin-bottom:8px;}
   #hireSkillPtsLine{color:var(--gold);font-size:14px;margin:2px 0 10px;font-weight:bold;}
+  
+  /* ================= BARRACKS FILTER TABS ================= */
+  #hireTabs {
+    display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+    margin-bottom: 12px; z-index: 10;
+  }
+  .hireTabBtn {
+    background: #0d181c; border: 1px solid #234752; color: #8fa3ad;
+    padding: 7px 14px; border-radius: 4px; cursor: pointer; font-family: inherit;
+    font-size: 11px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase;
+    transition: all 0.15s; margin: 0;
+  }
+  .hireTabBtn:hover { border-color: #6ad7ff; color: #fff; }
+  .hireTabBtn.active {
+    background: #193842; border-color: #6ad7ff; color: #6ad7ff;
+    box-shadow: 0 0 12px rgba(106, 215, 255, 0.35);
+  }
+  .hireCard.featured {
+    border-color: #ffd35c !important;
+    box-shadow: 0 0 16px rgba(255, 211, 92, 0.3) !important;
+  }
+  .featuredBadge {
+    position: absolute; top: -9px; right: 10px;
+    background: #ffd35c; color: #07080a; font-size: 9px; font-weight: bold;
+    padding: 2px 7px; border-radius: 10px; letter-spacing: 0.5px;
+  }
+
   #hireRoster{
     display:flex;gap:14px;justify-content:center;align-items:flex-start;
     flex-wrap:wrap;max-width:980px;width:100%;max-height:62vh;overflow:auto;
@@ -651,6 +678,14 @@
     <h2 id="hireTitle">ALLIANCE BARRACKS — HIRE DEFENDERS</h2>
     <p>Recruit Cameramen, Speakermen, and Legendary Titans! Hired units deploy directly into the sewer battlefield to eliminate toilets, hold back breaches, and provide heavy fire support.</p>
     <div id="hireSkillPtsLine">SKILL POINTS: <span id="hireSkillPtsVal">0</span></div>
+    <div id="hireTabs">
+      <button class="hireTabBtn active" data-cat="ALL">🌟 ALL UNITS (<span id="countAll"></span>)</button>
+      <button class="hireTabBtn" data-cat="TITAN 2.0 & 3.0" style="border-color:#ff4d4d;color:#ff8888;">🔥 NEW: TITANS 2.0 / 3.0</button>
+      <button class="hireTabBtn" data-cat="LEGENDARY ELITE">👑 LEGENDARY ELITE</button>
+      <button class="hireTabBtn" data-cat="TITAN HEAVIES">⚡ TITAN HEAVIES</button>
+      <button class="hireTabBtn" data-cat="FIELD INFANTRY">🪠 FIELD INFANTRY</button>
+      <button class="hireTabBtn" data-cat="SUPPORT OPS">🧪 SUPPORT OPS</button>
+    </div>
     <div id="hireRoster"></div>
     <button id="hireCloseBtn">RESUME DEFENSE</button>
   </div>
@@ -2294,6 +2329,8 @@ function buyHireUnit(unit){
   return true;
 }
 
+let activeHireCat = 'ALL';
+
 function renderHireScreen(){
   const ptsEl = document.getElementById('hireSkillPtsVal');
   if(ptsEl) ptsEl.textContent = skillPoints;
@@ -2301,17 +2338,38 @@ function renderHireScreen(){
   if(!roster) return;
   roster.innerHTML = '';
 
+  const countAll = document.getElementById('countAll');
+  if(countAll) countAll.textContent = ALLIANCE_UNITS.length;
+
   const hireTitle = document.getElementById('hireTitle');
   if(hireTitle) hireTitle.textContent = 'ALLIANCE BARRACKS — ' + ALLIANCE_UNITS.length + ' HIREABLE DEFENDERS';
 
+  // Setup tab click events
+  document.querySelectorAll('.hireTabBtn').forEach(btn => {
+    btn.onclick = () => {
+      sfx.uiClick();
+      document.querySelectorAll('.hireTabBtn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeHireCat = btn.getAttribute('data-cat');
+      renderHireScreen();
+    };
+  });
+
+  let unitsToDisplay = ALLIANCE_UNITS;
+  if(activeHireCat === 'TITAN 2.0 & 3.0'){
+    unitsToDisplay = ALLIANCE_UNITS.filter(u => u.id === 'titanSpeaker3' || u.id === 'titanSpeaker2' || u.id === 'simp2' || u.id === 'titanDrill');
+  } else if(activeHireCat !== 'ALL'){
+    unitsToDisplay = ALLIANCE_UNITS.filter(u => u.cat === activeHireCat);
+  }
+
   const cats = [];
-  ALLIANCE_UNITS.forEach(u => { if(cats.indexOf(u.cat) === -1) cats.push(u.cat); });
+  unitsToDisplay.forEach(u => { if(cats.indexOf(u.cat) === -1) cats.push(u.cat); });
   cats.forEach(cat => {
     const col = document.createElement('div');
     col.className = 'hireBranch';
     col.innerHTML = '<div class="hireBranchTitle">' + cat + '</div>';
 
-    ALLIANCE_UNITS.filter(u => u.cat === cat).forEach(u => {
+    unitsToDisplay.filter(u => u.cat === cat).forEach(u => {
       const r = hiredRanks[u.id] || 0;
       const maxed = r >= u.max;
       const available = !maxed && skillPoints >= u.cost;
@@ -2323,7 +2381,11 @@ function renderHireScreen(){
       let actionLabel = maxed ? 'MAXED' : (r > 0 ? 'UPGRADE (' + u.cost + ' PTS)' : 'HIRE (' + u.cost + ' PTS)');
       let btnColor = maxed ? '#556a4c' : (available ? '#6ad7ff' : '#2a3a35');
 
-      card.innerHTML = '<div class="hireHeader">'
+      const isNew = (u.id === 'titanSpeaker3' || u.id === 'titanSpeaker2' || u.id === 'simp2');
+      if(isNew) card.classList.add('featured');
+      const badgeHtml = u.id === 'titanSpeaker3' ? '<div class="featuredBadge">NEW APEX 3.0</div>' : (u.id === 'titanSpeaker2' ? '<div class="featuredBadge">NEW TITAN 2.0</div>' : (u.id === 'simp2' ? '<div class="featuredBadge">NEW CH4D 2.0</div>' : ''));
+
+      card.innerHTML = badgeHtml + '<div class="hireHeader">'
         + '<span class="hireIcon">' + u.icon + '</span>'
         + '<span class="hireName">' + u.name + '</span>'
         + '</div>'
