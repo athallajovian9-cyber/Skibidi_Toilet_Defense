@@ -1070,42 +1070,110 @@ function build3dSewerEnvironment(){
 }
 
 /* --- 3D TOILET MESH CREATOR --- */
+// Authentic Facial Feature Materials
+const matEyeWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1 });
+const matEyePupil = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.1, metalness: 0.8 });
+const matEyebrow = new THREE.MeshStandardMaterial({ color: 0x1f140c, roughness: 0.9 });
+const matMouthInside = new THREE.MeshStandardMaterial({ color: 0x3d070b, roughness: 0.4 });
+const matTeeth = new THREE.MeshStandardMaterial({ color: 0xf5f7f2, roughness: 0.2 });
+const matTongue = new THREE.MeshStandardMaterial({ color: 0xd43d52, roughness: 0.3 });
+
 function create3dToiletMesh(){
   const group = new THREE.Group();
-  // Tank
+
+  // 1. Vitreous China Tank & Flush
   const tank = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.5, 1.0), matWhitePorcelain);
   tank.position.set(0, 2.2, 0.6);
   tank.castShadow = true;
   group.add(tank);
-  // Chrome flush
+
   const lever = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.1, 0.3), matChrome);
   lever.position.set(0.95, 2.5, 0.4);
   group.add(lever);
-  // Base
+
+  // 2. Porcelain Bowl Base & Water
   const base = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.0, 1.4, 16), matWhitePorcelain);
   base.position.set(0, 0.7, 0);
   base.castShadow = true;
   group.add(base);
-  // Bowl Rim
+
   const rim = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.0, 0.9, 16), matWhitePorcelain);
   rim.position.set(0, 1.6, -0.2);
   rim.castShadow = true;
   group.add(rim);
-  // Water
+
   const water = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 0.1, 14), matWater);
   water.position.set(0, 1.8, -0.2);
   group.add(water);
-  // Head
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.6, 12, 12), matSkin);
-  head.position.set(0, 2.5, -0.2);
-  head.castShadow = true;
-  group.add(head);
-  // Hair
-  const hair = new THREE.Mesh(new THREE.SphereGeometry(0.62, 10, 10), matHair);
-  hair.position.set(0, 2.65, -0.15);
-  group.add(hair);
 
-  group.userData = { headRef: head };
+  // 3. HUMAN HEAD WITH DETAILED FACIAL EXPRESSION
+  const headGroup = new THREE.Group();
+  headGroup.position.set(0, 2.5, -0.2);
+
+  // Skull & Neck
+  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.3, 0.5, 12), matSkin);
+  neck.position.set(0, -0.25, 0);
+  headGroup.add(neck);
+
+  const skull = new THREE.Mesh(new THREE.SphereGeometry(0.62, 14, 14), matSkin);
+  skull.castShadow = true;
+  headGroup.add(skull);
+
+  // Hair
+  const hair = new THREE.Mesh(new THREE.SphereGeometry(0.64, 12, 12), matHair);
+  hair.position.set(0, 0.15, 0.05);
+  headGroup.add(hair);
+
+  // Eyes & Pupils (Manic Stare)
+  for(let side of [-1, 1]){
+    // Eyeball
+    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 10), matEyeWhite);
+    eye.position.set(side * 0.22, 0.10, -0.54);
+    headGroup.add(eye);
+
+    // Pupil
+    const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), matEyePupil);
+    pupil.position.set(side * 0.22, 0.10, -0.63);
+    headGroup.add(pupil);
+
+    // Eyebrow (Angled furrowed expression)
+    const brow = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.06, 0.08), matEyebrow);
+    brow.position.set(side * 0.22, 0.24, -0.56);
+    brow.rotation.z = side * 0.25;
+    headGroup.add(brow);
+  }
+
+  // Nose
+  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.18, 6), matSkin);
+  nose.position.set(0, 0.02, -0.62);
+  nose.rotation.x = Math.PI / 2;
+  headGroup.add(nose);
+
+  // Singing Open Mouth Cavity (Skibidi "Dop Dop" Sing)
+  const mouthGroup = new THREE.Group();
+  mouthGroup.position.set(0, -0.22, -0.52);
+
+  const mouthCavity = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.22, 0.18), matMouthInside);
+  mouthGroup.add(mouthCavity);
+
+  // Upper & Lower Teeth Rows
+  const upperTeeth = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.06, 0.1), matTeeth);
+  upperTeeth.position.set(0, 0.08, -0.06);
+  mouthGroup.add(upperTeeth);
+
+  const lowerTeeth = new THREE.Mesh(new THREE.BoxGeometry(0.30, 0.05, 0.1), matTeeth);
+  lowerTeeth.position.set(0, -0.08, -0.06);
+  mouthGroup.add(lowerTeeth);
+
+  // Pink Tongue
+  const tongue = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.06, 0.12), matTongue);
+  tongue.position.set(0, -0.06, 0.02);
+  mouthGroup.add(tongue);
+
+  headGroup.add(mouthGroup);
+  group.add(headGroup);
+
+  group.userData = { headRef: headGroup, mouthRef: mouthGroup, toiletIdx: 0 };
   gl3dScene.add(group);
   return group;
 }
@@ -1262,7 +1330,15 @@ function renderThreeEngine(now){
       mesh.rotation.z = Math.sin(ent.wobble || 0) * 0.12;
 
       if(mesh.userData.headRef){
-        mesh.userData.headRef.position.y = 2.5 + Math.abs(Math.sin(t * 8 + i)) * 0.18;
+        // Iconic Skibidi singing bob & head turning
+        mesh.userData.headRef.position.y = 2.5 + Math.abs(Math.sin(t * 9 + i * 2.1)) * 0.22;
+        mesh.userData.headRef.rotation.y = Math.sin(t * 7 + i) * 0.35; // Head swivels while singing
+        mesh.userData.headRef.rotation.z = Math.sin(t * 5 + i) * 0.15;
+      }
+      if(mesh.userData.mouthRef){
+        // Open/Close mouth for singing "Skibidi Dop Dop Yes Yes"
+        const singCycle = Math.abs(Math.sin(t * 11 + i * 1.5));
+        mesh.userData.mouthRef.scale.set(1, 0.6 + singCycle * 0.9, 1);
       }
     } else {
       mesh.visible = false;
@@ -3869,6 +3945,7 @@ function drawCartoonGman(a, now){
 }
 
 function drawHiredAllies(now){
+  if(gl3dRenderer && gl3dScene) return; // 3D models in WebGL handle Titans!
   deployedAllies.forEach(a => {
     ctx.save();
     ctx.translate(a.x, a.y);
@@ -6705,7 +6782,7 @@ drawWorld(now);
       t.y -= t.speed*moveFactor*dt; t.x += Math.sin(t.wobble)*0.6*dt;
       ctx.save();
       if(t.type==='phantom') ctx.globalAlpha=stealth;
-      drawPorcelainToilet(t,now);
+      if(!gl3dRenderer || !gl3dScene) { drawPorcelainToilet(t,now); }
       if(t.hitFlash>0){
         ctx.globalAlpha=Math.min(0.7,t.hitFlash/8);
         ctx.fillStyle='#fff6cf';
