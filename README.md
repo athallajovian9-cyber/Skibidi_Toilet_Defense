@@ -4,7 +4,7 @@ Official web repository and GitHub Pages source for **Skibidi Toilet Defense: Si
 
 - 🎮 **Play Online:** Host this repository with GitHub Pages to play directly from any browser or mobile device.
 - 🚀 **Desktop Mode:** Run `launcher.bat` on Windows for frameless fullscreen app mode with auto-browser detection.
-- 📱 **Mobile Optimized:** Full horizontal action dock, safe-area support, and touch ripple feedback.
+
 
 ## 🚀 How to Enable GitHub Pages:
 1. Go to **Settings** > **Pages** in this GitHub repository.
