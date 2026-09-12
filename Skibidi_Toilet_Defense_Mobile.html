@@ -6782,38 +6782,46 @@ drawWorld(now);
       t.y -= t.speed*moveFactor*dt; t.x += Math.sin(t.wobble)*0.6*dt;
       ctx.save();
       if(t.type==='phantom') ctx.globalAlpha=stealth;
-      if(!gl3dRenderer || !gl3dScene) { drawPorcelainToilet(t,now); }
-      if(t.hitFlash>0){
-        ctx.globalAlpha=Math.min(0.7,t.hitFlash/8);
-        ctx.fillStyle='#fff6cf';
-        ctx.beginPath();ctx.arc(t.x,t.y,t.r*1.02,0,Math.PI*2);ctx.fill();
+      // If 3D engine is active, pure 3D models render the visuals!
+      if(!gl3dRenderer || !gl3dScene) {
+        drawPorcelainToilet(t,now);
+        if(t.hitFlash>0){
+          ctx.globalAlpha=Math.min(0.7,t.hitFlash/8);
+          ctx.fillStyle='#fff6cf';
+          ctx.beginPath();ctx.arc(t.x,t.y,t.r*1.02,0,Math.PI*2);ctx.fill();
+        }
+        if(t.freezeTimer>0){ ctx.fillStyle='rgba(140,205,255,0.20)'; ctx.beginPath(); ctx.arc(t.x,t.y,t.r+5,0,Math.PI*2); ctx.fill(); }
+        if(t.burnTimer>0){ ctx.fillStyle='rgba(255,110,45,0.22)'; ctx.beginPath(); ctx.arc(t.x,t.y,t.r+5,0,Math.PI*2); ctx.fill(); }
       }
       ctx.restore();
 
-      // Tactical Floating Health Bar for Multi-HP Units
+      // Tactical Floating Health Bar (Anchored precisely to 3D Head Position)
+      const posX = (gl3dRenderer && t.screenX !== undefined) ? t.screenX : t.x;
+      const posY = (gl3dRenderer && t.screenY !== undefined) ? t.screenY : t.y;
+
       if(t.maxHp > 1){
-        const barW = Math.max(26, t.r * 1.3);
-        const barH = 4.5;
-        const barX = t.x - barW / 2;
-        const barY = t.y - t.r - 10;
+        const barW = Math.max(30, (t.r || 24) * 1.4);
+        const barH = 5;
+        const barX = posX - barW / 2;
+        const barY = posY - 45;
         const hpPct = Math.max(0, Math.min(1, t.hp / t.maxHp));
-        ctx.fillStyle = 'rgba(10, 16, 12, 0.75)';
+        ctx.fillStyle = 'rgba(8, 12, 10, 0.85)';
         ctx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
         ctx.fillStyle = hpPct > 0.5 ? '#8bff5c' : hpPct > 0.25 ? '#ffd35c' : '#ff4d4d';
         ctx.fillRect(barX, barY, barW * hpPct, barH);
-        ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+        ctx.strokeStyle = 'rgba(0,0,0,0.6)';
         ctx.lineWidth = 1;
         ctx.strokeRect(barX, barY, barW, barH);
       }
-      if(t.freezeTimer>0){ ctx.fillStyle='rgba(140,205,255,0.20)'; ctx.beginPath(); ctx.arc(t.x,t.y,t.r+5,0,Math.PI*2); ctx.fill(); }
-      if(t.burnTimer>0){ ctx.fillStyle='rgba(255,110,45,0.22)'; ctx.beginPath(); ctx.arc(t.x,t.y,t.r+5,0,Math.PI*2); ctx.fill(); }
-      if(t.type==='runner') drawLabel('RUNNER',t.x,t.y-t.r-18,'#ffd35c');
-      else if(t.type==='tank') drawLabel('TANK',t.x,t.y-t.r-18,'#6ad7ff');
-      else if(t.type==='splitter') drawLabel('SPLITTER',t.x,t.y-t.r-18,'#cc9cff');
-      else if(t.type==='healer') drawLabel('HEALER',t.x,t.y-t.r-18,'#74e5b1');
-      else if(t.type==='phantom') drawLabel('PHANTOM',t.x,t.y-t.r-18,'#c7a8ff');
-      if(t.stunTimer>0) drawLabel('STUN',t.x,t.y-t.r-18,'#ffe27c');
-      if(t.elite) drawLabel('ELITE',t.x,t.y+t.r+17,'#ff8f7a');
+
+      // Tactical Unit Variant Labels (Anchored right above 3D Head)
+      if(t.type==='runner') drawLabel('RUNNER', posX, posY - 58, '#ffd35c');
+      else if(t.type==='tank') drawLabel('TANK', posX, posY - 58, '#6ad7ff');
+      else if(t.type==='splitter') drawLabel('SPLITTER', posX, posY - 58, '#cc9cff');
+      else if(t.type==='healer') drawLabel('HEALER', posX, posY - 58, '#74e5b1');
+      else if(t.type==='phantom') drawLabel('PHANTOM', posX, posY - 58, '#c7a8ff');
+      if(t.stunTimer>0) drawLabel('STUN', posX, posY - 58, '#ffe27c');
+      if(t.elite) drawLabel('ELITE', posX, posY + 22, '#ff8f7a');
       if(t.hitFlash>0)t.hitFlash--;
       // Toilet reaches the end of the floor (cannot crawl to walls!)
       if(t.y <= floorEndY){
@@ -6849,8 +6857,10 @@ drawWorld(now);
       else boss.y=boss.targetY+Math.sin(now/500)*10;
       if(boss.hitFlash>0) boss.hitFlash--;
       if(!boss.isFinal){
-        drawPorcelainToilet(boss,now,{gold:true,armored:true});
-        drawLabel(boss.title || 'BOSS TOILET', boss.x, boss.y-boss.r-22, '#ffd35c');
+        if(!gl3dRenderer || !gl3dScene) { drawPorcelainToilet(boss,now,{gold:true,armored:true}); }
+        const bX = (gl3dRenderer && boss.screenX !== undefined) ? boss.screenX : boss.x;
+        const bY = (gl3dRenderer && boss.screenY !== undefined) ? boss.screenY : boss.y;
+        drawLabel(boss.title || 'BOSS TOILET', bX, bY - 65, '#ffd35c');
 
         // Draw accessories for specific boss tiers
         if(boss.title && boss.title.includes('BUZZSAW')){
@@ -6919,7 +6929,7 @@ drawWorld(now);
           popParticles(boss.x + (Math.random()-0.5)*boss.r, boss.y + (Math.random()-0.5)*boss.r, '#ff3a1a', 2);
         }
 
-        drawPorcelainToilet(boss,now,{gold:true,suit:true,laserState:boss.laserState,rage:isPhase3Rage});
+        if(!gl3dRenderer || !gl3dScene) { drawPorcelainToilet(boss,now,{gold:true,suit:true,laserState:boss.laserState,rage:isPhase3Rage}); }
         if(boss.laserState==='firing') [eyeL,eyeR].forEach(eye=>{const grad=ctx.createLinearGradient(eye.x,eye.y,eye.x,H);grad.addColorStop(0,'rgba(255,240,180,.95)');grad.addColorStop(.15,'rgba(255,70,40,.75)');grad.addColorStop(1,'rgba(255,60,45,0)');ctx.fillStyle=grad;ctx.beginPath();ctx.moveTo(eye.x-4,eye.y);ctx.lineTo(eye.x+4,eye.y);ctx.lineTo(eye.x+14,H);ctx.lineTo(eye.x-14,H);ctx.closePath();ctx.fill();});
         drawLabel('THE G-MAN',boss.x,boss.y-boss.r-24,'#ff5c3d');
       }
