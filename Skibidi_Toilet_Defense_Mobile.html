@@ -1249,7 +1249,6 @@ function showDifficulty(){
           difficultyScreen.style.display = 'none';
           gameWrap.style.display = 'block';
           resize();
-initThreeEngine();
           resetGame();
           // Restore saved stats
           wave = cp.wave;
@@ -1291,8 +1290,7 @@ document.querySelectorAll('.diffBtn').forEach(btn=>{
     difficultyScreen.style.display = 'none';
     gameWrap.style.display = 'block';
     resize();
-    initThreeEngine();
-    resetGame();
+        resetGame();
     if(!gameLoopStarted){
       gameLoopStarted = true;
       lastFrame = 0;
@@ -4549,11 +4547,7 @@ function resize(){
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
-  if(gl3dRenderer && gl3dCamera){
-    gl3dRenderer.setSize(W, H);
-    gl3dCamera.aspect = W / H;
-    gl3dCamera.updateProjectionMatrix();
-  }
+
 }
 window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', ()=> setTimeout(resize, 120));
@@ -6244,22 +6238,18 @@ function loop(ts){
       t.y -= t.speed*moveFactor*dt; t.x += Math.sin(t.wobble)*0.6*dt;
       ctx.save();
       if(t.type==='phantom') ctx.globalAlpha=stealth;
-      // If 3D engine is active, pure 3D models render the visuals!
-      if(!gl3dRenderer || !gl3dScene) {
-        drawPorcelainToilet(t,now);
-        if(t.hitFlash>0){
-          ctx.globalAlpha=Math.min(0.7,t.hitFlash/8);
-          ctx.fillStyle='#fff6cf';
-          ctx.beginPath();ctx.arc(t.x,t.y,t.r*1.02,0,Math.PI*2);ctx.fill();
-        }
-        if(t.freezeTimer>0){ ctx.fillStyle='rgba(140,205,255,0.20)'; ctx.beginPath(); ctx.arc(t.x,t.y,t.r+5,0,Math.PI*2); ctx.fill(); }
-        if(t.burnTimer>0){ ctx.fillStyle='rgba(255,110,45,0.22)'; ctx.beginPath(); ctx.arc(t.x,t.y,t.r+5,0,Math.PI*2); ctx.fill(); }
+      drawPorcelainToilet(t, now);
+      if(t.hitFlash > 0){
+        ctx.globalAlpha = Math.min(0.7, t.hitFlash / 8);
+        ctx.fillStyle = '#fff6cf';
+        ctx.beginPath(); ctx.arc(t.x, t.y, t.r * 1.02, 0, Math.PI * 2); ctx.fill();
       }
+      if(t.freezeTimer > 0){ ctx.fillStyle = 'rgba(140,205,255,0.20)'; ctx.beginPath(); ctx.arc(t.x, t.y, t.r + 5, 0, Math.PI * 2); ctx.fill(); }
+      if(t.burnTimer > 0){ ctx.fillStyle = 'rgba(255,110,45,0.22)'; ctx.beginPath(); ctx.arc(t.x, t.y, t.r + 5, 0, Math.PI * 2); ctx.fill(); }
       ctx.restore();
 
-      // Tactical Floating Health Bar (Anchored precisely to 3D Head Position)
-      const posX = (gl3dRenderer && t.screenX !== undefined) ? t.screenX : t.x;
-      const posY = (gl3dRenderer && t.screenY !== undefined) ? t.screenY : t.y;
+      const posX = t.x;
+      const posY = t.y;
 
       if(t.maxHp > 1){
         const barW = Math.max(30, (t.r || 24) * 1.4);
@@ -6319,10 +6309,8 @@ function loop(ts){
       else boss.y=boss.targetY+Math.sin(now/500)*10;
       if(boss.hitFlash>0) boss.hitFlash--;
       if(!boss.isFinal){
-        drawPorcelainToilet(boss,now,{gold:true,armored:true});
-        const bX = (gl3dRenderer && boss.screenX !== undefined) ? boss.screenX : boss.x;
-        const bY = (gl3dRenderer && boss.screenY !== undefined) ? boss.screenY : boss.y;
-        drawLabel(boss.title || 'BOSS TOILET', bX, bY - 65, '#ffd35c');
+        drawPorcelainToilet(boss, now, {gold:true, armored:true});
+        drawLabel(boss.title || 'BOSS TOILET', boss.x, boss.y - boss.r - 22, '#ffd35c');
 
         // Draw accessories for specific boss tiers
         if(boss.title && boss.title.includes('BUZZSAW')){
