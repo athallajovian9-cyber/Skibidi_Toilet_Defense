@@ -849,7 +849,7 @@
   </div>
 
   <div style="margin-top:16px;">
-    <button id="openTutorialBtn" class="miniBtn" style="border-color:var(--gold);color:var(--gold);padding:10px 24px;font-size:12px;letter-spacing:1px;box-shadow:0 0 12px rgba(255,211,92,0.2);">📖 FIELD MANUAL / TUTORIAL</button>
+    <button id="openTutorialBtn" class="miniBtn" onclick="openTutorial(event)" ontouchend="openTutorial(event)" style="border-color:var(--gold);color:var(--gold);padding:10px 24px;font-size:12px;letter-spacing:1px;box-shadow:0 0 12px rgba(255,211,92,0.2);cursor:pointer;">📖 FIELD MANUAL / TUTORIAL</button>
   </div>
 </div>
 
@@ -940,7 +940,7 @@
       <button id="modsBtn" class="miniBtn subtleBtn" style="border-color:#ff4d4d;color:#ff6a6a;font-weight:900;" title="Open Cheats & Mod Trainer [M]">⚡ CHEAT</button>
     </div>
     <div class="gridRow compactRow">
-      <button id="inGameTutBtn" class="miniBtn subtleBtn">📖 GUIDE</button>
+      <button id="inGameTutBtn" class="miniBtn subtleBtn" onclick="openTutorial(event)" ontouchend="openTutorial(event)">📖 GUIDE</button>
       <button id="pauseBtn" class="miniBtn subtleBtn">⏸️ PAUSE</button>
       <button id="fsMobileBtn" class="miniBtn subtleBtn" style="border-color:#6ad7ff;color:#6ad7ff;">⛶ FULL</button>
     </div>
@@ -966,7 +966,7 @@
     <button id="resumeBtn">RESUME</button>
     <button id="pauseInfinityToggleBtn" style="background:#181028;border:1.5px solid #c084fc;color:#c084fc;padding:8px 18px;margin-top:6px;cursor:pointer;font-family:inherit;font-weight:bold;box-shadow:0 0 12px rgba(192,132,252,0.3);" onclick="toggleInfinityMode(event)">♾️ TOGGLE INFINITY MODE</button>
     <button id="restartRunBtn" style="background:#2a2a3a;color:var(--porcelain);border:1px solid var(--pipe);padding:8px 18px;margin-top:6px;cursor:pointer;">RESTART RUN</button>
-    <button id="pauseTutBtn" style="background:#141f17;border:1px solid var(--gold);color:var(--gold);padding:8px 18px;margin-top:6px;cursor:pointer;">📖 OPERATIVE'S MANUAL</button>
+    <button id="pauseTutBtn" onclick="openTutorial(event)" ontouchend="openTutorial(event)" style="background:#141f17;border:1px solid var(--gold);color:var(--gold);padding:8px 18px;margin-top:6px;cursor:pointer;">📖 OPERATIVE'S MANUAL</button>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
       <button id="quitMenuBtn" style="background:#2a3a35;color:var(--porcelain);box-shadow:none;border:1px solid var(--pipe);">QUIT TO MAIN MENU</button>
       <button id="quitGameBtn" style="background:#5a1a1a;color:#ffd9d9;box-shadow:none;border:1px solid #7a2020;">QUIT GAME</button>
@@ -7946,6 +7946,7 @@ const BugManager = {
 
     // 2. Modals & UI Collisions
     this.checkUIAndModalInvariants();
+    this.checkModalAndButtonHealth();
 
     // 3. Economy & Stats
     this.checkEconomyAndStats();
@@ -8036,6 +8037,16 @@ const BugManager = {
     if(hypnoOverlay && hypnoOverlay.style.display === 'block') {
       if(typeof hypnoActiveTimer !== 'undefined' && hypnoActiveTimer <= 0) {
         this.reportBug({ type: 'STUCK_HYPNO_OVERLAY', message: 'Hypno visual overlay active with zero remaining duration' });
+      }
+    }
+  },
+
+  checkModalAndButtonHealth() {
+    const manualBtns = ['openTutorialBtn', 'inGameTutBtn', 'pauseTutBtn'];
+    for(const id of manualBtns) {
+      const b = document.getElementById(id);
+      if(b && !b.onclick) {
+        this.reportBug({ type: 'MANUAL_BUTTON_UNRESPONSIVE', message: `Manual trigger button #${id} missing click handler binding`, buttonId: id });
       }
     }
   },
@@ -8790,6 +8801,16 @@ const BugHandler = {
           if(typeof updateHud === 'function') updateHud();
           return true;
 
+        case 'UI_INTERACTION_ANOMALY':
+          ['openTutorialBtn', 'inGameTutBtn', 'pauseTutBtn'].forEach(id => {
+            const btn = document.getElementById(id);
+            if(btn) {
+              btn.onclick = (e) => openTutorial(e);
+              btn.ontouchend = (e) => openTutorial(e);
+            }
+          });
+          return true;
+
         case 'STATE_MACHINE_DESYNC':
           if(typeof wave !== 'undefined' && (isNaN(wave) || wave < 1)) wave = 1;
           if(typeof streak !== 'undefined' && (isNaN(streak) || streak < 0)) streak = 0;
@@ -8864,7 +8885,14 @@ const BugHandler = {
           if(typeof updateHud === 'function') updateHud();
           return true;
 
-        case 'UI_STATE_COLLISION':
+        case 'MANUAL_BUTTON_UNRESPONSIVE':
+        return {
+          rootCause: `Manual / Tutorial button #${bug.buttonId || 'manual'} missing click binding`,
+          category: 'UI_INTERACTION_ANOMALY',
+          fixPlan: 'Re-bind onclick and ontouchend handlers to openTutorial()'
+        };
+
+      case 'UI_STATE_COLLISION':
           if(bug.modals && bug.modals.length > 1) {
             const keepName = bug.modals[bug.modals.length - 1].name;
             if(keepName !== 'skills' && typeof closeSkillsScreen === 'function') closeSkillsScreen();
@@ -9878,21 +9906,30 @@ if(lastBtn) lastBtn.classList.add('selected');
 /* ================= TUTORIAL / FIELD MANUAL LOGIC ================= */
 let tutorialPrevState = null;
 
-function openTutorial(){
-  ensureAudio(); sfx.uiClick();
+function openTutorial(e){
+  if(e){
+    if(e.stopPropagation) e.stopPropagation();
+    if(e.type === 'touchend' && e.preventDefault) e.preventDefault();
+  }
+  try { ensureAudio(); if(window.sfx && typeof sfx.uiClick === 'function') sfx.uiClick(); } catch(err){}
   tutorialPrevState = state;
   if(state === 'playing') state = 'tutorial';
-  document.getElementById('tutorialScreen').style.display = 'flex';
+  const tut = document.getElementById('tutorialScreen');
+  if(tut) {
+    tut.style.display = 'flex';
+    tut.style.zIndex = '99999';
+  }
 }
 
-function closeTutorial(){
-  document.getElementById('tutorialScreen').style.display = 'none';
+function closeTutorial(e){
+  if(e && e.stopPropagation) e.stopPropagation();
+  const tut = document.getElementById('tutorialScreen');
+  if(tut) tut.style.display = 'none';
   if(tutorialPrevState){
     state = tutorialPrevState;
     tutorialPrevState = null;
   }
 }
-
 
 function switchTutTab(tabId, btnElement){
   if(typeof sfx !== 'undefined' && sfx.uiClick) sfx.uiClick();
