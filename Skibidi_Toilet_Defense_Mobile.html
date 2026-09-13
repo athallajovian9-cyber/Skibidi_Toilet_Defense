@@ -899,9 +899,9 @@
 <script>
 /* ================= CONFIG / PERSISTENCE ================= */
 const DIFFICULTIES = {
-  easy:   { spawnStart: 82, spawnMin: 24, spawnDecay: 4.0, speedMult: 0.92, hpMult: 0.90, toiletsBase: 9, toiletsGrowth: 1.15, maxToilets: 34, sigmaGain: 7, breachDamage: 1 },
-  normal: { spawnStart: 48, spawnMin: 9,  spawnDecay: 4.0, speedMult: 1.00, hpMult: 1.00, toiletsBase: 12, toiletsGrowth: 1.72, maxToilets: 55, sigmaGain: 9, breachDamage: 1 },
-  hard:   { spawnStart: 34, spawnMin: 5,  spawnDecay: 4.5, speedMult: 1.20, hpMult: 1.22, toiletsBase: 15, toiletsGrowth: 2.15, maxToilets: 68, sigmaGain: 12, breachDamage: 1 }
+  easy:   { spawnStart: 76, spawnMin: 20, spawnDecay: 3.5, speedMult: 0.88, hpMult: 0.85, toiletsBase: 8,  toiletsGrowth: 1.10, maxToilets: 32, sigmaGain: 9,  breachDamage: 1 },
+  normal: { spawnStart: 44, spawnMin: 10, spawnDecay: 3.8, speedMult: 0.96, hpMult: 0.95, toiletsBase: 11, toiletsGrowth: 1.45, maxToilets: 50, sigmaGain: 11, breachDamage: 1 },
+  hard:   { spawnStart: 32, spawnMin: 6,  spawnDecay: 4.2, speedMult: 1.12, hpMult: 1.15, toiletsBase: 14, toiletsGrowth: 1.85, maxToilets: 62, sigmaGain: 14, breachDamage: 1 }
 };
 
 /* SIGMA MODE: flat multiplier on every toilet's approach speed. Stacks on top of
@@ -2547,32 +2547,92 @@ function openRelicModal(){
    comes from ALLY_STATS and runs through the shared generic AI/draw branches, so
    adding a character is one compact entry. */
 const ALLY_STATS = {
-  titanSpeaker3: { role:'sonicGod',        name:'TITAN SPEAKERMAN 3.0',       cat:'LEGENDARY ELITE', desc:'THE APEX SOUND COLOSSUS! Version 3.0 EMPEROR Overhaul! Equipped with a crowned multi-cone speaker array, towering quad-pod shoulder acoustic wing towers, glowing red energy halo ring, crimson battle-cape, fortified layered mech-armor, blinding white-hot chest reactor, and dual heavy overcharged plasma-cannon blade gauntlets. Obliterates entire enemy armies with continuous supersonic shockwaves!', cost:7, max:1, icon:'🔊', r:1.85, body:'#121418', head:'#0a0c0e', lens:'#ff1a1a', label:'TITAN SPEAKERMAN 3.0', labelCol:'#ff1a1a', speed:3.1, cd:10, dmg:42, knockback:220, stun:60, range:600, rad:180 },
+  // === APEX TITANS (GOD-TIER HEAVIES) ===
+  titanSpeaker3: {
+    role:'sonicGod', name:'TITAN SPEAKERMAN 3.0', cat:'LEGENDARY ELITE',
+    desc:'THE APEX SOUND COLOSSUS! Version 3.0 EMPEROR Overhaul! Equipped with crowned speaker array, twin acoustic wing towers, rotating red energy halo, flowing battle-cape, and dual overcharged plasma bayonets. Unleashes continuous supersonic AoE shockwaves!',
+    cost:7, max:1, icon:'🔊', r:1.85, body:'#121418', head:'#0a0c0e', lens:'#ff1a1a', label:'TITAN SPEAKERMAN 3.0', labelCol:'#ff1a1a',
+    speed:3.4, cd:8, dmg:48, knockback:240, stun:75, range:650, rad:200
+  },
 
-  titanSpeaker2: { role:'plasmaArtillery', name:'UPGRADED TITAN SPEAKERMAN (2.0)', cat:'LEGENDARY ELITE', desc:'TITAN 2.0 OVERHAUL! Fitted with crimson dress shirt, charcoal combat pants, dual heavy shoulder speaker wing-towers, industrial jetpack thrusters, red core reactor, and twin heavy forearm plasma blasters with under-barrel combat blades. Unleashes massive rapid twin crimson plasma bursts and devastating sonic shockwaves!', cost:6, max:1, icon:'🔊', r:1.65, body:'#b82424', head:'#141414', lens:'#ff2222', label:'UPGRADED TITAN SPEAKER 2.0', labelCol:'#ff3d3d', speed:2.8, cd:12, dmg:28, knockback:120, stun:40, range:520, rad:140 },
+  titanSpeaker2: {
+    role:'plasmaArtillery', name:'UPGRADED TITAN SPEAKERMAN (2.0)', cat:'LEGENDARY ELITE',
+    desc:'TITAN 2.0 OVERHAUL! Fitted with dual shoulder speaker towers, jetpack thrusters, red core reactor, and twin heavy forearm plasma blasters. Unleashes rapid twin crimson plasma bursts and devastating sonic shockwaves!',
+    cost:6, max:1, icon:'🔊', r:1.65, body:'#1e2226', head:'#14181b', lens:'#ff2222', label:'UPGRADED TITAN SPEAKER 2.0', labelCol:'#ff3333',
+    speed:3.0, cd:12, dmg:32, knockback:150, stun:45, range:520, rad:130
+  },
 
-  simp2:       { role:'chadRusher',  name:'SIMP CAMERAMAN 2.0',   cat:'LEGENDARY ELITE', desc:'CH4D UPGRADE! Rolled-up sky-blue sleeves, iconic yellow-purple striped tie, heavy cybernetic exoskeleton, high-powered turbine thruster, and dual neon-cyan energy forearm blades! Closes in with supersonic speed and shreds toilet vanguards.', cost:4, max:2, icon:'🦾', r:1.2, body:'#1e2830', head:'#1a2228', lens:'#00f0ff', label:'CH4D SIMP 2.0', labelCol:'#00f0ff', speed:3.9, cd:14, dmg:16, knockback:65, stun:25, range:450, atkDist:48 },
+  titanDrill: {
+    role:'drillSmasher', name:'TITAN DRILLMAN (3D)', cat:'LEGENDARY ELITE',
+    desc:'MASSIVE MECH TITAN! Features conical rotating steel drill head, ochre hazard-orange boiler body with Japanese safety cross (Anzen Hyoshiki), dome pauldrons, and dual rotating arm drills that slam the sewer floor to create seismic fissures!',
+    cost:5, max:1, icon:'🔩', r:1.75, body:'#d46e13', head:'#a4b0bd', lens:'#ff9d4d', label:'TITAN DRILLMAN [3D]', labelCol:'#ff9d4d',
+    speed:2.2, cd:16, dmg:45, knockback:280, stun:90, range:520, rad:150
+  },
 
-  titanDrill:  { role:'drillSmasher', name:'TITAN DRILLMAN (3D)',   cat:'LEGENDARY ELITE', desc:'DOM STUDIO 3D OVERHAUL! Machine-turned conical drill head, hazard-orange boiler chassis with Japanese green safety cross (Anzen Hyoshiki), dome pauldrons, and massive dual rotating arm drills that slam the sewer bedrock to unleash seismic shockwave fissures!', cost:6, max:1, icon:'🔩', r:1.7, body:'#bd5a11', head:'#4a535e', lens:'#ff7a1b', label:'TITAN DRILLMAN (3D)', labelCol:'#ff8a1b', speed:1.5, cd:75, dmg:38, knockback:260, stun:80, range:500, atkDist:80 },
-  mechDog:     { role:'pouncer',      name:'CAMERA MECH-HOUND',     cat:'SUPPORT OPS', desc:'Rapid quadruped robotic hound! Runs along the floor, pounces onto toilets, clamps with electrified jaws to pin them in place.', cost:3, max:3, icon:'🐕', r:0.9, body:'#2a3a35', head:'#1a2622', lens:'#6ad7ff', label:'MECH HOUND', labelCol:'#6ad7ff', speed:3.8, cd:22, dmg:8, knockback:35, range:450, atkDist:36 },
-  jetpackCam:  { role:'strafer',      name:'JETPACK DUAL-UZI',      cat:'FIELD INFANTRY', desc:'Rocket-powered low-altitude commando! Strafes back and forth above the floor spraying twin uzis and dropping cluster mini-bombs.', cost:3, max:3, icon:'🚀', r:0.95, body:'#3a4a5a', head:'#1e2832', lens:'#ff9d4d', label:'JETPACK UZI', labelCol:'#ff9d4d', speed:3.2, cd:12, dmg:3 },
+  titanClock: {
+    role:'chronoMaster', name:'TITAN CLOCKMAN', cat:'LEGENDARY ELITE',
+    desc:'TEMPORAL WARFARE TITAN! Emits chronos-waves that freeze all active toilets in temporal stasis for 5s, followed by time-rift reality slashes!',
+    cost:6, max:1, icon:'⏰', r:1.8, body:'#2d281e', head:'#d4af37', lens:'#ffd700', label:'TITAN CLOCKMAN', labelCol:'#ffd700',
+    speed:2.0, cd:24, dmg:38, knockback:180, stun:150, range:580, rad:220
+  },
 
-  plumber:     { role:'rusher',      name:'PLUNGERMAN',            cat:'FIELD INFANTRY', desc:'Dual-plunger melee gremlin that chases toilets down and whacks them apart.', cost:1, max:4, icon:'🪠', r:0.9,  body:'#6b4d32', head:'#222824', lens:'#6ad7ff', label:'PLUNGER', labelCol:'#cbf0ff', speed:3.2, cd:15, dmg:3, knockback:26, range:380, atkDist:44 },
-  half:        { role:'rusher',      name:'HALFPIPE CAMERAMAN',    cat:'FIELD INFANTRY', desc:'Half-pipe skating cameraman that rams toilets for chip damage and shoves them.', cost:2, max:3, icon:'🛹', r:0.95, body:'#2a5a3a', head:'#123a24', lens:'#ffe27c', label:'HALFPIPE', labelCol:'#ffe27c', speed:3.0, cd:18, dmg:3, knockback:40, range:400, atkDist:46 },
-  elite:       { role:'rapid',       name:'ELITE CAMERAMAN',       cat:'FIELD INFANTRY', desc:'Twin-pistol rapid fire. Sustained mid-line DPS that never stops.', cost:2, max:3, icon:'🔫', r:1.0,  body:'#3a4a8a', head:'#222a5a', lens:'#8bff5c', label:'ELITE', labelCol:'#9fd0ff', speed:2.4, cd:9, dmg:2 },
-  black:       { role:'sniper',      name:'BLACK CAMERAMAN',       cat:'FIELD INFANTRY', desc:'Stealth marksman. Slow, deliberate, hits harder than its price tag.', cost:3, max:3, icon:'🎯', r:1.0,  body:'#1a1a22', head:'#0e0e14', lens:'#c9a2ff', label:'BLACK CAM', labelCol:'#c9a2ff', speed:1.9, cd:55, dmg:14 },
-  strider:     { role:'pulse',       name:'STRIDER SPEAKERMAN',    cat:'SUPPORT OPS', desc:'Skates at full speed blasting sonic knockback waves that shove swarms away.', cost:3, max:3, icon:'🛼', r:0.9,  body:'#3a2a4a', head:'#201528', lens:'#ffd35c', label:'STRIDER', labelCol:'#ff9de2', speed:3.1, cd:55, radius:160, dmg:4, stun:35, knockback:70 },
-  dj:          { role:'pulse',       name:'DJ SPEAKERMAN',         cat:'SUPPORT OPS', desc:'Drops full-on bass earthquakes. Huge AoE damage and heavy stun.', cost:4, max:2, icon:'🎚️', r:1.05, body:'#241a24', head:'#0f0f14', lens:'#ff8a00', label:'DJ SPEAKER', labelCol:'#ffd35c', speed:1.7, cd:130, radius:320, dmg:11, stun:65, knockback:130 },
-  girl:        { role:'hypnoPulse',  name:'TV GIRL',                cat:'SUPPORT OPS', desc:'Broadcasts hypnotic static that locks toilets in place and saps their health.', cost:3, max:3, icon:'📺', r:0.95, body:'#4a1030', head:'#2a0a1c', lens:'#ff6ad9', label:'TV GIRL', labelCol:'#ff9de2', speed:2.1, cd:120, radius:200, dmg:7, stun:90 },
-  scientist:   { role:'zap',         name:'SCIENTIST CAMERAMAN',   cat:'SUPPORT OPS', desc:'Fires lab zappers that arc through whole enemy clusters at once.', cost:4, max:2, icon:'🧪', r:1.0,  body:'#c9c9b2', head:'#e8e8e0', lens:'#74e5b1', label:'SCIENTIST', labelCol:'#74e5b1', speed:1.8, cd:95, radius:200, dmg:9 },
-  ghost:       { role:'teleRusher',  name:'GHOST PLUMBER',         cat:'SUPPORT OPS', desc:'Vapor-wraps behind toilets and clobbers them cold before they can react.', cost:3, max:3, icon:'👻', r:0.9,  body:'#3a3f4a', head:'#2a2f38', lens:'#7ae0ff', label:'GHOST PLMB', labelCol:'#7ae0ff', speed:3.4, cd:15, dmg:4, knockback:20, range:440, atkDist:44 },
-  angles:      { role:'beam',        name:'ANGLESMAN',              cat:'SUPPORT OPS', desc:'Scans the whole front line with a piercing resonance beam.', cost:4, max:2, icon:'📐', r:1.0,  body:'#245a4a', head:'#12302a', lens:'#9dffd9', label:'ANGLESMAN', labelCol:'#9dffd9', speed:1.9, cd:70, radius:170, dmg:13 },
-  fan:         { role:'heavy',       name:'FANSPEAKERMAN',         cat:'SUPPORT OPS', desc:'A massive bruiser that batters toilets straight across the arena.', cost:3, max:3, icon:'🗞️', r:1.15, body:'#5a4a2a', head:'#3a301c', lens:'#ffce54', label:'FANSPEAKER', labelCol:'#ffe27c', speed:1.7, cd:40, dmg:9, knockback:150, stun:45, range:420, atkDist:58 },
-  astro:       { role:'artillery',   name:'ASTRONAUT CAMERAMAN',   cat:'LEGENDARY ELITE', desc:'Orbital support: lobs explosive rocket pods into the densest part of the swarm.', cost:5, max:1, icon:'🧑‍🚀', r:1.2, body:'#4a3a5a', head:'#3a2a4a', lens:'#c9a2ff', label:'ASTRO CAM', labelCol:'#c9a2ff', speed:2.1, cd:55, rad:170, dmg:14 },
-  overseer:    { role:'beam',        name:'OVERSEER MONITOR',      cat:'LEGENDARY ELITE', desc:'Quad-screen surveillance beam that sweeps the ENTIRE front line.', cost:5, max:1, icon:'🖥️', r:1.25, body:'#14405a', head:'#0a2436', lens:'#6ad7ff', label:'OVERSEER', labelCol:'#6ad7ff', speed:1.5, cd:60, radius:220, dmg:11 },
-  titanPlunger:{ role:'heavy',       name:'TITAN PLUNGERMAN',      cat:'LEGENDARY ELITE', desc:'THE ODOR SLAYER. Colossal sweeping slam demolishes whole lines of toilets.', cost:6, max:1, icon:'🪠', r:1.6,  body:'#7d5030', head:'#c0392b', lens:'#ffd35c', label:'TITAN PLUNGERMAN', labelCol:'#ffd35c', speed:1.6, cd:60, dmg:28, knockback:230, stun:70, range:520, atkDist:90 },
-  titanClock:  { role:'timefield',   name:'CLOCKMAN TITAN',        cat:'LEGENDARY ELITE', desc:'Warped clockwork colossus. Every tick slows and drains every toilet on the map.', cost:6, max:1, icon:'⏰', r:1.5,  body:'#24324a', head:'#37486a', lens:'#9dc5ff', label:'CLOCKMAN TITAN', labelCol:'#9dc5ff', speed:1.4, cd:120, radius:999999, dmg:5, stun:40 },
-  gmini:       { role:'artillery',   name:'G-TOILET PROTOTYPE',    cat:'LEGENDARY ELITE', desc:'A captured siege toilet lobbing molten plasma at anything that moves.', cost:6, max:1, icon:'🚽', r:1.5,  body:'#8a6a1a', head:'#5a4a0a', lens:'#ff9d4d', label:'G-TOILET', labelCol:'#ff9d4d', speed:1.3, cd:90, rad:220, dmg:24 }
+  titanPlunger: {
+    role:'hydraulicSlammer', name:'TITAN PLUNGERMAN', cat:'LEGENDARY ELITE',
+    desc:'MECH-ENHANCED SLAMMER! Wields twin massive powered hydraulic plungers. Charges forward into enemy lines, launching toilets skyward!',
+    cost:5, max:1, icon:'🪠', r:1.7, body:'#1a241b', head:'#2e4530', lens:'#8bff5c', label:'TITAN PLUNGERMAN', labelCol:'#8bff5c',
+    speed:2.8, cd:14, dmg:36, knockback:260, stun:60, range:480, rad:120
+  },
+
+  // === TACTICAL ELITE SQUAD ===
+  simp2: {
+    role:'strafer', name:'SIMP CAMERAMAN 2.0 (CH4D)', cat:'FIELD INFANTRY',
+    desc:'THE ULTIMATE SIMP REVENGE! Upgraded into CH4D form with dual cyan hard-light forearm energy blades, high-output turbine jet thruster, charcoal suit, and striped tie. Blinks across lanes slashing toilets!',
+    cost:3, max:2, icon:'🗡️', r:1.25, body:'#1a1c1e', head:'#262d33', lens:'#00e5ff', label:'SIMP 2.0 (CH4D)', labelCol:'#00e5ff',
+    speed:4.6, cd:6, dmg:22, knockback:80, stun:25, range:240, rad:70
+  },
+
+  mechDog: {
+    role:'brawler', name:'MECH-HOUND CAMERAMAN', cat:'FIELD INFANTRY',
+    desc:'QUADRUPED SCOUT HUNTER! Prowls the sewer floor on hydraulic legs. Pounces on runner and sprinter toilets, tearing off armor shields!',
+    cost:3, max:2, icon:'🐕', r:1.2, body:'#222a24', head:'#344237', lens:'#8bff5c', label:'MECH-HOUND', labelCol:'#8bff5c',
+    speed:3.8, cd:8, dmg:18, knockback:90, stun:35, range:220, rad:65
+  },
+
+  jetpackCam: {
+    role:'strafer', name:'JETPACK CAMERAMAN', cat:'FIELD INFANTRY',
+    desc:'AIRBORNE INTERCEPTOR! Flies above enemy columns, dropping micro-bombs on dense toilet clusters.',
+    cost:2, max:3, icon:'🚀', r:1.0, body:'#252d27', head:'#38473c', lens:'#6ad7ff', label:'JETPACK CAM', labelCol:'#6ad7ff',
+    speed:4.2, cd:10, dmg:14, knockback:60, stun:15, range:320, rad:80
+  },
+
+  plumber: {
+    role:'brawler', name:'HEAVY PLUMBER CAMERAMAN', cat:'FIELD INFANTRY',
+    desc:'FRONTLINE BRUISER! Armored combat suit with reinforced carbon plunger. Knocks back armored toilets and clears breachers.',
+    cost:2, max:3, icon:'🔧', r:1.1, body:'#1b241e', head:'#2a3b30', lens:'#ffd35c', label:'PLUMBER CAM', labelCol:'#ffd35c',
+    speed:2.4, cd:9, dmg:16, knockback:110, stun:40, range:200, rad:60
+  },
+
+  // === SUPPORT & TECH OPS ===
+  scientist: {
+    role:'supportAura', name:'SCIENTIST CAMERAMAN', cat:'SUPPORT OPS',
+    desc:'NANITE FIELD GENERATOR! Radiates a repair aura that repairs base integrity and boosts all deployed ally damage by +25%!',
+    cost:3, max:1, icon:'🔬', r:1.1, body:'#15222e', head:'#243647', lens:'#6ad7ff', label:'SCIENTIST CAM', labelCol:'#6ad7ff',
+    speed:1.6, cd:20, dmg:10, knockback:40, stun:10, range:400, rad:300
+  },
+
+  dj: {
+    role:'soundBlaster', name:'DJ SPEAKERMAN', cat:'SUPPORT OPS',
+    desc:'BASS BOOSTER UNIT! Blasts sonic drops that slow all toilets by 40% across the entire lane and strips enemy armor plating.',
+    cost:3, max:1, icon:'🎧', r:1.2, body:'#281822', head:'#44283b', lens:'#ff5cd3', label:'DJ SPEAKERMAN', labelCol:'#ff5cd3',
+    speed:2.0, cd:15, dmg:15, knockback:120, stun:50, range:450, rad:220
+  },
+
+  astro: {
+    role:'warpSniper', name:'ASTRO ALLY INTERCEPTOR', cat:'SUPPORT OPS',
+    desc:'WARP-DRIVE ASSASSIN! Teleports behind high-threat toilets (Healers, Astro, Juggernauts) and snipes them with hyper-dense energy darts.',
+    cost:4, max:2, icon:'🛸', r:1.2, body:'#112228', head:'#1b353e', lens:'#6ad7ff', label:'ASTRO INTERCEPTOR', labelCol:'#6ad7ff',
+    speed:4.8, cd:10, dmg:28, knockback:100, stun:30, range:500, rad:90
+  }
 };
 
 const ALLIANCE_UNITS = [
