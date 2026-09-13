@@ -506,14 +506,12 @@
   
 
   /* ================= UNIFIED TACTICAL HUD & ACTION DOCK ================= */
-  #three3dCanvas {
-    position: absolute; inset: 0; width: 100%; height: 100%;
-    z-index: 1; pointer-events: none; display: block;
-  }
-  canvas#game {
-    position: absolute; inset: 0; width: 100%; height: 100%;
-    z-index: 2; display: block; background: transparent;
+  canvas#game, canvas {
+    display: block;
+    background: #0a0c10;
     touch-action: none;
+    width: 100%;
+    height: 100%;
   }
 
   /* TOP HUD */
@@ -695,7 +693,6 @@
     #actionBar .gridRow .miniBtn { flex: 1; min-width: 0; padding: 6px 2px; font-size: 10px; text-align: center; }
   }
 </style>
-<script src="three.min.js"></script>
 </head>
 <body>
 
@@ -787,7 +784,6 @@
   </div>
   <div id="toast"></div>
   <div id="waveBanner"><div class="big" id="waveBannerBig">WAVE 1</div><div class="small" id="waveBannerSmall"></div></div>
-  <canvas id="three3dCanvas"></canvas>
   <canvas id="game"></canvas>
   
   
@@ -933,458 +929,6 @@ let chosenDifficultyKey = storage.get('skibidiLastDifficulty', 'normal');
 
 /* ================= SOUND & PROCEDURAL BGM ENGINE ================= */
 
-
-/* ================= TRUE 3D WEBGL ENGINE (TITANS & TOILETS) ================= */
-let gl3dRenderer = null, gl3dScene = null, gl3dCamera = null;
-let gl3dWaterMesh = null, gl3dSpotlights = [];
-let gl3dDynLight = null;
-
-const gl3dToiletPool = [];
-const gl3dAllyPool = new Map();
-
-// Materials
-const matWhitePorcelain = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.12, metalness: 0.1 });
-const matChrome = new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.08, metalness: 0.95 });
-const matWater = new THREE.MeshStandardMaterial({ color: 0x124036, roughness: 0.1, metalness: 0.85 });
-const matSkin = new THREE.MeshStandardMaterial({ color: 0xd99b7b, roughness: 0.65, metalness: 0.0 });
-const matHair = new THREE.MeshStandardMaterial({ color: 0x241810, roughness: 0.85, metalness: 0.0 });
-
-// Titan Materials
-const matHazardOrange = new THREE.MeshStandardMaterial({ color: 0xe66e12, roughness: 0.35, metalness: 0.65 });
-const matDarkIron = new THREE.MeshStandardMaterial({ color: 0x181e22, roughness: 0.55, metalness: 0.75 });
-const matChromeSteel = new THREE.MeshStandardMaterial({ color: 0xecf2f8, roughness: 0.12, metalness: 0.95 });
-const matSafetyWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 });
-const matSafetyGreen = new THREE.MeshStandardMaterial({ color: 0x14a838, roughness: 0.4 });
-const matCrimsonTunic = new THREE.MeshStandardMaterial({ color: 0x8a0d16, roughness: 0.55, metalness: 0.3 });
-const matSpeakerBlack = new THREE.MeshStandardMaterial({ color: 0x111417, roughness: 0.45, metalness: 0.8 });
-const matRedGlow = new THREE.MeshStandardMaterial({ color: 0xff1e1e, emissive: 0xff1e1e, emissiveIntensity: 1.2, roughness: 0.2 });
-const matWhiteReactor = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffe6e6, emissiveIntensity: 2.4, roughness: 0.1 });
-const matCyanBlade = new THREE.MeshStandardMaterial({ color: 0x6ad7ff, emissive: 0x6ad7ff, emissiveIntensity: 1.8, roughness: 0.1 });
-
-function initThreeEngine(){
-  if(typeof THREE === 'undefined') return;
-  const threeCv = document.getElementById('three3dCanvas');
-  if(!threeCv) return;
-
-  if(gl3dRenderer) {
-    gl3dRenderer.setSize(window.innerWidth, window.innerHeight);
-    if(gl3dCamera){
-      gl3dCamera.aspect = window.innerWidth / window.innerHeight;
-      gl3dCamera.updateProjectionMatrix();
-    }
-    return;
-  }
-
-  try {
-    gl3dRenderer = new THREE.WebGLRenderer({
-      canvas: threeCv,
-      antialias: true,
-      alpha: false,
-      powerPreference: 'high-performance'
-    });
-    gl3dRenderer.setSize(window.innerWidth, window.innerHeight);
-    gl3dRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-    gl3dRenderer.shadowMap.enabled = true;
-    gl3dRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    gl3dRenderer.toneMapping = THREE.ACESFilmicToneMapping;
-    gl3dRenderer.toneMappingExposure = 1.25;
-
-    gl3dScene = new THREE.Scene();
-    // Bright High-Visibility Arena Sky & Subtle Atmospheric Fog
-    gl3dScene.background = new THREE.Color(0x18241d);
-    gl3dScene.fog = new THREE.FogExp2(0x18241d, 0.005); // Much lighter fog so everything is crystal clear
-
-    gl3dCamera = new THREE.PerspectiveCamera(54, window.innerWidth / window.innerHeight, 0.1, 500);
-    gl3dCamera.position.set(0, 16, 26);
-    gl3dCamera.lookAt(0, 0, -10);
-
-    // Bright Crisp Studio & Overhead Lighting
-    const mainSun = new THREE.DirectionalLight(0xfff7e6, 2.5);
-    mainSun.position.set(5, 25, 15);
-    mainSun.castShadow = true;
-    mainSun.shadow.mapSize.width = 1024;
-    mainSun.shadow.mapSize.height = 1024;
-    gl3dScene.add(mainSun);
-
-    const hemiLight = new THREE.HemisphereLight(0x8bcfa8, 0x334438, 1.4);
-    gl3dScene.add(hemiLight);
-
-    const ambientLight = new THREE.AmbientLight(0xd4edd8, 0.95);
-    gl3dScene.add(ambientLight);
-
-    gl3dDynLight = new THREE.PointLight(0xff5533, 0, 50, 2.5);
-    gl3dDynLight.position.set(0, 8, 0);
-    gl3dScene.add(gl3dDynLight);
-
-    build3dSewerEnvironment();
-    console.log("TRUE 3D WEBGL ENGINE RUNNING AT 60 FPS ON DEDICATED GPU!");
-  } catch(e){
-    console.warn("Three init error:", e);
-  }
-}
-
-function build3dSewerEnvironment(){
-  // 1. Wet Sewer Floor with PBR Reflection
-  const floorGeo = new THREE.PlaneGeometry(40, 100, 40, 100);
-  const floorMat = new THREE.MeshStandardMaterial({ color: 0x2b3d32, roughness: 0.22, metalness: 0.35 });
-  const floorMesh = new THREE.Mesh(floorGeo, floorMat);
-  floorMesh.rotation.x = -Math.PI / 2;
-  floorMesh.position.set(0, 0, -15);
-  floorMesh.receiveShadow = true;
-  gl3dScene.add(floorMesh);
-
-  // 2. Vaulted Curved Brick Walls (Left & Right)
-  const wallMat = new THREE.MeshStandardMaterial({ color: 0x3d4f43, roughness: 0.65, metalness: 0.15 });
-  for(let side of [-1, 1]){
-    const wallGeo = new THREE.BoxGeometry(2, 20, 100);
-    const wall = new THREE.Mesh(wallGeo, wallMat);
-    wall.position.set(side * 16, 10, -15);
-    wall.receiveShadow = true;
-    gl3dScene.add(wall);
-  }
-
-  // 3. Central Toxic Sludge Water Canal (Flowing PBR Water)
-  const waterGeo = new THREE.PlaneGeometry(8, 100);
-  gl3dWaterMesh = new THREE.Mesh(waterGeo, matWater);
-  gl3dWaterMesh.rotation.x = -Math.PI / 2;
-  gl3dWaterMesh.position.set(0, 0.05, -15);
-  gl3dWaterMesh.receiveShadow = true;
-  gl3dScene.add(gl3dWaterMesh);
-
-  // 4. Overhead Industrial Lamps with Real Dynamic Shadows
-  [-32, -12, 8, 28].forEach((lz, idx) => {
-    const lamp = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 1.4, 1.0, 12), matDarkIron);
-    lamp.position.set(0, 13, lz);
-    gl3dScene.add(lamp);
-
-    const spot = new THREE.SpotLight(0xffe6b0, 2.6, 42, Math.PI / 3.4, 0.45, 1.4);
-    spot.position.set(0, 12.8, lz);
-    spot.target.position.set(0, 0, lz);
-    spot.castShadow = true;
-    spot.shadow.mapSize.width = 1024;
-    spot.shadow.mapSize.height = 1024;
-    gl3dScene.add(spot);
-    gl3dScene.add(spot.target);
-    gl3dSpotlights.push(spot);
-  });
-}
-
-/* --- 3D TOILET MESH CREATOR --- */
-// Authentic Facial Feature Materials
-const matEyeWhite = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.1 });
-const matEyePupil = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.1, metalness: 0.8 });
-const matEyebrow = new THREE.MeshStandardMaterial({ color: 0x1f140c, roughness: 0.9 });
-const matMouthInside = new THREE.MeshStandardMaterial({ color: 0x3d070b, roughness: 0.4 });
-const matTeeth = new THREE.MeshStandardMaterial({ color: 0xf5f7f2, roughness: 0.2 });
-const matTongue = new THREE.MeshStandardMaterial({ color: 0xd43d52, roughness: 0.3 });
-
-function create3dToiletMesh(){
-  const group = new THREE.Group();
-
-  // 1. Vitreous China Tank & Flush
-  const tank = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.5, 1.0), matWhitePorcelain);
-  tank.position.set(0, 2.2, 0.6);
-  tank.castShadow = true;
-  group.add(tank);
-
-  const lever = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.1, 0.3), matChrome);
-  lever.position.set(0.95, 2.5, 0.4);
-  group.add(lever);
-
-  // 2. Porcelain Bowl Base & Water
-  const base = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.0, 1.4, 16), matWhitePorcelain);
-  base.position.set(0, 0.7, 0);
-  base.castShadow = true;
-  group.add(base);
-
-  const rim = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.0, 0.9, 16), matWhitePorcelain);
-  rim.position.set(0, 1.6, -0.2);
-  rim.castShadow = true;
-  group.add(rim);
-
-  const water = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 0.9, 0.1, 14), matWater);
-  water.position.set(0, 1.8, -0.2);
-  group.add(water);
-
-  // 3. HUMAN HEAD WITH DETAILED FACIAL EXPRESSION
-  const headGroup = new THREE.Group();
-  headGroup.position.set(0, 2.5, -0.2);
-
-  // Skull & Neck
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.3, 0.5, 12), matSkin);
-  neck.position.set(0, -0.25, 0);
-  headGroup.add(neck);
-
-  const skull = new THREE.Mesh(new THREE.SphereGeometry(0.62, 14, 14), matSkin);
-  skull.castShadow = true;
-  headGroup.add(skull);
-
-  // Hair
-  const hair = new THREE.Mesh(new THREE.SphereGeometry(0.64, 12, 12), matHair);
-  hair.position.set(0, 0.15, 0.05);
-  headGroup.add(hair);
-
-  // Eyes & Pupils (Manic Stare)
-  for(let side of [-1, 1]){
-    // Eyeball
-    const eye = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 10), matEyeWhite);
-    eye.position.set(side * 0.22, 0.10, -0.54);
-    headGroup.add(eye);
-
-    // Pupil
-    const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), matEyePupil);
-    pupil.position.set(side * 0.22, 0.10, -0.63);
-    headGroup.add(pupil);
-
-    // Eyebrow (Angled furrowed expression)
-    const brow = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.06, 0.08), matEyebrow);
-    brow.position.set(side * 0.22, 0.24, -0.56);
-    brow.rotation.z = side * 0.25;
-    headGroup.add(brow);
-  }
-
-  // Nose
-  const nose = new THREE.Mesh(new THREE.ConeGeometry(0.08, 0.18, 6), matSkin);
-  nose.position.set(0, 0.02, -0.62);
-  nose.rotation.x = Math.PI / 2;
-  headGroup.add(nose);
-
-  // Singing Open Mouth Cavity (Skibidi "Dop Dop" Sing)
-  const mouthGroup = new THREE.Group();
-  mouthGroup.position.set(0, -0.22, -0.52);
-
-  const mouthCavity = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.22, 0.18), matMouthInside);
-  mouthGroup.add(mouthCavity);
-
-  // Upper & Lower Teeth Rows
-  const upperTeeth = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.06, 0.1), matTeeth);
-  upperTeeth.position.set(0, 0.08, -0.06);
-  mouthGroup.add(upperTeeth);
-
-  const lowerTeeth = new THREE.Mesh(new THREE.BoxGeometry(0.30, 0.05, 0.1), matTeeth);
-  lowerTeeth.position.set(0, -0.08, -0.06);
-  mouthGroup.add(lowerTeeth);
-
-  // Pink Tongue
-  const tongue = new THREE.Mesh(new THREE.BoxGeometry(0.20, 0.06, 0.12), matTongue);
-  tongue.position.set(0, -0.06, 0.02);
-  mouthGroup.add(tongue);
-
-  headGroup.add(mouthGroup);
-  group.add(headGroup);
-
-  group.userData = { headRef: headGroup, mouthRef: mouthGroup, toiletIdx: 0 };
-  gl3dScene.add(group);
-  return group;
-}
-
-/* --- 3D TITAN DRILLMAN MESH CREATOR --- */
-function create3dTitanDrillMesh(){
-  const group = new THREE.Group();
-  // Boiler Body
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(1.4, 1.3, 2.8, 18), matHazardOrange);
-  body.position.set(0, 3.2, 0);
-  body.castShadow = true;
-  group.add(body);
-  // Cast Iron Reinforcement Ring
-  const ring = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 0.5, 18), matDarkIron);
-  ring.position.set(0, 3.2, 0);
-  group.add(ring);
-  // Safety Cross Plaque
-  const plaque = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.7, 0.1), matSafetyWhite);
-  plaque.position.set(0, 3.5, -1.45);
-  group.add(plaque);
-  const crossV = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.55, 0.05), matSafetyGreen);
-  crossV.position.set(0, 3.5, -1.52);
-  group.add(crossV);
-  const crossH = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.2, 0.05), matSafetyGreen);
-  crossH.position.set(0, 3.5, -1.52);
-  group.add(crossH);
-
-  // Rotating Conical Head Drill
-  const headDrillGroup = new THREE.Group();
-  headDrillGroup.position.set(0, 5.0, -0.4);
-  for(let i = 0; i < 5; i++){
-    const rb = 0.9 * (1 - i * 0.18), rt = 0.9 * (1 - (i + 1) * 0.18);
-    const coneSeg = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, 0.5, 14), matChromeSteel);
-    coneSeg.rotation.x = Math.PI / 2;
-    coneSeg.position.set(0, 0, -i * 0.45);
-    headDrillGroup.add(coneSeg);
-  }
-  group.add(headDrillGroup);
-
-  // Dual Arm Drills
-  const armDrills = [];
-  for(let side of [-1, 1]){
-    const armGroup = new THREE.Group();
-    armGroup.position.set(side * 2.2, 2.6, 0.2);
-    for(let i = 0; i < 4; i++){
-      const rb = 0.6 * (1 - i * 0.2), rt = 0.6 * (1 - (i + 1) * 0.2);
-      const armSeg = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, 0.6, 12), matChromeSteel);
-      armSeg.position.set(0, -i * 0.55, 0);
-      armGroup.add(armSeg);
-    }
-    group.add(armGroup);
-    armDrills.push(armGroup);
-  }
-
-  group.userData = { headDrill: headDrillGroup, armDrills: armDrills };
-  gl3dScene.add(group);
-  return group;
-}
-
-/* --- 3D TITAN SPEAKERMAN 3.0 MESH CREATOR --- */
-function create3dTitanSpeakerMesh(){
-  const group = new THREE.Group();
-  // Crimson Tunic Body
-  const body = new THREE.Mesh(new THREE.BoxGeometry(2.2, 3.0, 1.4), matCrimsonTunic);
-  body.position.set(0, 3.4, 0);
-  body.castShadow = true;
-  group.add(body);
-  // White-Hot Blinding Chest Reactor
-  const reactor = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.2, 16), matWhiteReactor);
-  reactor.rotation.x = Math.PI / 2;
-  reactor.position.set(0, 3.5, -0.75);
-  group.add(reactor);
-
-  // Towering Shoulder Speaker Wings
-  for(let side of [-1, 1]){
-    const wing = new THREE.Mesh(new THREE.BoxGeometry(1.0, 3.2, 0.8), matSpeakerBlack);
-    wing.position.set(side * 2.2, 5.2, 0.4);
-    wing.castShadow = true;
-    group.add(wing);
-    for(let wy of [4.2, 5.0, 5.8, 6.6]){
-      const woofer = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.1, 12), matRedGlow);
-      woofer.rotation.x = Math.PI / 2;
-      woofer.position.set(side * 2.2, wy, 0.0);
-      group.add(woofer);
-    }
-  }
-
-  // Crowned Speaker Head
-  const head = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.2, 1.1), matSpeakerBlack);
-  head.position.set(0, 5.4, 0);
-  group.add(head);
-  const headWoofer = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.2, 0.2, 14), matRedGlow);
-  headWoofer.rotation.x = Math.PI / 2;
-  headWoofer.position.set(0, 5.4, -0.6);
-  group.add(headWoofer);
-
-  // Rotating Radial Energy Halo Ring on Back
-  const haloGroup = new THREE.Group();
-  haloGroup.position.set(0, 5.4, 0.8);
-  for(let a = 0; a < 16; a++){
-    const angle = 2 * Math.PI * a / 16;
-    const hSeg = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.35, 0.1), matRedGlow);
-    hSeg.position.set(1.6 * Math.cos(angle), 1.6 * Math.sin(angle), 0);
-    haloGroup.add(hSeg);
-  }
-  group.add(haloGroup);
-
-  // Dual Heavy Forearm Plasma Blasters
-  for(let side of [-1, 1]){
-    const gun = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 1.8), matSpeakerBlack);
-    gun.position.set(side * 2.0, 2.5, -0.4);
-    group.add(gun);
-    const nozzle = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.3, 12), matRedGlow);
-    nozzle.rotation.x = Math.PI / 2;
-    nozzle.position.set(side * 2.0, 2.5, -1.35);
-    group.add(nozzle);
-  }
-
-  group.userData = { halo: haloGroup };
-  gl3dScene.add(group);
-  return group;
-}
-
-function renderThreeEngine(now){
-  if(!gl3dRenderer || !gl3dScene || !gl3dCamera) return;
-
-  const t = now * 0.001;
-
-  // 1. Synchronize 3D Toilets in Real Perspective
-  while(gl3dToiletPool.length < toilets.length){
-    gl3dToiletPool.push(create3dToiletMesh());
-  }
-  for(let i = 0; i < gl3dToiletPool.length; i++){
-    const mesh = gl3dToiletPool[i];
-    if(i < toilets.length){
-      const ent = toilets[i];
-      mesh.visible = true;
-      const normX = (ent.x / W) * 2 - 1;
-      const normY = (ent.y - floorEndY) / Math.max(1, (H - floorEndY));
-      const worldX = normX * 12;
-      const worldZ = (1 - normY) * 48 - 28;
-
-      mesh.position.set(worldX, 0, worldZ);
-      mesh.userData.toiletIdx = i;
-
-      // Project 3D coordinate back to 2D screen coordinates so 2D click fallback also matches 100%
-      if(gl3dCamera){
-        const v = new THREE.Vector3(worldX, 1.8, worldZ);
-        v.project(gl3dCamera);
-        ent.screenX = ((v.x + 1) * W) / 2;
-        ent.screenY = ((-v.y + 1) * H) / 2;
-      }
-      mesh.rotation.y = Math.PI;
-      mesh.rotation.z = Math.sin(ent.wobble || 0) * 0.12;
-
-      if(mesh.userData.headRef){
-        // Iconic Skibidi singing bob & head turning
-        mesh.userData.headRef.position.y = 2.5 + Math.abs(Math.sin(t * 9 + i * 2.1)) * 0.22;
-        mesh.userData.headRef.rotation.y = Math.sin(t * 7 + i) * 0.35; // Head swivels while singing
-        mesh.userData.headRef.rotation.z = Math.sin(t * 5 + i) * 0.15;
-      }
-      if(mesh.userData.mouthRef){
-        // Open/Close mouth for singing "Skibidi Dop Dop Yes Yes"
-        const singCycle = Math.abs(Math.sin(t * 11 + i * 1.5));
-        mesh.userData.mouthRef.scale.set(1, 0.6 + singCycle * 0.9, 1);
-      }
-    } else {
-      mesh.visible = false;
-    }
-  }
-
-  // 2. Synchronize 3D Titans & Allies in Real Perspective
-  deployedAllies.forEach(a => {
-    let mesh = gl3dAllyPool.get(a);
-    if(!mesh){
-      if(a.type === 'titanDrill') mesh = create3dTitanDrillMesh();
-      else if(a.type === 'titanSpeaker3') mesh = create3dTitanSpeakerMesh();
-      else mesh = create3dTitanDrillMesh(); // Default Titan 3D
-      gl3dAllyPool.set(a, mesh);
-    }
-    mesh.visible = true;
-    const normX = (a.x / W) * 2 - 1;
-    const normY = (a.y - floorEndY) / Math.max(1, (H - floorEndY));
-    const worldX = normX * 12;
-    const worldZ = (1 - normY) * 48 - 28;
-    mesh.position.set(worldX, 0, worldZ);
-
-    // Rotate Titan Drill 3D parts
-    if(mesh.userData.headDrill){
-      mesh.userData.headDrill.rotation.z += 0.25;
-    }
-    if(mesh.userData.armDrills){
-      mesh.userData.armDrills.forEach((ad, idx) => { ad.rotation.y += (idx === 0 ? 0.2 : -0.2); });
-    }
-    // Rotate Titan Speaker 3.0 Halo Ring
-    if(mesh.userData.halo){
-      mesh.userData.halo.rotation.z += 0.04;
-    }
-  });
-
-  // Water Ripple & Spotlights
-  if(gl3dWaterMesh) gl3dWaterMesh.position.y = 0.05 + Math.sin(t * 2.5) * 0.015;
-  gl3dSpotlights.forEach((sp, idx) => {
-    sp.intensity = 2.4 + Math.sin(t * 6 + idx * 2.2) * 0.3;
-  });
-  if(gl3dDynLight && gl3dDynLight.intensity > 0){
-    gl3dDynLight.intensity = Math.max(0, gl3dDynLight.intensity - 0.08);
-  }
-
-  gl3dRenderer.render(gl3dScene, gl3dCamera);
-}
 
 let audioCtx = null;
 let soundOn = storage.get('skibidiSoundOn', '1') !== '0';
@@ -3550,7 +3094,6 @@ function updateHiredAllies(dt, now){
         a.attackTimer = 40;
         a.attackAnim = 12;
         sfx.laserFire();
-  flash3dCombatLight(0x6ad7ff, 2.5);
         popParticles(target.x, target.y, '#6ad7ff', 12);
         if(target !== boss){
           popOneToilet(toilets.indexOf(target), {source:'TITAN_CAMERAMAN', dmg: 7});
@@ -3945,7 +3488,6 @@ function drawCartoonGman(a, now){
 }
 
 function drawHiredAllies(now){
-  if(gl3dRenderer && gl3dScene) return; // 3D models in WebGL handle Titans!
   deployedAllies.forEach(a => {
     ctx.save();
     ctx.translate(a.x, a.y);
@@ -5283,112 +4825,40 @@ function tapSlop(){
   return isTouchPlay() ? 18 : 0;
 }
 function tryPopAt(mx,my){
-  const slop = tapSlop();
+  const slop = Math.max(35, tapSlop());
 
-  // 1. HIGH-PRECISION 3D RAYCASTING (Direct 3D Toilet Mesh Hit Detection)
-  if(typeof THREE !== 'undefined' && gl3dCamera && gl3dToiletPool.length > 0){
-    try {
-      const raycaster = new THREE.Raycaster();
-      const mouse = new THREE.Vector2((mx / W) * 2 - 1, -(my / H) * 2 + 1);
-      raycaster.setFromCamera(mouse, gl3dCamera);
-      
-      const activeMeshes = gl3dToiletPool.filter(m => m.visible);
-      const intersects = raycaster.intersectObjects(activeMeshes, true);
-      if(intersects.length > 0){
-        // Find which group in activeMeshes was hit
-        let hitObj = intersects[0].object;
-        while(hitObj.parent && !hitObj.userData.toiletIdx !== undefined && hitObj !== gl3dScene){
-          if(hitObj.userData && hitObj.userData.toiletIdx !== undefined) break;
-          hitObj = hitObj.parent;
-        }
-        if(hitObj && hitObj.userData && hitObj.userData.toiletIdx !== undefined){
-          const tIdx = hitObj.userData.toiletIdx;
-          if(toilets[tIdx]){
-            popOneToilet(tIdx, {source:'CLICK'});
-            return true;
-          }
-        }
-      }
-    } catch(e){}
-  }
   if(boss){
-    const d = Math.hypot(mx-boss.x,my-boss.y);
-    if(d < boss.r + slop){
+    if(Math.hypot(mx - boss.x, my - boss.y) < boss.r + slop + 30){
       hitBoss(1, mx, my, 'CLICK');
       return true;
     }
   }
-  let best=-1, bestD=Infinity;
-  for(let i=0;i<toilets.length;i++){
-    const t=toilets[i];
-    const targetX = t.screenX !== undefined ? t.screenX : t.x;
-    const targetY = t.screenY !== undefined ? t.screenY : t.y;
-    const d = Math.hypot(mx - targetX, my - targetY);
-    const hitR=t.r+player.clickRadiusBonus+slop+(megaPlungerTimer > 0 ? 65 : 0);
-    if(d<hitR && d<bestD){best=i;bestD=d;}
+
+  let best = -1, bestD = Infinity;
+  for(let i = 0; i < toilets.length; i++){
+    const t = toilets[i];
+    const d = Math.hypot(mx - t.x, my - t.y);
+    const hitR = Math.max(65, (t.r || 24) * 2.4) + player.clickRadiusBonus + slop + (megaPlungerTimer > 0 ? 80 : 0);
+    if(d < hitR && d < bestD){
+      best = i;
+      bestD = d;
+    }
   }
-  if(best!==-1){
-    const t=toilets[best];
+
+  if(best !== -1){
+    const t = toilets[best];
     popOneToilet(best, {source:'CLICK'});
-    const chainR=player.chainRadius;
-    if(chainR>0){
-      const ox=t.x, oy=t.y;
-      const targets=toilets.map((o,i)=>({o,i,d:Math.hypot(o.x-ox,o.y-oy)})).filter(v=>v.d<chainR).sort((a,b)=>a.d-b.d).slice(0,6);
-      targets.forEach(v=>{ const idx=toilets.indexOf(v.o); if(idx!==-1) popOneToilet(idx,{source:'CHAIN', noChain:true}); });
+    const chainR = player.chainRadius;
+    if(chainR > 0){
+      const ox = t.x, oy = t.y;
+      const targets = toilets.map((o,i)=>({o,i,d:Math.hypot(o.x-ox,o.y-oy)})).filter(v=>v.d<chainR).sort((a,b)=>a.d-b.d).slice(0,6);
+      targets.forEach(v=>{ const idx = toilets.indexOf(v.o); if(idx>=0) popOneToilet(idx,{source:'CHAIN'}); });
     }
     return true;
   }
   return false;
 }
 
-function addCombo(amount=1){
-  combo += amount;
-  streak += amount;
-  comboTimer = waveModifier === 'CLEAN RUN' ? 108 : 78;
-}
-function comboMult(){ return Math.min(4.0, 1 + Math.floor(combo/4)*0.12); }
-function chargeAbility(amount){ abilityCharge = Math.min(100, abilityCharge + amount); }
-function addDamageNumber(x,y,text,color='#ffe27c'){
-  damageNumbers.push({x,y,text,color,life:34,maxLife:34,vy:-0.7});
-}
-function hitBoss(rawDamage, x, y, source='CLICK'){
-  if(!boss) return false;
-  let dmg=rawDamage;
-  const crit=Math.random()<player.critChance;
-  if(crit){dmg*=player.critMult;criticalHits++;}
-  dmg=Math.max(1,Math.round(dmg));
-  boss.hp-=dmg;
-  boss.hitFlash=7;
-  shake=Math.min(12,shake+(crit?3:1));
-  flash=Math.min(0.16,flash+(crit?0.04:0.015));
-  addDamageNumber(x,y,(crit?'CRIT ':'')+'-'+dmg,crit?'#fff1a1':'#ffb06a');
-  chargeAbility(source==='TURRET'?2:source==='BLAST'?4:3);
-  sfx.bossHit();
-  bossBarFill.style.width=Math.max(0,(boss.hp/boss.maxHp)*100)+'%';
-  if(boss.hp<=0) defeatBoss();
-  return true;
-}
-function defeatBoss(){
-  if(!boss) return;
-  const wasFinal=boss.isFinal;
-  sfx.bossDown();
-  popParticles(boss.x,boss.y,wasFinal?'#ff4d4d':'#ffd35c',wasFinal?110:55);
-  score+=Math.round((wasFinal?3500:420)*player.scoreMult*comboMult());
-  abilityCharge=Math.min(100,abilityCharge+(wasFinal?50:25)); addCombo(wasFinal?14:6);
-  bossBarWrap.style.display='none'; boss=null;
-  bossDefeatGuard = performance.now() + 600;
-  updateHud();
-  bossSlowMoTimer = 45;
-  if(wasFinal) setTimeout(showVictory,550); else setTimeout(openRelicModal, 450);
-}
-function showToast(text){
-  const el = document.getElementById('toast');
-  if(!el) return;
-  el.textContent = text;
-  el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=>el.classList.remove('show'), 700);
-}
 function popOneToilet(i, meta={}){
   const t=toilets[i]; if(!t) return;
   const crit=Math.random()<player.critChance;
@@ -5895,13 +5365,6 @@ function roundPath(x, y, w, h, r){
 
 function drawWorld(now){
   const t = now * 0.001;
-  // If Real 3D GPU Engine is active, let the 3D sewer tunnel, dynamic shadows and water shine through!
-  if(gl3dRenderer && gl3dScene){
-    drawFloorDecals(now);
-    drawFloorTraps(now);
-    drawRagdolls(now);
-    return;
-  }
   const sky = ctx.createLinearGradient(0, 0, 0, H);
   sky.addColorStop(0, '#1c222c');
   sky.addColorStop(0.22, '#2a261e');
@@ -6583,8 +6046,7 @@ function loop(ts){
   lastFrame=now;
   ctx.clearRect(0,0,W,H);
   if(shake>0){ctx.save();ctx.translate((Math.random()-0.5)*shake,(Math.random()-0.5)*shake);}
-  renderThreeEngine(now);
-drawWorld(now);
+  drawWorld(now);
   if(state==='playing'){
     if(comboTimer>0) comboTimer-=dt;
     else if(combo>0){ combo=Math.max(0,combo-0.10*dt); streak=0; if(combo<0.05) combo=0; }
@@ -6857,7 +6319,7 @@ drawWorld(now);
       else boss.y=boss.targetY+Math.sin(now/500)*10;
       if(boss.hitFlash>0) boss.hitFlash--;
       if(!boss.isFinal){
-        if(!gl3dRenderer || !gl3dScene) { drawPorcelainToilet(boss,now,{gold:true,armored:true}); }
+        drawPorcelainToilet(boss,now,{gold:true,armored:true});
         const bX = (gl3dRenderer && boss.screenX !== undefined) ? boss.screenX : boss.x;
         const bY = (gl3dRenderer && boss.screenY !== undefined) ? boss.screenY : boss.y;
         drawLabel(boss.title || 'BOSS TOILET', bX, bY - 65, '#ffd35c');
@@ -6929,7 +6391,7 @@ drawWorld(now);
           popParticles(boss.x + (Math.random()-0.5)*boss.r, boss.y + (Math.random()-0.5)*boss.r, '#ff3a1a', 2);
         }
 
-        if(!gl3dRenderer || !gl3dScene) { drawPorcelainToilet(boss,now,{gold:true,suit:true,laserState:boss.laserState,rage:isPhase3Rage}); }
+        drawPorcelainToilet(boss,now,{gold:true,suit:true,laserState:boss.laserState,rage:isPhase3Rage});
         if(boss.laserState==='firing') [eyeL,eyeR].forEach(eye=>{const grad=ctx.createLinearGradient(eye.x,eye.y,eye.x,H);grad.addColorStop(0,'rgba(255,240,180,.95)');grad.addColorStop(.15,'rgba(255,70,40,.75)');grad.addColorStop(1,'rgba(255,60,45,0)');ctx.fillStyle=grad;ctx.beginPath();ctx.moveTo(eye.x-4,eye.y);ctx.lineTo(eye.x+4,eye.y);ctx.lineTo(eye.x+14,H);ctx.lineTo(eye.x-14,H);ctx.closePath();ctx.fill();});
         drawLabel('THE G-MAN',boss.x,boss.y-boss.r-24,'#ff5c3d');
       }
