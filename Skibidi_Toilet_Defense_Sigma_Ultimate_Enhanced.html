@@ -803,9 +803,10 @@
       <button id="bassBlastBtn" class="miniBtn">🔊 BASS</button>
     </div>
     <div class="gridRow">
-      <button id="hireBtn" class="miniBtn highlightBtn">⚔️ HIRE</button>
-      <button id="skillsBtn" class="miniBtn" style="border-color:#ffd35c;color:#ffd35c;">🌲 SKILLS [K]</button>
-      <button id="shopBtn" class="miniBtn">🛒 WEAPONS [S]</button>
+      <button id="hireBtn" class="miniBtn highlightBtn" title="Hire Allies [H]">⚔️ HIRE [H]</button>
+      <button id="cadreBtn" class="miniBtn" style="border-color:#6ad7ff;color:#6ad7ff;" title="Alliance Cadre Skill Tree [J]">🎖️ CADRE [J]</button>
+      <button id="skillsBtn" class="miniBtn" style="border-color:#ffd35c;color:#ffd35c;" title="Operative Passive Skills [K]">🌲 SKILLS [K]</button>
+      <button id="shopBtn" class="miniBtn" title="Weapon Arsenal Shop [S]">🛒 WEAPONS [S]</button>
     </div>
     <div class="gridRow compactRow">
       <button id="inGameTutBtn" class="miniBtn subtleBtn">📖 GUIDE</button>
@@ -861,6 +862,9 @@
 
   <div id="hireScreen">
     <h2 id="hireTitle">ALLIANCE BARRACKS — HIRE DEFENDERS</h2>
+    <div style="margin:2px 0 10px;">
+      <button id="barracksToCadreBtn" class="miniBtn" style="border-color:#6ad7ff;color:#6ad7ff;padding:6px 16px;font-size:11px;letter-spacing:1px;font-weight:900;">🎖️ UPGRADE EMPLOYEES / CADRE SKILL TREE [J]</button>
+    </div>
     <p>Recruit Cameramen, Speakermen, and Legendary Titans! Hired units deploy directly into the sewer battlefield to eliminate toilets, hold back breaches, and provide heavy fire support.</p>
     <div id="hireSkillPtsLine">SKILL POINTS: <span id="hireSkillPtsVal">0</span></div>
     <div id="hireTabs">
@@ -875,7 +879,20 @@
     <button id="hireCloseBtn">RESUME DEFENSE</button>
   </div>
 
-    <!-- DEDICATED OPERATIVE SKILL TREE SCREEN -->
+      <!-- DEDICATED ALLIANCE CADRE / EMPLOYEE SKILL TREE SCREEN -->
+  <div id="cadreScreen" class="screen" style="display:none;z-index:21;background:rgba(5,9,14,0.96);">
+    <h2 style="color:#6ad7ff;text-shadow:0 0 16px rgba(106,215,255,0.6);margin-bottom:2px;">🎖️ ALLIANCE CADRE & TITAN SKILL TREE 🎖️</h2>
+    <div id="cadrePtsLine" style="margin: 4px 0 10px; font-size: 15px; color: var(--gold); font-weight: 800; letter-spacing: 1px;">
+      AVAILABLE SKILL POINTS: <span id="cadrePtsVal">0</span>⭐
+    </div>
+    <p style="margin: 0 0 14px; font-size: 12px; color: #a4c2d6; max-width: 760px; text-align: center;">
+      Upgrade your hired Cameramen, Speakermen, and Titans! Invest skill points across 3 specialized divisions: INFANTRY CORPS, TECH OPS, and TITAN WARFRAMES.
+    </p>
+    <div class="skillTree" id="cadreTree"></div>
+    <button id="cadreCloseBtn" style="margin-top:14px;width:100%;max-width:320px;border-color:#6ad7ff;color:#6ad7ff;">RESUME DEFENSE</button>
+  </div>
+
+  <!-- DEDICATED OPERATIVE SKILL TREE SCREEN -->
   <div id="skillsScreen" class="screen" style="display:none;z-index:20;background:rgba(6,9,7,0.96);">
     <h2 style="color:var(--gold);text-shadow:0 0 16px rgba(255,211,92,0.6);margin-bottom:2px;">⚡ OPERATIVE PASSIVE SKILL TREE ⚡</h2>
     <div id="skillPtsLineTree" style="margin: 4px 0 10px; font-size: 15px; color: var(--gold); font-weight: 800; letter-spacing: 1px;">
@@ -1382,6 +1399,152 @@ let toastTimer = 0;
 let lastFrame = 0;
 let skillPoints = 0;
 
+
+
+/* ================= ALLIANCE CADRE & TITAN SKILL TREE SYSTEM ================= */
+const cadreRanks = {};
+
+const CADRE_SKILLS = [
+  // === INFANTRY CORPS (Ground & Scout Troops) ===
+  {
+    id: 'plumber_rush', branch: 'INFANTRY', name: 'CARBON PLUNGER DRILL',
+    desc: 'Plungermen and Halfpipe Cameramen gain +35% move speed and deal +3 extra damage.',
+    cost: 1, max: 3, requires: [], tags: 'INFANTRY'
+  },
+  {
+    id: 'uzi_overdrive', branch: 'INFANTRY', name: 'DUAL UZI STRIP-FIRE',
+    desc: 'Jetpack Cameramen and Elite Dual-Pistol Cameramen fire +30% faster and pierce armor.',
+    cost: 1, max: 3, requires: ['plumber_rush'], tags: 'INFANTRY'
+  },
+  {
+    id: 'chad_cybernetics', branch: 'INFANTRY', name: 'CH4D HARD-LIGHT BLADES',
+    desc: 'Simp Cameraman 2.0 energy blades deal +40% extra damage and strike in a wider arc.',
+    cost: 2, max: 3, requires: ['uzi_overdrive'], tags: 'ELITE'
+  },
+  {
+    id: 'hound_electrified', branch: 'INFANTRY', name: 'TESLA CLAMP JAWS',
+    desc: 'Mech-Hound Cameramen electrified clamp pins toilets for 2.5s and strips all shields.',
+    cost: 2, max: 2, requires: ['chad_cybernetics'], tags: 'ELITE'
+  },
+
+  // === TECH & SUPPORT CORPS ===
+  {
+    id: 'acoustic_resonance', branch: 'TECH OPS', name: 'SUBWOOFER AMPLIFIER',
+    desc: 'Strider and DJ Speakerman sonic shockwaves gain +35% wider AoE and +50% knockback.',
+    cost: 1, max: 3, requires: [], tags: 'SUPPORT'
+  },
+  {
+    id: 'hypno_overload', branch: 'TECH OPS', name: 'NEURO-STATIC BROADCAST',
+    desc: 'TV Girl and TV Man hypnotic waves last +3s longer and leach 15% life from affected toilets.',
+    cost: 2, max: 3, requires: ['acoustic_resonance'], tags: 'SUPPORT'
+  },
+  {
+    id: 'lab_cascade', branch: 'TECH OPS', name: 'SUPERCONDUCTING ARCS',
+    desc: 'Scientist Cameraman lab zappers arc into 2 additional enemy targets.',
+    cost: 2, max: 2, requires: ['hypno_overload'], tags: 'SUPPORT'
+  },
+  {
+    id: 'orbital_lock', branch: 'TECH OPS', name: 'ASTRO KINETIC DARTS',
+    desc: 'Astro Interceptor and Astronaut Cameraman missiles deal +50% damage to boss and tanks.',
+    cost: 3, max: 2, requires: ['lab_cascade'], tags: 'SUPPORT'
+  },
+
+  // === TITAN WARFRAMES (God-Tier Titans) ===
+  {
+    id: 'drill_magma', branch: 'TITANS', name: 'SEISMIC TUNGSTEN DRILL',
+    desc: 'Titan Drillman slams deal +35% damage and open lingering lava fissures on the sewer floor.',
+    cost: 2, max: 3, requires: [], tags: 'TITAN'
+  },
+  {
+    id: 'speaker_hypercharge', branch: 'TITANS', name: 'APEX 3.0 ACOUSTIC CORE',
+    desc: 'Titan Speakerman 2.0 and 3.0 plasma cannon volleys fire +25% faster with +40% AoE radius.',
+    cost: 2, max: 3, requires: ['drill_magma'], tags: 'TITAN'
+  },
+  {
+    id: 'chrono_singularity', branch: 'TITANS', name: 'TEMPORAL STASIS ACCORD',
+    desc: 'Clockman Titan slows all toilets by an additional 25% and deals double damage during ticks.',
+    cost: 3, max: 2, requires: ['speaker_hypercharge'], tags: 'TITAN'
+  },
+  {
+    id: 'plunger_colossus', branch: 'TITANS', name: 'HYDRAULIC ODOR CRUSH',
+    desc: 'Titan Plungerman sweep launches toilets completely off-screen with +60% damage.',
+    cost: 3, max: 2, requires: ['chrono_singularity'], tags: 'TITAN'
+  }
+];
+
+function cadreRankOf(id){ return cadreRanks[id] || 0; }
+function cadrePrereqsMet(skill){ return skill.requires.every(id => cadreRankOf(id) > 0); }
+
+function buyCadreSkill(skill){
+  const r = cadreRankOf(skill.id);
+  if(r >= skill.max) return false;
+  if(!cadrePrereqsMet(skill)) return false;
+  if(skillPoints < skill.cost) return false;
+  skillPoints -= skill.cost;
+  cadreRanks[skill.id] = r + 1;
+  recomputePlayer();
+  sfx.upgrade();
+  renderCadreTree();
+  updateHud();
+  return true;
+}
+
+function renderCadreTree(){
+  const tree = document.getElementById('cadreTree');
+  if(!tree) return;
+  const pts = document.getElementById('cadrePtsVal');
+  if(pts) pts.textContent = skillPoints;
+  const groups = { INFANTRY:[], 'TECH OPS':[], TITANS:[] };
+  CADRE_SKILLS.forEach(s => {
+    if(groups[s.branch]) groups[s.branch].push(s);
+  });
+  tree.innerHTML = '';
+  Object.keys(groups).forEach(branch => {
+    const col = document.createElement('div');
+    col.className = 'branch';
+    col.innerHTML = '<div class="branchTitle" style="color:#6ad7ff;border-color:#3a5468;">' + branch + '</div>';
+    groups[branch].forEach(s => {
+      const r = cadreRankOf(s.id);
+      const maxed = r >= s.max;
+      const locked = !cadrePrereqsMet(s);
+      const available = !locked && !maxed && skillPoints >= s.cost;
+      const node = document.createElement('div');
+      node.className = 'skillNode' + (maxed ? ' maxed owned' : available ? ' available' : locked ? ' locked' : ' owned');
+      node.style.borderColor = maxed ? '#6ad7ff' : available ? '#ffd35c' : '#2a3b47';
+      node.setAttribute('role','button');
+      node.setAttribute('tabindex','0');
+      node.innerHTML = '<div class="name" style="color:#6ad7ff;">' + s.name + '</div>'
+        + '<div class="desc">' + s.desc + '</div>'
+        + '<div class="meta">Rank ' + r + '/' + s.max + '  |  Cost ' + s.cost + '⭐' + (locked ? '  |  LOCKED' : maxed ? '  |  MAX' : '') + '</div>';
+      if(available){
+        node.addEventListener('click', ()=> buyCadreSkill(s));
+      }
+      node.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter' || e.key === ' '){
+          e.preventDefault();
+          if(available) buyCadreSkill(s);
+        }
+      });
+      col.appendChild(node);
+    });
+    tree.appendChild(col);
+  });
+}
+
+let cadrePrevState = 'playing';
+function openCadreScreen(){
+  if(state === 'cadre') return;
+  cadrePrevState = state;
+  state = 'cadre';
+  renderCadreTree();
+  updateHud();
+  document.getElementById('cadreScreen').style.display = 'flex';
+}
+
+function closeCadreScreen(){
+  document.getElementById('cadreScreen').style.display = 'none';
+  state = cadrePrevState || 'playing';
+}
 
 /* ================= DEDICATED PASSIVE SKILL TREE SYSTEM ================= */
 const skillRanks = {};
@@ -4631,6 +4794,7 @@ function resetGame(){
   pausePrevState = 'playing';
   manualShop = false;
   toastTimer = 0;
+  Object.keys(cadreRanks).forEach(k => { delete cadreRanks[k]; });
   Object.keys(skillRanks).forEach(k => { delete skillRanks[k]; });
   Object.keys(weaponRanks).forEach(k => { delete weaponRanks[k]; });
   Object.keys(hiredRanks).forEach(k => { hiredRanks[k] = 0; });
@@ -5136,6 +5300,14 @@ function toggleFullscreen(){
 }
 
 
+  
+  const cBtn = document.getElementById('cadreBtn');
+  if(cBtn) cBtn.addEventListener('click', openCadreScreen);
+  const cClose = document.getElementById('cadreCloseBtn');
+  if(cClose) cClose.addEventListener('click', closeCadreScreen);
+  const b2c = document.getElementById('barracksToCadreBtn');
+  if(b2c) b2c.addEventListener('click', ()=>{ closeHireScreen(); openCadreScreen(); });
+
   const sBtn = document.getElementById('skillsBtn');
   if(sBtn) sBtn.addEventListener('click', openSkillsScreen);
   const sClose = document.getElementById('skillsCloseBtn');
@@ -5162,6 +5334,9 @@ window.addEventListener('keydown', (e)=>{
   } else if(e.key.toLowerCase() === 'h'){
     if(state === 'hire') closeHireScreen();
     else openHireScreen();
+  } else if(e.key.toLowerCase() === 'j'){
+    if(state === 'cadre') closeCadreScreen();
+    else openCadreScreen();
   } else if(e.key.toLowerCase() === 'k'){
     if(state === 'skills') closeSkillsScreen();
     else openSkillsScreen();
