@@ -804,7 +804,8 @@
     </div>
     <div class="gridRow">
       <button id="hireBtn" class="miniBtn highlightBtn">⚔️ HIRE</button>
-      <button id="shopBtn" class="miniBtn">🛒 SHOP</button>
+      <button id="skillsBtn" class="miniBtn" style="border-color:#ffd35c;color:#ffd35c;">🌲 SKILLS [K]</button>
+      <button id="shopBtn" class="miniBtn">🛒 WEAPONS [S]</button>
     </div>
     <div class="gridRow compactRow">
       <button id="inGameTutBtn" class="miniBtn subtleBtn">📖 GUIDE</button>
@@ -872,6 +873,19 @@
     </div>
     <div id="hireRoster"></div>
     <button id="hireCloseBtn">RESUME DEFENSE</button>
+  </div>
+
+    <!-- DEDICATED OPERATIVE SKILL TREE SCREEN -->
+  <div id="skillsScreen" class="screen" style="display:none;z-index:20;background:rgba(6,9,7,0.96);">
+    <h2 style="color:var(--gold);text-shadow:0 0 16px rgba(255,211,92,0.6);margin-bottom:2px;">⚡ OPERATIVE PASSIVE SKILL TREE ⚡</h2>
+    <div id="skillPtsLineTree" style="margin: 4px 0 10px; font-size: 15px; color: var(--gold); font-weight: 800; letter-spacing: 1px;">
+      AVAILABLE SKILL POINTS: <span id="skillPtsValTree">0</span>⭐
+    </div>
+    <p style="margin: 0 0 14px; font-size: 12px; color: #a4b89e; max-width: 760px; text-align: center;">
+      Invest skill points into permanent operative upgrades across 3 tactical branches: STRIKE (damage/reach), HOLD (defense/survival), and RIG (turret/economy).
+    </p>
+    <div class="skillTree" id="pureSkillTree"></div>
+    <button id="skillsCloseBtn" style="margin-top:14px;width:100%;max-width:320px;">RESUME DEFENSE</button>
   </div>
 
   <div id="upgradeScreen">
@@ -1359,6 +1373,7 @@ let gameLoopStarted = false;
 let abilityCharge = 0;
 let combo = 0;
 let comboTimer = 0;
+function comboMult(){ return Math.min(4.0, 1 + Math.floor(combo/4)*0.12); }
 let bestScore = Number(storage.get('skibidiBestScore', 0));
 let totalPops = 0;
 let paused = false;
@@ -1366,6 +1381,104 @@ let pausePrevState = 'playing';
 let toastTimer = 0;
 let lastFrame = 0;
 let skillPoints = 0;
+
+
+/* ================= DEDICATED PASSIVE SKILL TREE SYSTEM ================= */
+const skillRanks = {};
+
+const SKILLS = [
+  // === STRIKE BRANCH (OFFENSE / CRITS) ===
+  { id:'reach', branch:'STRIKE', name:'WIDER REACH', desc:'+12px click & tap hitbox radius per rank.', cost:1, max:3, requires:[], tags:'PRECISION', passive(r){ player.clickRadiusBonus = Math.min(45, player.clickRadiusBonus + 12*r); } },
+  { id:'chain', branch:'STRIKE', name:'CHAIN POP', desc:'Pops cascade shockwaves to nearby toilets.', cost:1, max:3, requires:['reach'], tags:'AREA', passive(r){ player.chainRadius = Math.min(150, player.chainRadius + 35*r); } },
+  { id:'crit', branch:'STRIKE', name:'CRITICAL POP', desc:'+8% critical pop chance per rank.', cost:2, max:3, requires:['chain'], tags:'BURST', passive(r){ player.critChance = Math.min(0.35, player.critChance + 0.08*r); } },
+  { id:'overkill', branch:'STRIKE', name:'OVERKILL', desc:'Critical hits deal +40% extra damage per rank.', cost:2, max:2, requires:['crit'], tags:'BOSS', passive(r){ player.critMult = 2 + 0.40*r; } },
+
+  // === HOLD BRANCH (DEFENSE / SURVIVAL) ===
+  { id:'slow', branch:'HOLD', name:'SLUG FIELD', desc:'Toilets move 8% slower across all waves.', cost:1, max:3, requires:[], tags:'CONTROL', passive(r){ player.speedReduction = Math.min(0.28, player.speedReduction + 0.08*r); } },
+  { id:'coolant', branch:'HOLD', name:'COOLANT VENTS', desc:'Reduces Sigma heat drain pressure.', cost:1, max:3, requires:['slow'], tags:'STABILITY', passive(r){ player.sigmaDecayBonus += 0.04*r; } },
+  { id:'life', branch:'HOLD', name:'EXTRA LIFE', desc:'Gain +1 maximum life and restore it immediately.', cost:1, max:3, requires:['coolant'], tags:'SURVIVAL', onBuy(){ player.maxLives += 1; lives = Math.min(player.maxLives, lives + 1); updateHud(); } },
+  { id:'shield', branch:'HOLD', name:'SECOND WIND', desc:'Absorbs one breach per rank without losing life.', cost:2, max:2, requires:['life'], tags:'SURVIVAL', onBuy(){ player.shields += 1; updateHud(); } },
+  { id:'medic', branch:'HOLD', name:'REPAIR CYCLE', desc:'Restore 1 life after every 4 cleared waves.', cost:2, max:1, requires:['shield'], tags:'RECOVERY', passive(r){ player.healOnWave = r; } },
+
+  // === RIG BRANCH (AUTOMATION & ECONOMY) ===
+  { id:'score', branch:'RIG', name:'SCORE SURGE', desc:'+20% score earned per rank.', cost:1, max:4, requires:[], tags:'SCORE', passive(r){ player.scoreMult += 0.20*r; } },
+  { id:'turret', branch:'RIG', name:'AUTO TURRET', desc:'Unlocks an automatic base defense targeter.', cost:1, max:1, requires:['score'], tags:'AUTO', passive(r){ player.turretLevel = Math.max(player.turretLevel, r); } },
+  { id:'barrel', branch:'RIG', name:'FASTER CYCLE', desc:'Auto-Turret fires 30% faster.', cost:2, max:1, requires:['turret'], tags:'AUTO', passive(r){ player.turretLevel = Math.max(player.turretLevel, 2); } },
+  { id:'caliber', branch:'RIG', name:'HIGH CALIBER', desc:'Turret damage +2 and targets highest threat.', cost:2, max:2, requires:['barrel'], tags:'AUTO', passive(r){ player.turretDamage = 1 + 2*r; } },
+  { id:'overclock', branch:'RIG', name:'OVERCLOCK', desc:'Turret enters hyper-fire and grants +15% score.', cost:3, max:1, requires:['caliber'], tags:'AUTO', passive(r){ player.turretLevel = 3; player.scoreMult += 0.15*r; } }
+];
+
+function rankOf(id){ return skillRanks[id] || 0; }
+function prereqsMet(skill){ return skill.requires.every(id => rankOf(id) > 0); }
+
+function buySkill(skill){
+  const r = rankOf(skill.id);
+  if(r >= skill.max) return false;
+  if(!prereqsMet(skill)) return false;
+  if(skillPoints < skill.cost) return false;
+  skillPoints -= skill.cost;
+  skillRanks[skill.id] = r + 1;
+  if(skill.onBuy) skill.onBuy();
+  recomputePlayer();
+  sfx.upgrade();
+  renderSkillTree();
+  updateHud();
+  return true;
+}
+
+function renderSkillTree(){
+  const tree = document.getElementById('pureSkillTree');
+  if(!tree) return;
+  const pts = document.getElementById('skillPtsValTree');
+  if(pts) pts.textContent = skillPoints;
+  const groups = { STRIKE:[], HOLD:[], RIG:[] };
+  SKILLS.forEach(s => groups[s.branch].push(s));
+  tree.innerHTML = '';
+  Object.keys(groups).forEach(branch => {
+    const col = document.createElement('div');
+    col.className = 'branch';
+    col.innerHTML = '<div class="branchTitle">' + branch + '</div>';
+    groups[branch].forEach(s => {
+      const r = rankOf(s.id);
+      const maxed = r >= s.max;
+      const locked = !prereqsMet(s);
+      const available = !locked && !maxed && skillPoints >= s.cost;
+      const node = document.createElement('div');
+      node.className = 'skillNode' + (maxed ? ' maxed owned' : available ? ' available' : locked ? ' locked' : ' owned');
+      node.setAttribute('role','button');
+      node.setAttribute('tabindex','0');
+      node.innerHTML = '<div class="name">' + s.name + '</div>'
+        + '<div class="desc">' + s.desc + '</div>'
+        + '<div class="meta">Rank ' + r + '/' + s.max + '  |  Cost ' + s.cost + '⭐' + (locked ? '  |  LOCKED' : maxed ? '  |  MAX' : '') + '</div>';
+      if(available){
+        node.addEventListener('click', ()=> buySkill(s));
+      }
+      node.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter' || e.key === ' '){
+          e.preventDefault();
+          if(available) buySkill(s);
+        }
+      });
+      col.appendChild(node);
+    });
+    tree.appendChild(col);
+  });
+}
+
+let skillsPrevState = 'playing';
+function openSkillsScreen(){
+  if(state === 'skills') return;
+  skillsPrevState = state;
+  state = 'skills';
+  renderSkillTree();
+  updateHud();
+  document.getElementById('skillsScreen').style.display = 'flex';
+}
+
+function closeSkillsScreen(){
+  document.getElementById('skillsScreen').style.display = 'none';
+  state = skillsPrevState || 'playing';
+}
 
 const WEAPONS = [
   { id:'plunger', cat:'PRIMARY FIRE', name:'PLUNGER', desc:'Every pop hits +1 harder and pops wider (+4px radius) per level. The classic.', costs:[1,1,2], max:3 },
@@ -4000,7 +4113,12 @@ function recomputePlayer(){
   player.sigmaDecayBonus = 0;
   player.turretLevel = 0;
   if(hasRelic('score_overflow')) player.scoreMult += 0.25;
-  player.clickRadiusBonus = Math.min(40, player.clickRadiusBonus + 4 * Math.max(0, weaponRank('plunger') - 1));
+  // Apply Passive Skills
+  SKILLS.forEach(s => {
+    const r = rankOf(s.id);
+    if(r && s.passive) s.passive(r);
+  });
+  player.clickRadiusBonus = Math.min(45, player.clickRadiusBonus + 4 * Math.max(0, weaponRank('plunger') - 1));
   player.turretLevel = Math.min(3, player.turretLevel);
 }
 
@@ -4513,6 +4631,7 @@ function resetGame(){
   pausePrevState = 'playing';
   manualShop = false;
   toastTimer = 0;
+  Object.keys(skillRanks).forEach(k => { delete skillRanks[k]; });
   Object.keys(weaponRanks).forEach(k => { delete weaponRanks[k]; });
   Object.keys(hiredRanks).forEach(k => { hiredRanks[k] = 0; });
   deployedAllies.length = 0;
@@ -5016,7 +5135,13 @@ function toggleFullscreen(){
   }
 }
 
-document.getElementById('resumeBtn').addEventListener('click', togglePause);
+
+  const sBtn = document.getElementById('skillsBtn');
+  if(sBtn) sBtn.addEventListener('click', openSkillsScreen);
+  const sClose = document.getElementById('skillsCloseBtn');
+  if(sClose) sClose.addEventListener('click', closeSkillsScreen);
+
+  document.getElementById('resumeBtn').addEventListener('click', togglePause);
 document.getElementById('restartRunBtn').addEventListener('click', restartRun);
 document.getElementById('quitMenuBtn').addEventListener('click', quitToMainMenu);
 document.getElementById('quitGameBtn').addEventListener('click', quitGame);
@@ -5037,6 +5162,9 @@ window.addEventListener('keydown', (e)=>{
   } else if(e.key.toLowerCase() === 'h'){
     if(state === 'hire') closeHireScreen();
     else openHireScreen();
+  } else if(e.key.toLowerCase() === 'k'){
+    if(state === 'skills') closeSkillsScreen();
+    else openSkillsScreen();
   } else if(e.key.toLowerCase() === 's'){
     if(state === 'shop') closeManualShop();
     else openManualShop();

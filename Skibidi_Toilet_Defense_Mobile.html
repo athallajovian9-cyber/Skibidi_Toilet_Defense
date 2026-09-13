@@ -124,7 +124,6 @@
     padding:max(16px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
   }
   #upgradeScreen p{max-width:760px;}
-  #skillPtsLine{color:var(--gold);font-size:14px;margin:4px 0 10px;}
   #weaponShop{width:min(980px,100%);max-width:980px;}
   #weaponShop h3{color:var(--gold);letter-spacing:2px;font-size:12px;margin:2px 0 8px;}
   .skillTree{
@@ -805,7 +804,8 @@
     </div>
     <div class="gridRow">
       <button id="hireBtn" class="miniBtn highlightBtn">⚔️ HIRE</button>
-      <button id="shopBtn" class="miniBtn">🛒 SHOP</button>
+      <button id="skillsBtn" class="miniBtn" style="border-color:#ffd35c;color:#ffd35c;">🌲 SKILLS [K]</button>
+      <button id="shopBtn" class="miniBtn">🛒 WEAPONS [S]</button>
     </div>
     <div class="gridRow compactRow">
       <button id="inGameTutBtn" class="miniBtn subtleBtn">📖 GUIDE</button>
@@ -833,6 +833,7 @@
     </div>
     <p>Nothing moves while paused.</p>
     <button id="resumeBtn">RESUME</button>
+    <button id="restartRunBtn" style="background:#2a2a3a;color:var(--porcelain);border:1px solid var(--pipe);padding:8px 18px;margin-top:6px;cursor:pointer;">RESTART RUN</button>
     <button id="pauseTutBtn" style="background:#141f17;border:1px solid var(--gold);color:var(--gold);padding:8px 18px;margin-top:6px;cursor:pointer;">📖 OPERATIVE'S MANUAL</button>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
       <button id="quitMenuBtn" style="background:#2a3a35;color:var(--porcelain);box-shadow:none;border:1px solid var(--pipe);">QUIT TO MAIN MENU</button>
@@ -874,6 +875,19 @@
     <button id="hireCloseBtn">RESUME DEFENSE</button>
   </div>
 
+    <!-- DEDICATED OPERATIVE SKILL TREE SCREEN -->
+  <div id="skillsScreen" class="screen" style="display:none;z-index:20;background:rgba(6,9,7,0.96);">
+    <h2 style="color:var(--gold);text-shadow:0 0 16px rgba(255,211,92,0.6);margin-bottom:2px;">⚡ OPERATIVE PASSIVE SKILL TREE ⚡</h2>
+    <div id="skillPtsLineTree" style="margin: 4px 0 10px; font-size: 15px; color: var(--gold); font-weight: 800; letter-spacing: 1px;">
+      AVAILABLE SKILL POINTS: <span id="skillPtsValTree">0</span>⭐
+    </div>
+    <p style="margin: 0 0 14px; font-size: 12px; color: #a4b89e; max-width: 760px; text-align: center;">
+      Invest skill points into permanent operative upgrades across 3 tactical branches: STRIKE (damage/reach), HOLD (defense/survival), and RIG (turret/economy).
+    </p>
+    <div class="skillTree" id="pureSkillTree"></div>
+    <button id="skillsCloseBtn" style="margin-top:14px;width:100%;max-width:320px;">RESUME DEFENSE</button>
+  </div>
+
   <div id="upgradeScreen">
     <h2 id="upgradeTitle">WEAPON ARSENAL SHOP</h2>
     <div id="skillPtsLine" style="margin: 6px 0 12px; font-size: 15px; color: var(--gold); font-weight: 800; letter-spacing: 1px;">
@@ -899,9 +913,9 @@
 <script>
 /* ================= CONFIG / PERSISTENCE ================= */
 const DIFFICULTIES = {
-  easy:   { spawnStart: 76, spawnMin: 20, spawnDecay: 3.5, speedMult: 0.88, hpMult: 0.85, toiletsBase: 8,  toiletsGrowth: 1.10, maxToilets: 32, sigmaGain: 9,  breachDamage: 1 },
-  normal: { spawnStart: 44, spawnMin: 10, spawnDecay: 3.8, speedMult: 0.96, hpMult: 0.95, toiletsBase: 11, toiletsGrowth: 1.45, maxToilets: 50, sigmaGain: 11, breachDamage: 1 },
-  hard:   { spawnStart: 32, spawnMin: 6,  spawnDecay: 4.2, speedMult: 1.12, hpMult: 1.15, toiletsBase: 14, toiletsGrowth: 1.85, maxToilets: 62, sigmaGain: 14, breachDamage: 1 }
+  easy:   { spawnStart: 82, spawnMin: 24, spawnDecay: 4.0, speedMult: 0.92, hpMult: 0.90, toiletsBase: 9, toiletsGrowth: 1.15, maxToilets: 34, sigmaGain: 7, breachDamage: 1 },
+  normal: { spawnStart: 48, spawnMin: 9,  spawnDecay: 4.0, speedMult: 1.00, hpMult: 1.00, toiletsBase: 12, toiletsGrowth: 1.72, maxToilets: 55, sigmaGain: 9, breachDamage: 1 },
+  hard:   { spawnStart: 34, spawnMin: 5,  spawnDecay: 4.5, speedMult: 1.20, hpMult: 1.22, toiletsBase: 15, toiletsGrowth: 2.15, maxToilets: 68, sigmaGain: 12, breachDamage: 1 }
 };
 
 /* SIGMA MODE: flat multiplier on every toilet's approach speed. Stacks on top of
@@ -1254,7 +1268,6 @@ function showDifficulty(){
           wave = cp.wave;
           score = cp.score;
           skillPoints = cp.skillPoints;
-          if(cp.skills) Object.assign(skillRanks, cp.skills);
           if(cp.weapons) Object.assign(weaponRanks, cp.weapons);
           if(cp.allies) Object.assign(hiredRanks, cp.allies);
           syncAlliesWithRanks();
@@ -1360,6 +1373,7 @@ let gameLoopStarted = false;
 let abilityCharge = 0;
 let combo = 0;
 let comboTimer = 0;
+function comboMult(){ return Math.min(4.0, 1 + Math.floor(combo/4)*0.12); }
 let bestScore = Number(storage.get('skibidiBestScore', 0));
 let totalPops = 0;
 let paused = false;
@@ -1367,26 +1381,104 @@ let pausePrevState = 'playing';
 let toastTimer = 0;
 let lastFrame = 0;
 let skillPoints = 0;
+
+
+/* ================= DEDICATED PASSIVE SKILL TREE SYSTEM ================= */
 const skillRanks = {};
 
 const SKILLS = [
-  { id:'reach', branch:'STRIKE', name:'WIDER REACH', desc:'+9px click radius per rank.', cost:1, max:3, requires:[], tags:'PRECISION', passive(r){ player.clickRadiusBonus = Math.min(30, player.clickRadiusBonus + 9*r); } },
-  { id:'chain', branch:'STRIKE', name:'CHAIN POP', desc:'Pops spread to nearby toilets; radius grows per rank.', cost:1, max:3, requires:['reach'], tags:'AREA', passive(r){ player.chainRadius = Math.min(130, player.chainRadius + 28*r); } },
-  { id:'crit', branch:'STRIKE', name:'CRITICAL POP', desc:'+7% critical chance per rank.', cost:2, max:3, requires:['chain'], tags:'BURST', passive(r){ player.critChance = Math.min(0.30, player.critChance + 0.07*r); } },
-  { id:'overkill', branch:'STRIKE', name:'OVERKILL', desc:'Critical hits deal +35% damage per rank.', cost:2, max:2, requires:['crit'], tags:'BOSS', passive(r){ player.critMult = 2 + 0.35*r; } },
+  // === STRIKE BRANCH (OFFENSE / CRITS) ===
+  { id:'reach', branch:'STRIKE', name:'WIDER REACH', desc:'+12px click & tap hitbox radius per rank.', cost:1, max:3, requires:[], tags:'PRECISION', passive(r){ player.clickRadiusBonus = Math.min(45, player.clickRadiusBonus + 12*r); } },
+  { id:'chain', branch:'STRIKE', name:'CHAIN POP', desc:'Pops cascade shockwaves to nearby toilets.', cost:1, max:3, requires:['reach'], tags:'AREA', passive(r){ player.chainRadius = Math.min(150, player.chainRadius + 35*r); } },
+  { id:'crit', branch:'STRIKE', name:'CRITICAL POP', desc:'+8% critical pop chance per rank.', cost:2, max:3, requires:['chain'], tags:'BURST', passive(r){ player.critChance = Math.min(0.35, player.critChance + 0.08*r); } },
+  { id:'overkill', branch:'STRIKE', name:'OVERKILL', desc:'Critical hits deal +40% extra damage per rank.', cost:2, max:2, requires:['crit'], tags:'BOSS', passive(r){ player.critMult = 2 + 0.40*r; } },
 
-  { id:'slow', branch:'HOLD', name:'SLUG FIELD', desc:'Toilets move 7% slower per rank.', cost:1, max:3, requires:[], tags:'CONTROL', passive(r){ player.speedReduction = Math.min(0.26, player.speedReduction + 0.07*r); } },
-  { id:'coolant', branch:'HOLD', name:'COOLANT VENTS', desc:'Reduces Sigma heat drain pressure.', cost:1, max:3, requires:['slow'], tags:'STABILITY', passive(r){ player.sigmaDecayBonus += 0.035*r; } },
-  { id:'life', branch:'HOLD', name:'EXTRA LIFE', desc:'Gain +1 maximum life and restore it on purchase.', cost:1, max:3, requires:['coolant'], tags:'SURVIVAL', onBuy(){ player.maxLives += 1; lives = Math.min(player.maxLives, lives + 1); } },
-  { id:'shield', branch:'HOLD', name:'SECOND WIND', desc:'Absorbs one breach per rank.', cost:2, max:2, requires:['life'], tags:'SURVIVAL', onBuy(){ player.shields += 1; } },
-  { id:'medic', branch:'HOLD', name:'REPAIR CYCLE', desc:'Restore 1 life after every 5 cleared waves.', cost:2, max:1, requires:['shield'], tags:'RECOVERY', passive(r){ player.healOnWave = r; } },
+  // === HOLD BRANCH (DEFENSE / SURVIVAL) ===
+  { id:'slow', branch:'HOLD', name:'SLUG FIELD', desc:'Toilets move 8% slower across all waves.', cost:1, max:3, requires:[], tags:'CONTROL', passive(r){ player.speedReduction = Math.min(0.28, player.speedReduction + 0.08*r); } },
+  { id:'coolant', branch:'HOLD', name:'COOLANT VENTS', desc:'Reduces Sigma heat drain pressure.', cost:1, max:3, requires:['slow'], tags:'STABILITY', passive(r){ player.sigmaDecayBonus += 0.04*r; } },
+  { id:'life', branch:'HOLD', name:'EXTRA LIFE', desc:'Gain +1 maximum life and restore it immediately.', cost:1, max:3, requires:['coolant'], tags:'SURVIVAL', onBuy(){ player.maxLives += 1; lives = Math.min(player.maxLives, lives + 1); updateHud(); } },
+  { id:'shield', branch:'HOLD', name:'SECOND WIND', desc:'Absorbs one breach per rank without losing life.', cost:2, max:2, requires:['life'], tags:'SURVIVAL', onBuy(){ player.shields += 1; updateHud(); } },
+  { id:'medic', branch:'HOLD', name:'REPAIR CYCLE', desc:'Restore 1 life after every 4 cleared waves.', cost:2, max:1, requires:['shield'], tags:'RECOVERY', passive(r){ player.healOnWave = r; } },
 
-  { id:'score', branch:'RIG', name:'SCORE SURGE', desc:'+18% score per rank.', cost:1, max:4, requires:[], tags:'SCORE', passive(r){ player.scoreMult += 0.18*r; } },
-  { id:'turret', branch:'RIG', name:'AUTO TURRET', desc:'Unlocks an automatic targeter.', cost:1, max:1, requires:['score'], tags:'AUTO', passive(r){ player.turretLevel = Math.max(player.turretLevel, r); } },
-  { id:'barrel', branch:'RIG', name:'FASTER CYCLE', desc:'Turret fires 25% faster.', cost:2, max:1, requires:['turret'], tags:'AUTO', passive(r){ player.turretLevel = Math.max(player.turretLevel, 2); } },
-  { id:'caliber', branch:'RIG', name:'HIGH CALIBER', desc:'Turret damage +1 and improved finisher priority.', cost:2, max:2, requires:['barrel'], tags:'AUTO', passive(r){ player.turretDamage = 1+r; } },
-  { id:'overclock', branch:'RIG', name:'OVERCLOCK', desc:'Turret fires faster and grants +12% score.', cost:3, max:1, requires:['caliber'], tags:'AUTO', passive(r){ player.turretLevel = 3; player.scoreMult += 0.12*r; } }
+  // === RIG BRANCH (AUTOMATION & ECONOMY) ===
+  { id:'score', branch:'RIG', name:'SCORE SURGE', desc:'+20% score earned per rank.', cost:1, max:4, requires:[], tags:'SCORE', passive(r){ player.scoreMult += 0.20*r; } },
+  { id:'turret', branch:'RIG', name:'AUTO TURRET', desc:'Unlocks an automatic base defense targeter.', cost:1, max:1, requires:['score'], tags:'AUTO', passive(r){ player.turretLevel = Math.max(player.turretLevel, r); } },
+  { id:'barrel', branch:'RIG', name:'FASTER CYCLE', desc:'Auto-Turret fires 30% faster.', cost:2, max:1, requires:['turret'], tags:'AUTO', passive(r){ player.turretLevel = Math.max(player.turretLevel, 2); } },
+  { id:'caliber', branch:'RIG', name:'HIGH CALIBER', desc:'Turret damage +2 and targets highest threat.', cost:2, max:2, requires:['barrel'], tags:'AUTO', passive(r){ player.turretDamage = 1 + 2*r; } },
+  { id:'overclock', branch:'RIG', name:'OVERCLOCK', desc:'Turret enters hyper-fire and grants +15% score.', cost:3, max:1, requires:['caliber'], tags:'AUTO', passive(r){ player.turretLevel = 3; player.scoreMult += 0.15*r; } }
 ];
+
+function rankOf(id){ return skillRanks[id] || 0; }
+function prereqsMet(skill){ return skill.requires.every(id => rankOf(id) > 0); }
+
+function buySkill(skill){
+  const r = rankOf(skill.id);
+  if(r >= skill.max) return false;
+  if(!prereqsMet(skill)) return false;
+  if(skillPoints < skill.cost) return false;
+  skillPoints -= skill.cost;
+  skillRanks[skill.id] = r + 1;
+  if(skill.onBuy) skill.onBuy();
+  recomputePlayer();
+  sfx.upgrade();
+  renderSkillTree();
+  updateHud();
+  return true;
+}
+
+function renderSkillTree(){
+  const tree = document.getElementById('pureSkillTree');
+  if(!tree) return;
+  const pts = document.getElementById('skillPtsValTree');
+  if(pts) pts.textContent = skillPoints;
+  const groups = { STRIKE:[], HOLD:[], RIG:[] };
+  SKILLS.forEach(s => groups[s.branch].push(s));
+  tree.innerHTML = '';
+  Object.keys(groups).forEach(branch => {
+    const col = document.createElement('div');
+    col.className = 'branch';
+    col.innerHTML = '<div class="branchTitle">' + branch + '</div>';
+    groups[branch].forEach(s => {
+      const r = rankOf(s.id);
+      const maxed = r >= s.max;
+      const locked = !prereqsMet(s);
+      const available = !locked && !maxed && skillPoints >= s.cost;
+      const node = document.createElement('div');
+      node.className = 'skillNode' + (maxed ? ' maxed owned' : available ? ' available' : locked ? ' locked' : ' owned');
+      node.setAttribute('role','button');
+      node.setAttribute('tabindex','0');
+      node.innerHTML = '<div class="name">' + s.name + '</div>'
+        + '<div class="desc">' + s.desc + '</div>'
+        + '<div class="meta">Rank ' + r + '/' + s.max + '  |  Cost ' + s.cost + '⭐' + (locked ? '  |  LOCKED' : maxed ? '  |  MAX' : '') + '</div>';
+      if(available){
+        node.addEventListener('click', ()=> buySkill(s));
+      }
+      node.addEventListener('keydown', (e)=>{
+        if(e.key === 'Enter' || e.key === ' '){
+          e.preventDefault();
+          if(available) buySkill(s);
+        }
+      });
+      col.appendChild(node);
+    });
+    tree.appendChild(col);
+  });
+}
+
+let skillsPrevState = 'playing';
+function openSkillsScreen(){
+  if(state === 'skills') return;
+  skillsPrevState = state;
+  state = 'skills';
+  renderSkillTree();
+  updateHud();
+  document.getElementById('skillsScreen').style.display = 'flex';
+}
+
+function closeSkillsScreen(){
+  document.getElementById('skillsScreen').style.display = 'none';
+  state = skillsPrevState || 'playing';
+}
 
 const WEAPONS = [
   { id:'plunger', cat:'PRIMARY FIRE', name:'PLUNGER', desc:'Every pop hits +1 harder and pops wider (+4px radius) per level. The classic.', costs:[1,1,2], max:3 },
@@ -1418,7 +1510,9 @@ const RELIC_POOL = [
   { id: 'toxic_aftermath', name: 'TOXIC AFTERMATH', icon: '☣️', desc: 'Every defeated toilet erupts into a lingering corrosive acid puddle on the sewer floor.' },
   { id: 'seismic_resonance', name: 'SEISMIC RESONANCE', icon: '🌋', desc: 'Titan and heavy unit ground slams cause secondary floor tremors across the entire lane.' },
   { id: 'hydraulic_overhaul', name: 'HYDRAULIC OVERHAUL', icon: '⚙️', desc: 'Spring Bouncers carry 2 extra charges and launch enemies with +50% velocity.' },
-  { id: 'vampiric_drain', name: 'VAMPIRIC DRAIN', icon: '🩸', desc: 'Defeating toilets has a 12% chance to restore a lost Life or grant a Titan Forcefield.' }
+  { id: 'vampiric_drain', name: 'VAMPIRIC DRAIN', icon: '🩸', desc: 'Defeating toilets has a 12% chance to restore a lost Life or grant a Titan Forcefield.' },
+  { id: 'glacial_field', name: 'GLACIAL FIELD', icon: '❄️', desc: 'Frozen hazard field: all toilets crawl 12% slower for the rest of the run.' },
+  { id: 'score_overflow', name: 'SCORE OVERFLOW', icon: '💎', desc: 'Every score gain is boosted +25%.' }
 ];
 
 function hasRelic(id){
@@ -2530,6 +2624,7 @@ function openRelicModal(){
     card.onclick = () => {
       sfx.relicFanfare();
       relicsCollected.push(r.id);
+      recomputePlayer();
       updateRelicsHud();
       document.getElementById('relicModal').style.display = 'none';
       showToast('⚡ RELIC EQUIPPED: ' + r.name + '!');
@@ -2547,92 +2642,32 @@ function openRelicModal(){
    comes from ALLY_STATS and runs through the shared generic AI/draw branches, so
    adding a character is one compact entry. */
 const ALLY_STATS = {
-  // === APEX TITANS (GOD-TIER HEAVIES) ===
-  titanSpeaker3: {
-    role:'sonicGod', name:'TITAN SPEAKERMAN 3.0', cat:'LEGENDARY ELITE',
-    desc:'THE APEX SOUND COLOSSUS! Version 3.0 EMPEROR Overhaul! Equipped with crowned speaker array, twin acoustic wing towers, rotating red energy halo, flowing battle-cape, and dual overcharged plasma bayonets. Unleashes continuous supersonic AoE shockwaves!',
-    cost:7, max:1, icon:'🔊', r:1.85, body:'#121418', head:'#0a0c0e', lens:'#ff1a1a', label:'TITAN SPEAKERMAN 3.0', labelCol:'#ff1a1a',
-    speed:3.4, cd:8, dmg:48, knockback:240, stun:75, range:650, rad:200
-  },
+  titanSpeaker3: { role:'sonicGod',        name:'TITAN SPEAKERMAN 3.0',       cat:'LEGENDARY ELITE', desc:'THE APEX SOUND COLOSSUS! Version 3.0 EMPEROR Overhaul! Equipped with a crowned multi-cone speaker array, towering quad-pod shoulder acoustic wing towers, glowing red energy halo ring, crimson battle-cape, fortified layered mech-armor, blinding white-hot chest reactor, and dual heavy overcharged plasma-cannon blade gauntlets. Obliterates entire enemy armies with continuous supersonic shockwaves!', cost:7, max:1, icon:'🔊', r:1.85, body:'#121418', head:'#0a0c0e', lens:'#ff1a1a', label:'TITAN SPEAKERMAN 3.0', labelCol:'#ff1a1a', speed:3.1, cd:10, dmg:42, knockback:220, stun:60, range:600, rad:180 },
 
-  titanSpeaker2: {
-    role:'plasmaArtillery', name:'UPGRADED TITAN SPEAKERMAN (2.0)', cat:'LEGENDARY ELITE',
-    desc:'TITAN 2.0 OVERHAUL! Fitted with dual shoulder speaker towers, jetpack thrusters, red core reactor, and twin heavy forearm plasma blasters. Unleashes rapid twin crimson plasma bursts and devastating sonic shockwaves!',
-    cost:6, max:1, icon:'🔊', r:1.65, body:'#1e2226', head:'#14181b', lens:'#ff2222', label:'UPGRADED TITAN SPEAKER 2.0', labelCol:'#ff3333',
-    speed:3.0, cd:12, dmg:32, knockback:150, stun:45, range:520, rad:130
-  },
+  titanSpeaker2: { role:'plasmaArtillery', name:'UPGRADED TITAN SPEAKERMAN (2.0)', cat:'LEGENDARY ELITE', desc:'TITAN 2.0 OVERHAUL! Fitted with crimson dress shirt, charcoal combat pants, dual heavy shoulder speaker wing-towers, industrial jetpack thrusters, red core reactor, and twin heavy forearm plasma blasters with under-barrel combat blades. Unleashes massive rapid twin crimson plasma bursts and devastating sonic shockwaves!', cost:6, max:1, icon:'🔊', r:1.65, body:'#b82424', head:'#141414', lens:'#ff2222', label:'UPGRADED TITAN SPEAKER 2.0', labelCol:'#ff3d3d', speed:2.8, cd:12, dmg:28, knockback:120, stun:40, range:520, rad:140 },
 
-  titanDrill: {
-    role:'drillSmasher', name:'TITAN DRILLMAN (3D)', cat:'LEGENDARY ELITE',
-    desc:'MASSIVE MECH TITAN! Features conical rotating steel drill head, ochre hazard-orange boiler body with Japanese safety cross (Anzen Hyoshiki), dome pauldrons, and dual rotating arm drills that slam the sewer floor to create seismic fissures!',
-    cost:5, max:1, icon:'🔩', r:1.75, body:'#d46e13', head:'#a4b0bd', lens:'#ff9d4d', label:'TITAN DRILLMAN [3D]', labelCol:'#ff9d4d',
-    speed:2.2, cd:16, dmg:45, knockback:280, stun:90, range:520, rad:150
-  },
+  simp2:       { role:'chadRusher',  name:'SIMP CAMERAMAN 2.0',   cat:'LEGENDARY ELITE', desc:'CH4D UPGRADE! Rolled-up sky-blue sleeves, iconic yellow-purple striped tie, heavy cybernetic exoskeleton, high-powered turbine thruster, and dual neon-cyan energy forearm blades! Closes in with supersonic speed and shreds toilet vanguards.', cost:4, max:2, icon:'🦾', r:1.2, body:'#1e2830', head:'#1a2228', lens:'#00f0ff', label:'CH4D SIMP 2.0', labelCol:'#00f0ff', speed:3.9, cd:14, dmg:16, knockback:65, stun:25, range:450, atkDist:48 },
 
-  titanClock: {
-    role:'chronoMaster', name:'TITAN CLOCKMAN', cat:'LEGENDARY ELITE',
-    desc:'TEMPORAL WARFARE TITAN! Emits chronos-waves that freeze all active toilets in temporal stasis for 5s, followed by time-rift reality slashes!',
-    cost:6, max:1, icon:'⏰', r:1.8, body:'#2d281e', head:'#d4af37', lens:'#ffd700', label:'TITAN CLOCKMAN', labelCol:'#ffd700',
-    speed:2.0, cd:24, dmg:38, knockback:180, stun:150, range:580, rad:220
-  },
+  titanDrill:  { role:'drillSmasher', name:'TITAN DRILLMAN (3D)',   cat:'LEGENDARY ELITE', desc:'DOM STUDIO 3D OVERHAUL! Machine-turned conical drill head, hazard-orange boiler chassis with Japanese green safety cross (Anzen Hyoshiki), dome pauldrons, and massive dual rotating arm drills that slam the sewer bedrock to unleash seismic shockwave fissures!', cost:6, max:1, icon:'🔩', r:1.7, body:'#bd5a11', head:'#4a535e', lens:'#ff7a1b', label:'TITAN DRILLMAN (3D)', labelCol:'#ff8a1b', speed:1.5, cd:75, dmg:38, knockback:260, stun:80, range:500, atkDist:80 },
+  mechDog:     { role:'pouncer',      name:'CAMERA MECH-HOUND',     cat:'SUPPORT OPS', desc:'Rapid quadruped robotic hound! Runs along the floor, pounces onto toilets, clamps with electrified jaws to pin them in place.', cost:3, max:3, icon:'🐕', r:0.9, body:'#2a3a35', head:'#1a2622', lens:'#6ad7ff', label:'MECH HOUND', labelCol:'#6ad7ff', speed:3.8, cd:28, dmg:8, knockback:35, range:450, atkDist:36 },
+  jetpackCam:  { role:'strafer',      name:'JETPACK DUAL-UZI',      cat:'FIELD INFANTRY', desc:'Rocket-powered low-altitude commando! Strafes back and forth above the floor spraying twin uzis and dropping cluster mini-bombs.', cost:3, max:3, icon:'🚀', r:0.95, body:'#3a4a5a', head:'#1e2832', lens:'#ff9d4d', label:'JETPACK UZI', labelCol:'#ff9d4d', speed:3.2, cd:16, dmg:3 },
 
-  titanPlunger: {
-    role:'hydraulicSlammer', name:'TITAN PLUNGERMAN', cat:'LEGENDARY ELITE',
-    desc:'MECH-ENHANCED SLAMMER! Wields twin massive powered hydraulic plungers. Charges forward into enemy lines, launching toilets skyward!',
-    cost:5, max:1, icon:'🪠', r:1.7, body:'#1a241b', head:'#2e4530', lens:'#8bff5c', label:'TITAN PLUNGERMAN', labelCol:'#8bff5c',
-    speed:2.8, cd:14, dmg:36, knockback:260, stun:60, range:480, rad:120
-  },
-
-  // === TACTICAL ELITE SQUAD ===
-  simp2: {
-    role:'strafer', name:'SIMP CAMERAMAN 2.0 (CH4D)', cat:'FIELD INFANTRY',
-    desc:'THE ULTIMATE SIMP REVENGE! Upgraded into CH4D form with dual cyan hard-light forearm energy blades, high-output turbine jet thruster, charcoal suit, and striped tie. Blinks across lanes slashing toilets!',
-    cost:3, max:2, icon:'🗡️', r:1.25, body:'#1a1c1e', head:'#262d33', lens:'#00e5ff', label:'SIMP 2.0 (CH4D)', labelCol:'#00e5ff',
-    speed:4.6, cd:6, dmg:22, knockback:80, stun:25, range:240, rad:70
-  },
-
-  mechDog: {
-    role:'brawler', name:'MECH-HOUND CAMERAMAN', cat:'FIELD INFANTRY',
-    desc:'QUADRUPED SCOUT HUNTER! Prowls the sewer floor on hydraulic legs. Pounces on runner and sprinter toilets, tearing off armor shields!',
-    cost:3, max:2, icon:'🐕', r:1.2, body:'#222a24', head:'#344237', lens:'#8bff5c', label:'MECH-HOUND', labelCol:'#8bff5c',
-    speed:3.8, cd:8, dmg:18, knockback:90, stun:35, range:220, rad:65
-  },
-
-  jetpackCam: {
-    role:'strafer', name:'JETPACK CAMERAMAN', cat:'FIELD INFANTRY',
-    desc:'AIRBORNE INTERCEPTOR! Flies above enemy columns, dropping micro-bombs on dense toilet clusters.',
-    cost:2, max:3, icon:'🚀', r:1.0, body:'#252d27', head:'#38473c', lens:'#6ad7ff', label:'JETPACK CAM', labelCol:'#6ad7ff',
-    speed:4.2, cd:10, dmg:14, knockback:60, stun:15, range:320, rad:80
-  },
-
-  plumber: {
-    role:'brawler', name:'HEAVY PLUMBER CAMERAMAN', cat:'FIELD INFANTRY',
-    desc:'FRONTLINE BRUISER! Armored combat suit with reinforced carbon plunger. Knocks back armored toilets and clears breachers.',
-    cost:2, max:3, icon:'🔧', r:1.1, body:'#1b241e', head:'#2a3b30', lens:'#ffd35c', label:'PLUMBER CAM', labelCol:'#ffd35c',
-    speed:2.4, cd:9, dmg:16, knockback:110, stun:40, range:200, rad:60
-  },
-
-  // === SUPPORT & TECH OPS ===
-  scientist: {
-    role:'supportAura', name:'SCIENTIST CAMERAMAN', cat:'SUPPORT OPS',
-    desc:'NANITE FIELD GENERATOR! Radiates a repair aura that repairs base integrity and boosts all deployed ally damage by +25%!',
-    cost:3, max:1, icon:'🔬', r:1.1, body:'#15222e', head:'#243647', lens:'#6ad7ff', label:'SCIENTIST CAM', labelCol:'#6ad7ff',
-    speed:1.6, cd:20, dmg:10, knockback:40, stun:10, range:400, rad:300
-  },
-
-  dj: {
-    role:'soundBlaster', name:'DJ SPEAKERMAN', cat:'SUPPORT OPS',
-    desc:'BASS BOOSTER UNIT! Blasts sonic drops that slow all toilets by 40% across the entire lane and strips enemy armor plating.',
-    cost:3, max:1, icon:'🎧', r:1.2, body:'#281822', head:'#44283b', lens:'#ff5cd3', label:'DJ SPEAKERMAN', labelCol:'#ff5cd3',
-    speed:2.0, cd:15, dmg:15, knockback:120, stun:50, range:450, rad:220
-  },
-
-  astro: {
-    role:'warpSniper', name:'ASTRO ALLY INTERCEPTOR', cat:'SUPPORT OPS',
-    desc:'WARP-DRIVE ASSASSIN! Teleports behind high-threat toilets (Healers, Astro, Juggernauts) and snipes them with hyper-dense energy darts.',
-    cost:4, max:2, icon:'🛸', r:1.2, body:'#112228', head:'#1b353e', lens:'#6ad7ff', label:'ASTRO INTERCEPTOR', labelCol:'#6ad7ff',
-    speed:4.8, cd:10, dmg:28, knockback:100, stun:30, range:500, rad:90
-  }
+  plumber:     { role:'rusher',      name:'PLUNGERMAN',            cat:'FIELD INFANTRY', desc:'Dual-plunger melee gremlin that chases toilets down and whacks them apart.', cost:1, max:4, icon:'🪠', r:0.9,  body:'#6b4d32', head:'#222824', lens:'#6ad7ff', label:'PLUNGER', labelCol:'#cbf0ff', speed:3.2, cd:18, dmg:2, knockback:26, range:380, atkDist:44 },
+  half:        { role:'rusher',      name:'HALFPIPE CAMERAMAN',    cat:'FIELD INFANTRY', desc:'Half-pipe skating cameraman that rams toilets for chip damage and shoves them.', cost:2, max:3, icon:'🛹', r:0.95, body:'#2a5a3a', head:'#123a24', lens:'#ffe27c', label:'HALFPIPE', labelCol:'#ffe27c', speed:3.0, cd:20, dmg:4, knockback:40, range:400, atkDist:46 },
+  elite:       { role:'rapid',       name:'ELITE CAMERAMAN',       cat:'FIELD INFANTRY', desc:'Twin-pistol rapid fire. Sustained mid-line DPS that never stops.', cost:2, max:3, icon:'🔫', r:1.0,  body:'#3a4a8a', head:'#222a5a', lens:'#8bff5c', label:'ELITE', labelCol:'#9fd0ff', speed:2.4, cd:8, dmg:2 },
+  black:       { role:'sniper',      name:'BLACK CAMERAMAN',       cat:'FIELD INFANTRY', desc:'Stealth marksman. Slow, deliberate, hits harder than its price tag.', cost:3, max:3, icon:'🎯', r:1.0,  body:'#1a1a22', head:'#0e0e14', lens:'#c9a2ff', label:'BLACK CAM', labelCol:'#c9a2ff', speed:1.9, cd:50, dmg:14 },
+  strider:     { role:'pulse',       name:'STRIDER SPEAKERMAN',    cat:'SUPPORT OPS', desc:'Skates at full speed blasting sonic knockback waves that shove swarms away.', cost:3, max:3, icon:'🛼', r:0.9,  body:'#3a2a4a', head:'#201528', lens:'#ffd35c', label:'STRIDER', labelCol:'#ff9de2', speed:3.1, cd:50, radius:200, dmg:7, stun:45, knockback:90 },
+  dj:          { role:'pulse',       name:'DJ SPEAKERMAN',         cat:'SUPPORT OPS', desc:'Drops full-on bass earthquakes. Huge AoE damage and heavy stun.', cost:4, max:2, icon:'🎚️', r:1.05, body:'#241a24', head:'#0f0f14', lens:'#ff8a00', label:'DJ SPEAKER', labelCol:'#ffd35c', speed:1.7, cd:115, radius:360, dmg:20, stun:75, knockback:130 },
+  girl:        { role:'hypnoPulse',  name:'TV GIRL',                cat:'SUPPORT OPS', desc:'Broadcasts hypnotic static that locks toilets in place and saps their health.', cost:3, max:3, icon:'📺', r:0.95, body:'#4a1030', head:'#2a0a1c', lens:'#ff6ad9', label:'TV GIRL', labelCol:'#ff9de2', speed:2.1, cd:105, radius:230, dmg:10, stun:90 },
+  scientist:   { role:'zap',         name:'SCIENTIST CAMERAMAN',   cat:'SUPPORT OPS', desc:'Fires lab zappers that arc through whole enemy clusters at once.', cost:4, max:2, icon:'🧪', r:1.0,  body:'#c9c9b2', head:'#e8e8e0', lens:'#74e5b1', label:'SCIENTIST', labelCol:'#74e5b1', speed:1.8, cd:85, radius:230, dmg:15 },
+  ghost:       { role:'teleRusher',  name:'GHOST PLUMBER',         cat:'SUPPORT OPS', desc:'Vapor-wraps behind toilets and clobbers them cold before they can react.', cost:3, max:3, icon:'👻', r:0.9,  body:'#3a3f4a', head:'#2a2f38', lens:'#7ae0ff', label:'GHOST PLMB', labelCol:'#7ae0ff', speed:3.4, cd:15, dmg:4, knockback:20, range:440, atkDist:44 },
+  angles:      { role:'beam',        name:'ANGLESMAN',              cat:'SUPPORT OPS', desc:'Scans the whole front line with a piercing resonance beam.', cost:4, max:2, icon:'📐', r:1.0,  body:'#245a4a', head:'#12302a', lens:'#9dffd9', label:'ANGLESMAN', labelCol:'#9dffd9', speed:1.9, cd:65, radius:200, dmg:17 },
+  fan:         { role:'heavy',       name:'FANSPEAKERMAN',         cat:'SUPPORT OPS', desc:'A massive bruiser that batters toilets straight across the arena.', cost:3, max:3, icon:'🗞️', r:1.15, body:'#5a4a2a', head:'#3a301c', lens:'#ffce54', label:'FANSPEAKER', labelCol:'#ffe27c', speed:1.7, cd:38, dmg:10, knockback:150, stun:45, range:420, atkDist:58 },
+  astro:       { role:'artillery',   name:'ASTRONAUT CAMERAMAN',   cat:'LEGENDARY ELITE', desc:'Orbital support: lobs explosive rocket pods into the densest part of the swarm.', cost:5, max:1, icon:'🧑‍🚀', r:1.2, body:'#4a3a5a', head:'#3a2a4a', lens:'#c9a2ff', label:'ASTRO CAM', labelCol:'#c9a2ff', speed:2.1, cd:58, rad:190, dmg:22 },
+  overseer:    { role:'beam',        name:'OVERSEER MONITOR',      cat:'LEGENDARY ELITE', desc:'Quad-screen surveillance beam that sweeps the ENTIRE front line.', cost:5, max:1, icon:'🖥️', r:1.25, body:'#14405a', head:'#0a2436', lens:'#6ad7ff', label:'OVERSEER', labelCol:'#6ad7ff', speed:1.5, cd:55, radius:250, dmg:16 },
+  titanPlunger:{ role:'heavy',       name:'TITAN PLUNGERMAN',      cat:'LEGENDARY ELITE', desc:'THE ODOR SLAYER. Colossal sweeping slam demolishes whole lines of toilets.', cost:6, max:1, icon:'🪠', r:1.6,  body:'#7d5030', head:'#c0392b', lens:'#ffd35c', label:'TITAN PLUNGERMAN', labelCol:'#ffd35c', speed:1.6, cd:58, dmg:32, knockback:230, stun:70, range:520, atkDist:90 },
+  titanClock:  { role:'timefield',   name:'CLOCKMAN TITAN',        cat:'LEGENDARY ELITE', desc:'Warped clockwork colossus. Every tick slows and drains every toilet on the map.', cost:6, max:1, icon:'⏰', r:1.5,  body:'#24324a', head:'#37486a', lens:'#9dc5ff', label:'CLOCKMAN TITAN', labelCol:'#9dc5ff', speed:1.4, cd:115, radius:999999, dmg:9, stun:50 },
+  gmini:       { role:'artillery',   name:'G-TOILET PROTOTYPE',    cat:'LEGENDARY ELITE', desc:'A captured siege toilet lobbing molten plasma at anything that moves.', cost:6, max:1, icon:'🚽', r:1.5,  body:'#8a6a1a', head:'#5a4a0a', lens:'#ff9d4d', label:'G-TOILET', labelCol:'#ff9d4d', speed:1.3, cd:85, rad:240, dmg:30 }
 };
 
 const ALLIANCE_UNITS = [
@@ -2935,18 +2970,18 @@ function updateHiredAllies(dt, now){
         if(dist <= 48){
           a.attackTimer -= dt;
           if(a.attackTimer <= 0){
-            a.attackTimer = 16;
+            a.attackTimer = 20;
             a.attackAnim = 12;
             sfx.plungerSquish();
             popParticles(target.x, target.y, '#b3804d', 7);
             if(target !== boss){
               const idx = toilets.indexOf(target);
               if(idx !== -1){
-                popOneToilet(idx, {source:'SIMP_CAMERAMAN', dmg: 3});
+                popOneToilet(idx, {source:'SIMP_CAMERAMAN', dmg: 2});
                 target.y = Math.min(H + 20, target.y + 24);
               }
             } else {
-              hitBoss(3, boss.x, boss.y, 'SIMP_CAMERAMAN');
+              hitBoss(2, boss.x, boss.y, 'SIMP_CAMERAMAN');
             }
           }
         }
@@ -2981,7 +3016,7 @@ function updateHiredAllies(dt, now){
         a.dir = target.x >= a.x ? 1 : -1;
         a.attackTimer -= dt;
         if(a.attackTimer <= 0){
-          a.attackTimer = 32;
+          a.attackTimer = 30;
           a.attackAnim = 10;
           sfx.minigun();
           const tdx = target.x - a.x, tdy = target.y - (a.y - 14);
@@ -2991,7 +3026,7 @@ function updateHiredAllies(dt, now){
             y: a.y - 14,
             vx: (tdx / len) * 13,
             vy: (tdy / len) * 13,
-            r: 3, dmg: 3, kind: 'minigun', rad: 0
+            r: 3, dmg: 4, kind: 'minigun', rad: 0
           });
         }
       }
@@ -3059,19 +3094,19 @@ function updateHiredAllies(dt, now){
         }
         a.attackTimer -= dt;
         if(a.attackTimer <= 0 && dist < 120){
-          a.attackTimer = 68;
+          a.attackTimer = 60;
           a.attackAnim = 16;
           sfx.sonic();
           sonicRings.push({ x: a.x, y: a.y - 12, life: 22 });
           toilets.forEach((t, tidx) => {
-            if(Math.hypot(t.x - a.x, t.y - a.y) < 135){
+            if(Math.hypot(t.x - a.x, t.y - a.y) < 150){
               t.stunTimer = Math.max(t.stunTimer || 0, 40);
               t.y = Math.min(H + 25, t.y + 45);
-              popOneToilet(tidx, {source:'SPEAKERMAN', dmg: 3});
+              popOneToilet(tidx, {source:'SPEAKERMAN', dmg: 5});
             }
           });
           if(boss && Math.hypot(boss.x - a.x, boss.y - a.y) < 150){
-            hitBoss(4, boss.x, boss.y, 'SPEAKERMAN');
+            hitBoss(6, boss.x, boss.y, 'SPEAKERMAN');
           }
         }
       } else {
@@ -3107,14 +3142,15 @@ function updateHiredAllies(dt, now){
         }
         a.attackTimer -= dt;
         if(a.attackTimer <= 0 && dist < 140){
-          a.attackTimer = 110;
+          a.attackTimer = 100;
           a.attackAnim = 20;
           sfx.hypno();
-          toilets.forEach(t => {
+          toilets.forEach((t, tidx) => {
             if(Math.hypot(t.x - a.x, t.y - a.y) < 150){
               t.hypnoTimer = Math.max(t.hypnoTimer || 0, 110);
               t.stunTimer = Math.max(t.stunTimer || 0, 110);
               popParticles(t.x, t.y, '#c7a8ff', 6);
+              if(tidx !== -1) popOneToilet(tidx, {source:'TV_MAN', dmg: 6});
             }
           });
         }
@@ -3154,15 +3190,15 @@ function updateHiredAllies(dt, now){
         sfx.laserFire();
         popParticles(target.x, target.y, '#6ad7ff', 12);
         if(target !== boss){
-          popOneToilet(toilets.indexOf(target), {source:'TITAN_CAMERAMAN', dmg: 7});
+          popOneToilet(toilets.indexOf(target), {source:'TITAN_CAMERAMAN', dmg: 9});
         } else {
-          hitBoss(9, boss.x, boss.y, 'TITAN_CAMERAMAN');
+          hitBoss(11, boss.x, boss.y, 'TITAN_CAMERAMAN');
         }
       }
 
       // Rocket Hammer Slam
       a.hammerTimer = (a.hammerTimer || 0) + dt;
-      if(a.hammerTimer > 280){
+      if(a.hammerTimer > 260){
         a.hammerTimer = 0;
         titanHammerVfx = 25;
         sfx.rocketHit();
@@ -3173,10 +3209,10 @@ function updateHiredAllies(dt, now){
           const tidx = toilets.indexOf(t);
           if(tidx !== -1){
             t.y = Math.min(H + 30, t.y + 90);
-            popOneToilet(tidx, {source:'HAMMER_SLAM', dmg: 10});
+            popOneToilet(tidx, {source:'HAMMER_SLAM', dmg: 14});
           }
         });
-        if(boss) hitBoss(18, boss.x, boss.y, 'HAMMER_SLAM');
+        if(boss) hitBoss(22, boss.x, boss.y, 'HAMMER_SLAM');
       }
     }
 
@@ -3198,14 +3234,14 @@ function updateHiredAllies(dt, now){
 
       a.attackTimer -= dt;
       if(a.attackTimer <= 0 && target){
-        a.attackTimer = 18;
+        a.attackTimer = 16;
         a.attackAnim = 8;
         sfx.minigun();
         popParticles(target.x, target.y, '#ff4d4d', 8);
         if(target !== boss){
-          popOneToilet(toilets.indexOf(target), {source:'TITAN_SPEAKERMAN', dmg: 5});
+          popOneToilet(toilets.indexOf(target), {source:'TITAN_SPEAKERMAN', dmg: 6});
         } else {
-          hitBoss(6, boss.x, boss.y, 'TITAN_SPEAKERMAN');
+          hitBoss(7, boss.x, boss.y, 'TITAN_SPEAKERMAN');
         }
       }
     }
@@ -3228,7 +3264,7 @@ function updateHiredAllies(dt, now){
 
       a.attackTimer -= dt;
       if(a.attackTimer <= 0){
-        a.attackTimer = 145;
+        a.attackTimer = 140;
         titanLaserVfx = 22;
         sfx.laserFire();
         shake = 10; flash = 0.25;
@@ -3236,9 +3272,9 @@ function updateHiredAllies(dt, now){
         const tvTargets = toilets.slice();
         tvTargets.forEach(t => {
           const tidx = toilets.indexOf(t);
-          if(tidx !== -1) popOneToilet(tidx, {source:'TITAN_TV', dmg: 15});
+          if(tidx !== -1) popOneToilet(tidx, {source:'TITAN_TV', dmg: 18});
         });
-        if(boss) hitBoss(24, boss.x, boss.y, 'TITAN_TV');
+        if(boss) hitBoss(30, boss.x, boss.y, 'TITAN_TV');
       }
     }
 
@@ -4069,76 +4105,21 @@ function renderBuffsHud(){
 
 function weaponRank(id){ return weaponRanks[id] || 0; }
 
-function rankOf(id){ return skillRanks[id] || 0; }
-function prereqsMet(skill){ return skill.requires.every(id => rankOf(id) > 0); }
 function recomputePlayer(){
   player.clickRadiusBonus = 0;
   player.chainRadius = 0;
-  player.speedReduction = 0;
+  player.speedReduction = hasRelic('glacial_field') ? 0.12 : 0;
   player.scoreMult = 1;
   player.sigmaDecayBonus = 0;
   player.turretLevel = 0;
+  if(hasRelic('score_overflow')) player.scoreMult += 0.25;
+  // Apply Passive Skills
   SKILLS.forEach(s => {
     const r = rankOf(s.id);
     if(r && s.passive) s.passive(r);
   });
-  player.clickRadiusBonus = Math.min(40, player.clickRadiusBonus + 4 * Math.max(0, weaponRank('plunger') - 1));
+  player.clickRadiusBonus = Math.min(45, player.clickRadiusBonus + 4 * Math.max(0, weaponRank('plunger') - 1));
   player.turretLevel = Math.min(3, player.turretLevel);
-}
-
-function buySkill(skill){
-  const r = rankOf(skill.id);
-  if(r >= skill.max) return false;
-  if(!prereqsMet(skill)) return false;
-  if(skillPoints < skill.cost) return false;
-  skillPoints -= skill.cost;
-  skillRanks[skill.id] = r + 1;
-  if(skill.onBuy) skill.onBuy();
-  recomputePlayer();
-  sfx.upgrade();
-  renderSkillTree();
-  updateHud();
-  return true;
-}
-
-function renderSkillTree(){
-  const tree = document.getElementById('skillTree');
-  if(!tree) return;
-  const pts = document.getElementById('skillPtsVal');
-  if(pts) pts.textContent = skillPoints;
-  const groups = { STRIKE:[], HOLD:[], RIG:[] };
-  SKILLS.forEach(s => groups[s.branch].push(s));
-  tree.innerHTML = '';
-  Object.keys(groups).forEach(branch => {
-    const col = document.createElement('div');
-    col.className = 'branch';
-    col.innerHTML = '<div class="branchTitle">' + branch + '</div>';
-    groups[branch].forEach(s => {
-      const r = rankOf(s.id);
-      const maxed = r >= s.max;
-      const locked = !prereqsMet(s);
-      const available = !locked && !maxed && skillPoints >= s.cost;
-      const node = document.createElement('div');
-      node.className = 'skillNode' + (maxed ? ' maxed owned' : available ? ' available' : locked ? ' locked' : ' owned');
-      node.setAttribute('role','button');
-      node.setAttribute('tabindex','0');
-      node.innerHTML = '<div class="name">' + s.name + '</div>'
-        + '<div class="desc">' + s.desc + '</div>'
-        + '<div class="meta">Rank ' + r + '/' + s.max + '  |  Cost ' + s.cost + (locked ? '  |  LOCKED' : maxed ? '  |  MAX' : '') + '</div>';
-      if(available){
-        node.addEventListener('click', ()=> buySkill(s));
-      }
-      // keyboard activation
-      node.addEventListener('keydown', (e)=>{
-        if(e.key === 'Enter' || e.key === ' '){
-          e.preventDefault();
-          if(available) buySkill(s);
-        }
-      });
-      col.appendChild(node);
-    });
-    tree.appendChild(col);
-  });
 }
 
 function renderWeapons(){
@@ -5143,16 +5124,25 @@ const pBtn = document.getElementById('pauseBtn'); if(pBtn) pBtn.addEventListener
 
 const fsBtn = document.getElementById('fsMobileBtn');
 if(fsBtn){
-  fsBtn.addEventListener('click', ()=>{
-    if(!document.fullscreenElement){
-      document.documentElement.requestFullscreen().catch(()=>{});
-    } else {
-      document.exitFullscreen().catch(()=>{});
-    }
-  });
+  fsBtn.addEventListener('click', toggleFullscreen);
 }
 
-document.getElementById('resumeBtn').addEventListener('click', togglePause);
+function toggleFullscreen(){
+  if(!document.fullscreenElement){
+    document.documentElement.requestFullscreen().catch(()=>{});
+  } else {
+    document.exitFullscreen().catch(()=>{});
+  }
+}
+
+
+  const sBtn = document.getElementById('skillsBtn');
+  if(sBtn) sBtn.addEventListener('click', openSkillsScreen);
+  const sClose = document.getElementById('skillsCloseBtn');
+  if(sClose) sClose.addEventListener('click', closeSkillsScreen);
+
+  document.getElementById('resumeBtn').addEventListener('click', togglePause);
+document.getElementById('restartRunBtn').addEventListener('click', restartRun);
 document.getElementById('quitMenuBtn').addEventListener('click', quitToMainMenu);
 document.getElementById('quitGameBtn').addEventListener('click', quitGame);
 window.addEventListener('keydown', (e)=>{
@@ -5172,6 +5162,9 @@ window.addEventListener('keydown', (e)=>{
   } else if(e.key.toLowerCase() === 'h'){
     if(state === 'hire') closeHireScreen();
     else openHireScreen();
+  } else if(e.key.toLowerCase() === 'k'){
+    if(state === 'skills') closeSkillsScreen();
+    else openSkillsScreen();
   } else if(e.key.toLowerCase() === 's'){
     if(state === 'shop') closeManualShop();
     else openManualShop();
@@ -5182,11 +5175,17 @@ window.addEventListener('keydown', (e)=>{
   } else if(e.key.toLowerCase() === 'm'){
     if(modsPanel.style.display === 'flex') modsCloseBtn.click();
     else modsBtn.click();
+  } else if(e.key === 'F11'){
+    e.preventDefault();
+    toggleFullscreen();
   } else if(e.key.toLowerCase() === 'p' || e.key === 'Escape'){
     const tut = document.getElementById('tutorialScreen');
     if(tut && tut.style.display === 'flex'){ closeTutorial(); return; }
     togglePause();
   }
+});
+window.addEventListener('blur', ()=>{
+  if(!paused && state === 'playing') togglePause();
 });
 document.addEventListener('touchmove', (e)=>{
   if(e.target === canvas) e.preventDefault();
@@ -5261,13 +5260,26 @@ function quitGame(){
   setTimeout(function(){ location.replace('about:blank'); }, 80);
 }
 
+function restartRun(){
+  score = 0;
+  wave = 1;
+  try { localStorage.removeItem('skibidiCheckpoint'); } catch(e){}
+  resetGame();
+  state = 'playing';
+  pausePrevState = 'playing';
+  document.getElementById('pauseOverlay').style.display = 'none';
+  updateRelicsHud();
+  updateHud();
+  startWave();
+  if(!gameLoopStarted){ gameLoopStarted = true; lastFrame = 0; requestAnimationFrame(loop); }
+}
+
 function saveCheckpoint(){
   if(wave % 5 === 0 && wave > 1 && wave < TOTAL_WAVES){
     const data = {
       wave: wave,
       score: score,
       skillPoints: skillPoints,
-      skills: skillRanks,
       weapons: weaponRanks,
       allies: hiredRanks,
       diffKey: chosenDifficultyKey,
@@ -5285,7 +5297,6 @@ function openUpgradeScreen(fromBoss){
   if(player.healOnWave && wave % 5 === 0 && lives < player.maxLives) lives++;
   document.getElementById('upgradeTitle').textContent = fromBoss ? 'BOSS DEFEATED — UPGRADE' : 'WAVE CLEARED — UPGRADE';
   sfx.waveClear();
-  renderSkillTree();
   renderWeapons();
   updateHud();
   upgradeScreen.style.display = 'flex';
@@ -5299,7 +5310,7 @@ document.getElementById('continueBtn').addEventListener('click', ()=>{
   startWave();
 });
 
-/* ================= MID-WAVE SKILL SHOP ================= */
+/* ================= MID-WAVE WEAPON SHOP ================= */
 let manualShop = false;
 let shopPrevState = 'playing';
 const shopBtn = document.getElementById('shopBtn');
@@ -5310,8 +5321,7 @@ function openManualShop(){
   manualShop = true;
   shopPrevState = state;
   state = 'shop';
-  document.getElementById('upgradeTitle').textContent = 'SKILL SHOP';
-  renderSkillTree();
+  document.getElementById('upgradeTitle').textContent = 'WEAPON ARSENAL SHOP';
   renderWeapons();
   updateHud();
   upgradeScreen.style.display = 'flex';
