@@ -5095,11 +5095,15 @@ function startWave(){
 
   if(isGManWave(wave)){
     state = 'bossIntro';
-    const gmanSubtitle = isInfinityMode ? 'G-MAN 1.0 (APEX OVERLORD) HAS ENTERED THE RUN' : 'THE G-MAN HAS ARRIVED';
-    showBanner('WAVE ' + wave, gmanSubtitle, ()=>{
+    const isGMan20 = isInfinityMode && (wave % 200 === 0);
+    const gmanTitle = isGMan20 ? 'WAVE ' + wave + ' // G-MAN 2.0' : 'WAVE ' + wave;
+    const gmanSubtitle = isGMan20 
+      ? 'G-MAN 2.0 (JETPACK APEX SIEGE ENGINE) HAS AIR-DROPPED INTO THE FACILITY!' 
+      : (isInfinityMode ? 'G-MAN 1.0 (APEX OVERLORD) HAS ENTERED THE RUN' : 'THE G-MAN HAS ARRIVED');
+    showBanner(gmanTitle, gmanSubtitle, ()=>{
       spawnGManBoss();
       state = 'playing';
-    }, 1800);
+    }, 1900);
   } else if(isBossWave(wave)){
     state = 'bossIntro';
     showBanner('BOSS INCOMING', 'A sigma-tier toilet has entered the chat.', ()=>{
@@ -5255,18 +5259,24 @@ function spawnBoss(){
 function spawnGManBoss(){
   sfx.bossSpawn();
   finalMinionTimer = 0;
+  const isGMan20 = isInfinityMode && (wave % 200 === 0);
   const scale = Math.max(1, wave / 100);
-  const hp = Math.round((850 + (scale - 1) * 600) * diff.hpMult);
+  const baseHp = isGMan20 ? 1850 : 850;
+  const hp = Math.round((baseHp + (scale - 1) * 750) * diff.hpMult);
   boss = {
     x: W/2, y: H + 120,
-    r: 96, vx: 1.25,
+    r: isGMan20 ? 104 : 96,
+    vx: isGMan20 ? 1.85 : 1.25,
     hp, maxHp: hp,
-    targetY: H * 0.28,
+    targetY: isGMan20 ? H * 0.24 : H * 0.28,
     phase: 'rising',
     isFinal: !isInfinityMode,
     isGMan: true,
-    title: 'G-MAN 1.0 (APEX)',
-    laserTimer: 160,
+    version: isGMan20 ? '2.0' : '1.0',
+    title: isGMan20 ? 'G-MAN 2.0 (JETPACK APEX)' : 'G-MAN 1.0 (APEX)',
+    hasJetpack: isGMan20,
+    hasCannons: isGMan20,
+    laserTimer: isGMan20 ? 130 : 160,
     laserState: 'idle',
     laserStateTimer: 0,
     wobble: 0
@@ -6141,6 +6151,267 @@ function drawSuitedFigure(r, now, opts){
   ctx.beginPath(); ctx.moveTo(-r * 0.16, -r * 0.22); ctx.lineTo(r * 0.16, -r * 0.22); ctx.stroke();
 }
 
+
+
+function drawGMan20Toilet(ent, now, opts){
+  const r = ent.r;
+  const charging = opts && opts.laserState === 'charging';
+  const firing = opts && opts.laserState === 'firing';
+  const rage = opts && opts.rage;
+
+  ctx.save();
+  ctx.translate(ent.x, ent.y);
+  ctx.rotate(Math.sin(ent.wobble || 0) * 0.08);
+
+  // 1. TWIN JETPACK ROCKET THRUSTERS (Behind Cistern Tank)
+  [-r * 0.65, r * 0.65].forEach((jx, idx) => {
+    ctx.save();
+    const tw = r * 0.28, th = r * 0.95;
+    const ty = -r * 1.15;
+    
+    // Thruster Cylinder (Ribbed Gunmetal)
+    const thrusterGrad = ctx.createLinearGradient(jx - tw/2, ty, jx + tw/2, ty + th);
+    thrusterGrad.addColorStop(0, '#3a4146');
+    thrusterGrad.addColorStop(0.3, '#1c2024');
+    thrusterGrad.addColorStop(0.7, '#2f353a');
+    thrusterGrad.addColorStop(1, '#0e1114');
+    ctx.fillStyle = thrusterGrad;
+    roundPath(jx - tw/2, ty, tw, th, 4); ctx.fill();
+    ctx.strokeStyle = '#0a0d0f'; ctx.lineWidth = 2; ctx.stroke();
+
+    // Cooling Ribs & Reinforcement Bands
+    ctx.strokeStyle = '#ffd35c'; ctx.lineWidth = 2;
+    for(let band = ty + th * 0.2; band < ty + th * 0.8; band += th * 0.22){
+      ctx.beginPath(); ctx.moveTo(jx - tw/2, band); ctx.lineTo(jx + tw/2, band); ctx.stroke();
+    }
+
+    // Exhaust Nozzle Bell
+    ctx.fillStyle = '#181b1e';
+    ctx.beginPath();
+    ctx.moveTo(jx - tw * 0.45, ty + th);
+    ctx.lineTo(jx + tw * 0.45, ty + th);
+    ctx.lineTo(jx + tw * 0.6, ty + th + r * 0.16);
+    ctx.lineTo(jx - tw * 0.6, ty + th + r * 0.16);
+    ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#4a535a'; ctx.lineWidth = 1.5; ctx.stroke();
+
+    // Animated Rocket Exhaust Flame Plume (High-thrust jetpack fire!)
+    const nozzleY = ty + th + r * 0.16;
+    const flameLen = r * (0.45 + Math.sin(now * 0.035 + idx * 2.5) * 0.18 + (firing ? 0.35 : 0));
+    
+    // Outer Orange Flame
+    const flameGrad = ctx.createLinearGradient(jx, nozzleY, jx, nozzleY + flameLen);
+    flameGrad.addColorStop(0, 'rgba(255, 240, 150, 0.95)');
+    flameGrad.addColorStop(0.35, 'rgba(255, 120, 20, 0.85)');
+    flameGrad.addColorStop(0.8, 'rgba(255, 40, 10, 0.5)');
+    flameGrad.addColorStop(1, 'rgba(255, 30, 10, 0)');
+    ctx.fillStyle = flameGrad;
+    ctx.beginPath();
+    ctx.moveTo(jx - tw * 0.4, nozzleY);
+    ctx.quadraticCurveTo(jx - tw * 0.1, nozzleY + flameLen * 0.6, jx, nozzleY + flameLen);
+    ctx.quadraticCurveTo(jx + tw * 0.1, nozzleY + flameLen * 0.6, jx + tw * 0.4, nozzleY);
+    ctx.closePath(); ctx.fill();
+
+    // Inner White-Hot Thrust Core
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.beginPath();
+    ctx.moveTo(jx - tw * 0.2, nozzleY);
+    ctx.lineTo(jx, nozzleY + flameLen * 0.45);
+    ctx.lineTo(jx + tw * 0.2, nozzleY);
+    ctx.closePath(); ctx.fill();
+
+    ctx.restore();
+  });
+
+  // 2. DARK MATTE CHARCOAL PORCELAIN TANK (Reinforced Cistern)
+  const tankX = -r * 0.50, tankY = -r * 1.10, tankW = r * 1.0, tankH = r * 0.78;
+  const tankGrad = ctx.createLinearGradient(tankX, tankY, tankX + tankW, tankY + tankH);
+  tankGrad.addColorStop(0, '#42484f');
+  tankGrad.addColorStop(0.25, '#282c31');
+  tankGrad.addColorStop(0.7, '#1b1e22');
+  tankGrad.addColorStop(1, '#0e1012');
+  ctx.fillStyle = tankGrad;
+  roundPath(tankX, tankY, tankW, tankH, r * 0.1); ctx.fill();
+  ctx.strokeStyle = '#090a0c'; ctx.lineWidth = 2.4; ctx.stroke();
+
+  // Armor Bolting Plates on Tank
+  ctx.fillStyle = '#636c75';
+  [[-r * 0.42, tankY + r * 0.1], [r * 0.42, tankY + r * 0.1], [-r * 0.42, tankY + tankH - r * 0.1], [r * 0.42, tankY + tankH - r * 0.1]].forEach(([bx, by]) => {
+    ctx.beginPath(); ctx.arc(bx, by, r * 0.035, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#1a1d20'; ctx.lineWidth = 1; ctx.stroke();
+  });
+
+  // 3. DUAL HEAVY DIRECTED-ENERGY LASER CANNONS
+  [-1, 1].forEach(side => {
+    ctx.save();
+    const cx = side * r * 0.95;
+    const cy = r * 0.05;
+
+    // Heavy Mechanical Pivot Mount
+    ctx.fillStyle = '#22272c';
+    ctx.beginPath(); ctx.arc(side * r * 0.72, cy, r * 0.16, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#505860'; ctx.lineWidth = 2; ctx.stroke();
+
+    // Cannon Extension Strut
+    ctx.strokeStyle = '#343a41'; ctx.lineWidth = 8;
+    ctx.beginPath(); ctx.moveTo(side * r * 0.72, cy); ctx.lineTo(cx, cy); ctx.stroke();
+
+    // Heavy Cylindrical Laser Cannon Barrel
+    const barrelW = r * 0.32, barrelH = r * 0.65;
+    const bGrad = ctx.createLinearGradient(cx - barrelW/2, cy - barrelH/2, cx + barrelW/2, cy + barrelH/2);
+    bGrad.addColorStop(0, '#58616a');
+    bGrad.addColorStop(0.35, '#2a3036');
+    bGrad.addColorStop(0.8, '#181b1f');
+    bGrad.addColorStop(1, '#0c0e10');
+    ctx.fillStyle = bGrad;
+    roundPath(cx - barrelW/2, cy - barrelH/2, barrelW, barrelH, 5); ctx.fill();
+    ctx.strokeStyle = '#0a0c0e'; ctx.lineWidth = 2; ctx.stroke();
+
+    // Hazard Energy Emitter Ring
+    const glowColor = firing ? '#ffe066' : charging ? '#ffb339' : '#4fa3ff';
+    ctx.fillStyle = glowColor;
+    ctx.shadowColor = glowColor; ctx.shadowBlur = firing ? 22 : charging ? 14 : 5;
+    ctx.beginPath(); ctx.ellipse(cx, cy - barrelH/2, barrelW * 0.42, r * 0.07, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Targeting Stabilizer Rails
+    ctx.strokeStyle = '#ff9922'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(cx - barrelW * 0.4, cy); ctx.lineTo(cx - barrelW * 0.4, cy + barrelH * 0.4); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx + barrelW * 0.4, cy); ctx.lineTo(cx + barrelW * 0.4, cy + barrelH * 0.4); ctx.stroke();
+
+    ctx.restore();
+  });
+
+  // 4. MILITARY BOWL WITH BALLISTIC ARMOR PLATES
+  const bowlGrad = ctx.createRadialGradient(-r * 0.15, r * 0.1, r * 0.12, 0, r * 0.3, r * 0.95);
+  bowlGrad.addColorStop(0, '#3e444b');
+  bowlGrad.addColorStop(0.3, '#262a2e');
+  bowlGrad.addColorStop(0.75, '#16191c');
+  bowlGrad.addColorStop(1, '#0c0d10');
+  ctx.fillStyle = bowlGrad;
+  ctx.beginPath(); ctx.ellipse(0, r * 0.32, r * 0.92, r * 0.56, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#0a0c0e'; ctx.lineWidth = 2.4; ctx.stroke();
+
+  // Angular Ballistic Armor Plating (Front Apron Shield)
+  const plateGrad = ctx.createLinearGradient(-r * 0.65, 0, r * 0.65, r * 0.5);
+  plateGrad.addColorStop(0, '#4a535c');
+  plateGrad.addColorStop(0.5, '#2c3238');
+  plateGrad.addColorStop(1, '#15181b');
+  ctx.fillStyle = plateGrad;
+  ctx.beginPath();
+  ctx.moveTo(-r * 0.68, r * 0.12);
+  ctx.lineTo(r * 0.68, r * 0.12);
+  ctx.lineTo(r * 0.52, r * 0.65);
+  ctx.lineTo(0, r * 0.74);
+  ctx.lineTo(-r * 0.52, r * 0.65);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#ffd35c'; ctx.lineWidth = 2; ctx.stroke();
+
+  // Armor Seam Screws
+  ctx.fillStyle = '#ffd35c';
+  [[-r * 0.55, r * 0.2], [r * 0.55, r * 0.2], [-r * 0.38, r * 0.55], [r * 0.38, r * 0.55], [0, r * 0.65]].forEach(([sx, sy]) => {
+    ctx.beginPath(); ctx.arc(sx, sy, 3, 0, Math.PI * 2); ctx.fill();
+  });
+
+  // Dark Sewer Waste Well
+  ctx.beginPath(); ctx.ellipse(0, r * 0.26, r * 0.58, r * 0.32, 0, 0, Math.PI * 2);
+  ctx.fillStyle = '#060809'; ctx.fill();
+
+  // 5. G-MAN 2.0 HEAD (Intense Yellow-Green Laser Eyes)
+  ctx.save();
+  ctx.translate(0, -r * 0.30);
+
+  // Muscular Neck
+  const neckGrad = ctx.createLinearGradient(-r * 0.22, 0, r * 0.22, r * 0.45);
+  neckGrad.addColorStop(0, '#916d54'); neckGrad.addColorStop(0.5, '#c9a287'); neckGrad.addColorStop(1, '#694a34');
+  ctx.fillStyle = neckGrad;
+  ctx.beginPath();
+  ctx.moveTo(-r * 0.22, r * 0.05); ctx.lineTo(-r * 0.26, r * 0.52);
+  ctx.lineTo(r * 0.26, r * 0.52); ctx.lineTo(r * 0.22, r * 0.05);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#382517'; ctx.lineWidth = 1.4; ctx.stroke();
+
+  // Chiseled Head Contour
+  const faceGrad = ctx.createRadialGradient(-r * 0.08, -r * 0.22, 6, 0, -r * 0.05, r * 0.52);
+  faceGrad.addColorStop(0, '#fae6d4'); faceGrad.addColorStop(0.35, '#e4c4ab'); faceGrad.addColorStop(0.75, '#b58f73'); faceGrad.addColorStop(1, '#70513b');
+  ctx.fillStyle = faceGrad;
+  ctx.beginPath();
+  ctx.moveTo(-r * 0.34, -r * 0.25);
+  ctx.quadraticCurveTo(-r * 0.38, r * 0.08, -r * 0.22, r * 0.28);
+  ctx.lineTo(-r * 0.08, r * 0.35); ctx.lineTo(0, r * 0.36); ctx.lineTo(r * 0.08, r * 0.35);
+  ctx.quadraticCurveTo(r * 0.38, r * 0.08, r * 0.34, -r * 0.25);
+  ctx.quadraticCurveTo(r * 0.36, -r * 0.55, 0, -r * 0.56);
+  ctx.quadraticCurveTo(-r * 0.36, -r * 0.55, -r * 0.34, -r * 0.25);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#382215'; ctx.lineWidth = 1.8; ctx.stroke();
+
+  // Slicked Crew Cut Hair with Widows Peak
+  const hairGrad = ctx.createLinearGradient(0, -r * 0.62, 0, -r * 0.25);
+  hairGrad.addColorStop(0, '#0c0a09'); hairGrad.addColorStop(0.5, '#201a18'); hairGrad.addColorStop(1, '#332924');
+  ctx.fillStyle = hairGrad;
+  ctx.beginPath();
+  ctx.moveTo(-r * 0.35, -r * 0.22);
+  ctx.quadraticCurveTo(-r * 0.37, -r * 0.58, 0, -r * 0.60);
+  ctx.quadraticCurveTo(r * 0.37, -r * 0.58, r * 0.35, -r * 0.22);
+  ctx.quadraticCurveTo(r * 0.24, -r * 0.32, r * 0.12, -r * 0.30);
+  ctx.lineTo(0, -r * 0.24);
+  ctx.lineTo(-r * 0.12, -r * 0.30);
+  ctx.quadraticCurveTo(-r * 0.24, -r * 0.32, -r * 0.35, -r * 0.22);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#080605'; ctx.lineWidth = 1.6; ctx.stroke();
+
+  // Eyebrows in Aggressive Menacing Scowl
+  ctx.fillStyle = '#140f0c';
+  ctx.beginPath();
+  ctx.moveTo(-r * 0.24, -r * 0.08); ctx.lineTo(-r * 0.04, -r * 0.02); ctx.lineTo(-r * 0.05, -r * 0.06); ctx.lineTo(-r * 0.23, -r * 0.11);
+  ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(r * 0.24, -r * 0.08); ctx.lineTo(r * 0.04, -r * 0.02); ctx.lineTo(r * 0.05, -r * 0.06); ctx.lineTo(r * 0.23, -r * 0.11);
+  ctx.closePath(); ctx.fill();
+
+  // Aquiline Nose
+  const noseGrad = ctx.createLinearGradient(-r * 0.04, -r * 0.04, r * 0.08, r * 0.12);
+  noseGrad.addColorStop(0, '#fad5be'); noseGrad.addColorStop(1, '#a67d60');
+  ctx.fillStyle = noseGrad;
+  ctx.beginPath(); ctx.moveTo(0, -r * 0.04); ctx.lineTo(-r * 0.05, r * 0.09); ctx.lineTo(0, r * 0.11); ctx.lineTo(r * 0.05, r * 0.09);
+  ctx.closePath(); ctx.fill();
+
+  // Malevolent Grin & Clenched Teeth
+  const mouthW = r * 0.27, mouthH = r * 0.095, mouthY = r * 0.19;
+  ctx.fillStyle = '#1c0707';
+  ctx.beginPath();
+  ctx.moveTo(-mouthW, mouthY - r * 0.02);
+  ctx.quadraticCurveTo(0, mouthY - r * 0.04, mouthW, mouthY - r * 0.02);
+  ctx.quadraticCurveTo(0, mouthY + mouthH + r * 0.02, -mouthW, mouthY - r * 0.02);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#300e0e'; ctx.lineWidth = 1.5; ctx.stroke();
+
+  // Clenched Teeth
+  ctx.fillStyle = '#f8f9fa';
+  ctx.fillRect(-mouthW * 0.8, mouthY - r * 0.02, mouthW * 1.6, mouthH * 0.8);
+  ctx.strokeStyle = 'rgba(40,20,20,0.45)'; ctx.lineWidth = 1;
+  for(let tx = -mouthW * 0.65; tx <= mouthW * 0.65; tx += mouthW * 0.2){
+    ctx.beginPath(); ctx.moveTo(tx, mouthY - r * 0.02); ctx.lineTo(tx, mouthY + mouthH * 0.7); ctx.stroke();
+  }
+
+  // SIGNATURE G-MAN 2.0 BRIGHT YELLOW-GREEN LASER EYES
+  const eyeDX = r * 0.12, eyeY = -r * 0.04;
+  const eyeGlow = firing ? 1.0 : charging ? (0.6 + Math.sin(now / 30) * 0.35) : 0.45;
+
+  [[-eyeDX, eyeY], [eyeDX, eyeY]].forEach(([ex, ey]) => {
+    ctx.fillStyle = '#e8ded4';
+    ctx.beginPath(); ctx.ellipse(ex, ey, r * 0.068, r * 0.044, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#2b1b12'; ctx.lineWidth = 1.2; ctx.stroke();
+
+    ctx.fillStyle = firing ? '#ffffff' : '#b4ff39';
+    ctx.shadowColor = '#8ce81e'; ctx.shadowBlur = 14 + eyeGlow * 22;
+    ctx.beginPath(); ctx.arc(ex, ey, r * 0.038 + eyeGlow * 2, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+  });
+
+  ctx.restore();
+  ctx.restore();
+}
 
 function drawGMan10Toilet(ent, now, opts){
   const r = ent.r;
@@ -8213,18 +8484,58 @@ function loop(ts){
           popParticles(boss.x + (Math.random()-0.5)*boss.r, boss.y + (Math.random()-0.5)*boss.r, '#ff3a1a', 2);
         }
 
-        drawGMan10Toilet(boss, now, {laserState: boss.laserState, rage: isPhase3Rage});
-        if(boss.laserState==='firing') [eyeL,eyeR].forEach(eye=>{
-          const grad=ctx.createLinearGradient(eye.x,eye.y,eye.x,H);
-          grad.addColorStop(0,'rgba(255,255,220,1)');
-          grad.addColorStop(0.12,'rgba(255,50,20,0.9)');
-          grad.addColorStop(0.6,'rgba(255,140,0,0.4)');
-          grad.addColorStop(1,'rgba(255,40,20,0)');
-          ctx.fillStyle=grad;
-          ctx.beginPath(); ctx.moveTo(eye.x-6,eye.y); ctx.lineTo(eye.x+6,eye.y);
-          ctx.lineTo(eye.x+22,H); ctx.lineTo(eye.x-22,H); ctx.closePath(); ctx.fill();
-        });
-        drawLabel(boss.title || 'G-MAN 1.0 (APEX)', boss.x, boss.y-boss.r-26, '#ff4732');
+        if(boss.version === '2.0'){
+          // G-MAN 2.0 Jetpack Thruster Flight Particles
+          if(Math.random() < 0.65){
+            popParticles(boss.x - boss.r * 0.65, boss.y + boss.r * 0.1, '#ff9922', 2);
+            popParticles(boss.x + boss.r * 0.65, boss.y + boss.r * 0.1, '#ff9922', 2);
+          }
+
+          drawGMan20Toilet(boss, now, {laserState: boss.laserState, rage: isPhase3Rage});
+
+          // QUAD LASER BEAMS: 2 from Eyes (Yellow-Green) + 2 from Heavy Side Cannons (Yellow-Orange)!
+          if(boss.laserState === 'firing'){
+            // 1. Dual Eye Beams (Yellow-Green Plasma)
+            [eyeL, eyeR].forEach(eye => {
+              const grad = ctx.createLinearGradient(eye.x, eye.y, eye.x, H);
+              grad.addColorStop(0, '#ffffff');
+              grad.addColorStop(0.15, 'rgba(180, 255, 57, 0.95)');
+              grad.addColorStop(0.65, 'rgba(120, 230, 30, 0.45)');
+              grad.addColorStop(1, 'rgba(100, 210, 20, 0)');
+              ctx.fillStyle = grad;
+              ctx.beginPath(); ctx.moveTo(eye.x - 6, eye.y); ctx.lineTo(eye.x + 6, eye.y);
+              ctx.lineTo(eye.x + 20, H); ctx.lineTo(eye.x - 20, H); ctx.closePath(); ctx.fill();
+            });
+
+            // 2. Dual Side Cannon Beams (Heavy Golden-Orange Shock Lasers)
+            const canonL = { x: boss.x - boss.r * 0.95, y: boss.y - boss.r * 0.25 };
+            const canonR = { x: boss.x + boss.r * 0.95, y: boss.y - boss.r * 0.25 };
+            [canonL, canonR].forEach(cn => {
+              const grad = ctx.createLinearGradient(cn.x, cn.y, cn.x, H);
+              grad.addColorStop(0, '#ffffff');
+              grad.addColorStop(0.15, 'rgba(255, 170, 30, 0.95)');
+              grad.addColorStop(0.65, 'rgba(255, 90, 10, 0.5)');
+              grad.addColorStop(1, 'rgba(255, 60, 10, 0)');
+              ctx.fillStyle = grad;
+              ctx.beginPath(); ctx.moveTo(cn.x - 12, cn.y); ctx.lineTo(cn.x + 12, cn.y);
+              ctx.lineTo(cn.x + 36, H); ctx.lineTo(cn.x - 36, H); ctx.closePath(); ctx.fill();
+            });
+          }
+          drawLabel('G-MAN 2.0 (JETPACK APEX)', boss.x, boss.y - boss.r - 28, '#ffd35c');
+        } else {
+          drawGMan10Toilet(boss, now, {laserState: boss.laserState, rage: isPhase3Rage});
+          if(boss.laserState==='firing') [eyeL,eyeR].forEach(eye=>{
+            const grad=ctx.createLinearGradient(eye.x,eye.y,eye.x,H);
+            grad.addColorStop(0,'rgba(255,255,220,1)');
+            grad.addColorStop(0.12,'rgba(255,50,20,0.9)');
+            grad.addColorStop(0.6,'rgba(255,140,0,0.4)');
+            grad.addColorStop(1,'rgba(255,40,20,0)');
+            ctx.fillStyle=grad;
+            ctx.beginPath(); ctx.moveTo(eye.x-6,eye.y); ctx.lineTo(eye.x+6,eye.y);
+            ctx.lineTo(eye.x+22,H); ctx.lineTo(eye.x-22,H); ctx.closePath(); ctx.fill();
+          });
+          drawLabel(boss.title || 'G-MAN 1.0 (APEX)', boss.x, boss.y-boss.r-26, '#ff4732');
+        }
       }
     }
     sigma=Math.max(0,sigma-(0.035+player.sigmaDecayBonus)*dt);
