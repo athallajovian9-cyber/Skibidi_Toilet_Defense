@@ -127,34 +127,70 @@
   #weaponShop{width:min(980px,100%);max-width:980px;}
   #weaponShop h3{color:var(--gold);letter-spacing:2px;font-size:12px;margin:2px 0 8px;}
   .skillTree{
-    display:flex;gap:18px;justify-content:center;align-items:flex-start;
-    flex-wrap:wrap;max-width:980px;width:100%;max-height:62vh;overflow:auto;
-    -webkit-overflow-scrolling:touch;overscroll-behavior:contain;
+    display:flex;gap:20px;justify-content:center;align-items:flex-start;
+    flex-wrap:wrap;max-width:1040px;width:100%;max-height:64vh;overflow:auto;
+    -webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:8px;
   }
-  .branch{display:flex;flex-direction:column;align-items:center;min-width:210px;}
+  .branch{
+    display:flex;flex-direction:column;align-items:center;min-width:240px;flex:1;max-width:320px;
+    background:rgba(12, 18, 14, 0.65);border:1px solid rgba(80, 140, 105, 0.3);border-radius:10px;padding:12px 10px 6px;
+    box-shadow:inset 0 0 20px rgba(0,0,0,0.5);
+  }
   .branchTitle{
-    color:var(--gold);letter-spacing:2px;font-size:12px;margin-bottom:8px;
-    border-bottom:1px solid var(--pipe);padding-bottom:6px;width:100%;text-align:center;
+    letter-spacing:1.5px;font-size:12px;font-weight:900;margin-bottom:12px;
+    padding:6px 12px;width:100%;text-align:center;border-radius:6px;
+    display:flex;align-items:center;justify-content:center;gap:6px;box-sizing:border-box;
   }
+  .branch.strike .branchTitle{ background:rgba(255,122,61,0.15);border:1px solid #ff7a3d;color:#ff9f68;box-shadow:0 0 12px rgba(255,122,61,0.25); }
+  .branch.hold .branchTitle{ background:rgba(106,215,255,0.15);border:1px solid #6ad7ff;color:#9ce3ff;box-shadow:0 0 12px rgba(106,215,255,0.25); }
+  .branch.rig .branchTitle{ background:rgba(255,211,92,0.15);border:1px solid #ffd35c;color:#ffe18d;box-shadow:0 0 12px rgba(255,211,92,0.25); }
+  .branch.infantry .branchTitle{ background:rgba(139,255,92,0.15);border:1px solid #8bff5c;color:#b2ff8f;box-shadow:0 0 12px rgba(139,255,92,0.25); }
+  .branch.techops .branchTitle{ background:rgba(199,168,255,0.15);border:1px solid #c7a8ff;color:#dec9ff;box-shadow:0 0 12px rgba(199,168,255,0.25); }
+  .branch.titans .branchTitle{ background:rgba(255,92,61,0.15);border:1px solid #ff5c3d;color:#ff8e78;box-shadow:0 0 12px rgba(255,92,61,0.25); }
+
   .skillNode{
-    background:#10160d;border:2px solid var(--pipe);width:210px;padding:10px 12px;
-    text-align:left;position:relative;margin:0 0 14px;
-    transition:border-color .15s, transform .1s, box-shadow .15s;
+    background:#0e1511;border:1.5px solid #293d2c;width:100%;padding:10px 12px;
+    text-align:left;position:relative;margin:0 0 16px;border-radius:8px;box-sizing:border-box;
+    transition:all .18s cubic-bezier(0.16, 1, 0.3, 1);
   }
   .skillNode::after{
-    content:'';position:absolute;left:50%;bottom:-14px;width:2px;height:14px;
-    background:var(--pipe);transform:translateX(-1px);
+    content:'';position:absolute;left:50%;bottom:-16px;width:2px;height:16px;
+    background:#293d2c;transform:translateX(-1px);z-index:1;
   }
   .skillNode:last-child::after{display:none;}
-  .skillNode .name{color:var(--gold);font-size:13px;font-weight:bold;margin-bottom:3px;}
-  .skillNode .desc{color:#b9c7b2;font-size:11px;line-height:1.35;}
-  .skillNode .meta{margin-top:6px;font-size:10px;color:#8fa385;}
-  .skillNode.locked{opacity:0.38;cursor:not-allowed;}
-  .skillNode.available{border-color:var(--gold);box-shadow:0 0 12px rgba(255,211,92,.28);cursor:pointer;}
-  .skillNode.available:hover{transform:translateY(-2px);}
-  .skillNode.owned{border-color:var(--sigma);}
-  .skillNode.maxed{background:#152010;border-color:var(--sigma);cursor:default;}
-  .skillNode:focus{outline:3px solid rgba(255,211,92,0.08);}
+  .skillNode:last-child{margin-bottom:8px;}
+
+  .skillNodeHeader{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+  .skillNode .name{font-size:12px;font-weight:800;letter-spacing:0.5px;display:flex;align-items:center;gap:6px;}
+  .skillNode .tag{font-size:8px;padding:2px 6px;border-radius:4px;font-weight:800;letter-spacing:0.5px;}
+  .skillNode .desc{color:#b9c7b2;font-size:11px;line-height:1.4;margin:4px 0 8px;}
+
+  .skillPipsWrap{display:flex;align-items:center;justify-content:space-between;border-top:1px solid rgba(80,140,105,0.2);padding-top:6px;margin-top:4px;}
+  .skillPips{display:flex;gap:4px;}
+  .skillPip{width:14px;height:6px;border-radius:2px;background:#1a251b;border:1px solid #2d3f2f;transition:all .2s ease;}
+  .skillPip.filled{background:#8bff5c;border-color:#8bff5c;box-shadow:0 0 6px rgba(139,255,92,0.6);}
+  .skillPip.filled.max{background:#ffd35c;border-color:#ffd35c;box-shadow:0 0 6px rgba(255,211,92,0.6);}
+  .skillCostBadge{font-size:10px;font-weight:800;letter-spacing:0.5px;}
+
+  .skillNode.locked{opacity:0.42;cursor:not-allowed;background:#090d0a;border-color:#1c271e;}
+  .skillNode.locked .name{color:#768772;}
+  .skillNode.locked::after{background:#1c271e;}
+  .skillNode.available{
+    border-color:var(--gold);box-shadow:0 0 16px rgba(255,211,92,0.22);cursor:pointer;
+    background:linear-gradient(135deg, #121c13, #182619);
+  }
+  .skillNode.available .name{color:#ffd35c;}
+  .skillNode.available:hover{transform:translateY(-2px);box-shadow:0 0 24px rgba(255,211,92,0.4);border-color:#ffe38d;}
+  .skillNode.owned{border-color:rgba(139,255,92,0.6);background:#101a12;}
+  .skillNode.owned .name{color:#a9ff85;}
+  .skillNode.owned::after{background:rgba(139,255,92,0.6);}
+  .skillNode.maxed{
+    background:linear-gradient(135deg, #101c13, #152419);border-color:var(--gold);
+    cursor:default;box-shadow:0 0 12px rgba(255,211,92,0.18);
+  }
+  .skillNode.maxed .name{color:#ffd35c;}
+  .skillNode.maxed::after{background:var(--gold);}
+  .skillNode:focus{outline:2px solid rgba(255,211,92,0.5);outline-offset:2px;}
 
   #continueBtn{margin-top:14px;}
   /* cleaned */
@@ -1798,40 +1834,93 @@ function buyCadreSkill(skill){
   return true;
 }
 
-function renderCadreTree(){
-  const tree = document.getElementById('cadreTree');
+
+const SKILL_ICONS = {
+  reach: '🎯', chain: '⚡', crit: '💥', overkill: '☠️',
+  slow: '🐌', coolant: '❄️', life: '❤️', shield: '🛡️', medic: '🏥',
+  score: '💰', turret: '🤖', barrel: '🔄', caliber: '💣', overclock: '⚡',
+  plumber_rush: '🪠', uzi_overdrive: '🔫', chad_cybernetics: '⚔️', hound_electrified: '🐕',
+  acoustic_resonance: '🔊', hypno_overload: '📺', lab_cascade: '🔬', orbital_lock: '🚀',
+  drill_magma: '⛏️', speaker_hypercharge: '📢', chrono_singularity: '⏱️'
+};
+
+function renderSkillTree(){
+  const tree = document.getElementById('pureSkillTree');
   if(!tree) return;
-  const pts = document.getElementById('cadrePtsVal');
+  const pts = document.getElementById('skillPtsValTree');
   if(pts) pts.textContent = skillPoints;
-  const groups = { INFANTRY:[], 'TECH OPS':[], TITANS:[] };
-  CADRE_SKILLS.forEach(s => {
-    if(groups[s.branch]) groups[s.branch].push(s);
-  });
+  const groups = {
+    STRIKE: { name: '⚔️ STRIKE // OFFENSE', cls: 'strike' },
+    HOLD:   { name: '🛡️ HOLD // SURVIVAL', cls: 'hold' },
+    RIG:    { name: '⚙️ RIG // AUTOMATION', cls: 'rig' }
+  };
+  const groupedSkills = { STRIKE:[], HOLD:[], RIG:[] };
+  SKILLS.forEach(s => { if(groupedSkills[s.branch]) groupedSkills[s.branch].push(s); });
+
   tree.innerHTML = '';
-  Object.keys(groups).forEach(branch => {
+  Object.keys(groupedSkills).forEach(branch => {
     const col = document.createElement('div');
-    col.className = 'branch';
-    col.innerHTML = '<div class="branchTitle" style="color:#6ad7ff;border-color:#3a5468;">' + branch + '</div>';
-    groups[branch].forEach(s => {
-      const r = cadreRankOf(s.id);
+    const bInfo = groups[branch] || { name: branch, cls: 'strike' };
+    col.className = 'branch ' + bInfo.cls;
+    col.innerHTML = '<div class="branchTitle">' + bInfo.name + '</div>';
+
+    groupedSkills[branch].forEach(s => {
+      const r = rankOf(s.id);
       const maxed = r >= s.max;
-      const locked = !cadrePrereqsMet(s);
+      const locked = !prereqsMet(s);
       const available = !locked && !maxed && skillPoints >= s.cost;
+      const icon = SKILL_ICONS[s.id] || '⚡';
+
       const node = document.createElement('div');
-      node.className = 'skillNode' + (maxed ? ' maxed owned' : available ? ' available' : locked ? ' locked' : ' owned');
-      node.style.borderColor = maxed ? '#6ad7ff' : available ? '#ffd35c' : '#2a3b47';
+      node.className = 'skillNode' + (maxed ? ' maxed owned' : available ? ' available' : locked ? ' locked' : r > 0 ? ' owned' : '');
       node.setAttribute('role','button');
       node.setAttribute('tabindex','0');
-      node.innerHTML = '<div class="name" style="color:#6ad7ff;">' + s.name + '</div>'
-        + '<div class="desc">' + s.desc + '</div>'
-        + '<div class="meta">Rank ' + r + '/' + s.max + '  |  Cost ' + s.cost + '⭐' + (locked ? '  |  LOCKED' : maxed ? '  |  MAX' : '') + '</div>';
+
+      let pipsHtml = '';
+      for(let p = 0; p < s.max; p++){
+        pipsHtml += `<div class="skillPip ${p < r ? (maxed ? 'filled max' : 'filled') : ''}"></div>`;
+      }
+
+      let costStatus = '';
+      if(maxed) costStatus = '<span class="skillCostBadge" style="color:#ffd35c;">★ MAXED</span>';
+      else if(locked) costStatus = '<span class="skillCostBadge" style="color:#768772;">🔒 LOCKED</span>';
+      else if(available) costStatus = `<span class="skillCostBadge" style="color:#8bff5c;">UPGRADE: ${s.cost}⭐</span>`;
+      else costStatus = `<span class="skillCostBadge" style="color:#ff8e78;">COST: ${s.cost}⭐</span>`;
+
+      let reqMsg = '';
+      if(locked && s.requires && s.requires.length){
+        const reqNames = s.requires.map(rid => {
+          const reqSkill = SKILLS.find(x => x.id === rid);
+          return reqSkill ? reqSkill.name : rid;
+        }).join(', ');
+        reqMsg = `<div style="font-size:9px;color:#ff9f68;margin-top:4px;font-weight:700;">⚠️ REQUIRES: ${reqNames}</div>`;
+      }
+
+      const tagColor = branch === 'STRIKE' ? 'background:rgba(255,122,61,0.2);color:#ff9f68;border:1px solid #ff7a3d;' :
+                       branch === 'HOLD' ? 'background:rgba(106,215,255,0.2);color:#6ad7ff;border:1px solid #6ad7ff;' :
+                       'background:rgba(255,211,92,0.2);color:#ffd35c;border:1px solid #ffd35c;';
+
+      node.innerHTML = `
+        <div class="skillNodeHeader">
+          <div class="name"><span>${icon}</span> <span>${s.name}</span></div>
+          <span class="tag" style="${tagColor}">${s.tags || branch}</span>
+        </div>
+        <div class="desc">${s.desc}</div>
+        ${reqMsg}
+        <div class="skillPipsWrap">
+          <div class="skillPips">${pipsHtml}</div>
+          <div style="font-size:10px;color:#8fa385;font-weight:bold;">${r}/${s.max}</div>
+          ${costStatus}
+        </div>
+      `;
+
       if(available){
-        node.addEventListener('click', ()=> buyCadreSkill(s));
+        node.addEventListener('click', ()=> buySkill(s));
       }
       node.addEventListener('keydown', (e)=>{
         if(e.key === 'Enter' || e.key === ' '){
           e.preventDefault();
-          if(available) buyCadreSkill(s);
+          if(available) buySkill(s);
         }
       });
       col.appendChild(node);
@@ -1840,95 +1929,83 @@ function renderCadreTree(){
   });
 }
 
-let cadrePrevState = 'playing';
-function openCadreScreen(){
-  if(state === 'cadre') return;
-  cadrePrevState = state;
-  state = 'cadre';
-  renderCadreTree();
-  updateHud();
-  document.getElementById('cadreScreen').style.display = 'flex';
-}
-
-function closeCadreScreen(){
-  document.getElementById('cadreScreen').style.display = 'none';
-  state = cadrePrevState || 'playing';
-}
-
-/* ================= DEDICATED PASSIVE SKILL TREE SYSTEM ================= */
-const skillRanks = {};
-
-const SKILLS = [
-  // === STRIKE BRANCH (OFFENSE / CRITS) ===
-  { id:'reach', branch:'STRIKE', name:'WIDER REACH', desc:'+12px click & tap hitbox radius per rank.', cost:1, max:3, requires:[], tags:'PRECISION', passive(r){ player.clickRadiusBonus = Math.min(45, player.clickRadiusBonus + 12*r); } },
-  { id:'chain', branch:'STRIKE', name:'CHAIN POP', desc:'Pops cascade shockwaves to nearby toilets.', cost:1, max:3, requires:['reach'], tags:'AREA', passive(r){ player.chainRadius = Math.min(150, player.chainRadius + 35*r); } },
-  { id:'crit', branch:'STRIKE', name:'CRITICAL POP', desc:'+8% critical pop chance per rank.', cost:2, max:3, requires:['chain'], tags:'BURST', passive(r){ player.critChance = Math.min(0.35, player.critChance + 0.08*r); } },
-  { id:'overkill', branch:'STRIKE', name:'OVERKILL', desc:'Critical hits deal +40% extra damage per rank.', cost:2, max:2, requires:['crit'], tags:'BOSS', passive(r){ player.critMult = 2 + 0.40*r; } },
-
-  // === HOLD BRANCH (DEFENSE / SURVIVAL) ===
-  { id:'slow', branch:'HOLD', name:'SLUG FIELD', desc:'Toilets move 8% slower across all waves.', cost:1, max:3, requires:[], tags:'CONTROL', passive(r){ player.speedReduction = Math.min(0.28, player.speedReduction + 0.08*r); } },
-  { id:'coolant', branch:'HOLD', name:'COOLANT VENTS', desc:'Reduces Sigma heat drain pressure.', cost:1, max:3, requires:['slow'], tags:'STABILITY', passive(r){ player.sigmaDecayBonus += 0.04*r; } },
-  { id:'life', branch:'HOLD', name:'EXTRA LIFE', desc:'Gain +1 maximum life and restore it immediately.', cost:1, max:3, requires:['coolant'], tags:'SURVIVAL', onBuy(){ player.maxLives += 1; lives = Math.min(player.maxLives, lives + 1); updateHud(); } },
-  { id:'shield', branch:'HOLD', name:'SECOND WIND', desc:'Absorbs one breach per rank without losing life.', cost:2, max:2, requires:['life'], tags:'SURVIVAL', onBuy(){ player.shields += 1; updateHud(); } },
-  { id:'medic', branch:'HOLD', name:'REPAIR CYCLE', desc:'Restore 1 life after every 4 cleared waves.', cost:2, max:1, requires:['shield'], tags:'RECOVERY', passive(r){ player.healOnWave = r; } },
-
-  // === RIG BRANCH (AUTOMATION & ECONOMY) ===
-  { id:'score', branch:'RIG', name:'SCORE SURGE', desc:'+20% score earned per rank.', cost:1, max:4, requires:[], tags:'SCORE', passive(r){ player.scoreMult += 0.20*r; } },
-  { id:'turret', branch:'RIG', name:'AUTO TURRET', desc:'Unlocks an automatic base defense targeter.', cost:1, max:1, requires:['score'], tags:'AUTO', passive(r){ player.turretLevel = Math.max(player.turretLevel, r); } },
-  { id:'barrel', branch:'RIG', name:'FASTER CYCLE', desc:'Auto-Turret fires 30% faster.', cost:2, max:1, requires:['turret'], tags:'AUTO', passive(r){ player.turretLevel = Math.max(player.turretLevel, 2); } },
-  { id:'caliber', branch:'RIG', name:'HIGH CALIBER', desc:'Turret damage +2 and targets highest threat.', cost:2, max:2, requires:['barrel'], tags:'AUTO', passive(r){ player.turretDamage = 1 + 2*r; } },
-  { id:'overclock', branch:'RIG', name:'OVERCLOCK', desc:'Turret enters hyper-fire and grants +15% score.', cost:3, max:1, requires:['caliber'], tags:'AUTO', passive(r){ player.turretLevel = 3; player.scoreMult += 0.15*r; } }
-];
-
-function rankOf(id){ return skillRanks[id] || 0; }
-function prereqsMet(skill){ return skill.requires.every(id => rankOf(id) > 0); }
-
-function buySkill(skill){
-  const r = rankOf(skill.id);
-  if(r >= skill.max) return false;
-  if(!prereqsMet(skill)) return false;
-  if(skillPoints < skill.cost) return false;
-  skillPoints -= skill.cost;
-  skillRanks[skill.id] = r + 1;
-  if(skill.onBuy) skill.onBuy();
-  recomputePlayer();
-  sfx.upgrade();
-  renderSkillTree();
-  updateHud();
-  return true;
-}
-
-function renderSkillTree(){
-  const tree = document.getElementById('pureSkillTree');
+function renderCadreTree(){
+  const tree = document.getElementById('cadreTree');
   if(!tree) return;
-  const pts = document.getElementById('skillPtsValTree');
+  const pts = document.getElementById('cadrePtsVal');
   if(pts) pts.textContent = skillPoints;
-  const groups = { STRIKE:[], HOLD:[], RIG:[] };
-  SKILLS.forEach(s => groups[s.branch].push(s));
+  const groups = {
+    INFANTRY:  { name: '🪖 INFANTRY // SQUAD', cls: 'infantry' },
+    'TECH OPS':{ name: '📡 TECH OPS // SUPPORT', cls: 'techops' },
+    TITANS:    { name: '⚡ TITAN // WARFRAMES', cls: 'titans' }
+  };
+  const groupedSkills = { INFANTRY:[], 'TECH OPS':[], TITANS:[] };
+  CADRE_SKILLS.forEach(s => { if(groupedSkills[s.branch]) groupedSkills[s.branch].push(s); });
+
   tree.innerHTML = '';
-  Object.keys(groups).forEach(branch => {
+  Object.keys(groupedSkills).forEach(branch => {
     const col = document.createElement('div');
-    col.className = 'branch';
-    col.innerHTML = '<div class="branchTitle">' + branch + '</div>';
-    groups[branch].forEach(s => {
-      const r = rankOf(s.id);
+    const bInfo = groups[branch] || { name: branch, cls: 'infantry' };
+    col.className = 'branch ' + bInfo.cls;
+    col.innerHTML = '<div class="branchTitle">' + bInfo.name + '</div>';
+
+    groupedSkills[branch].forEach(s => {
+      const r = cadreRankOf(s.id);
       const maxed = r >= s.max;
-      const locked = !prereqsMet(s);
+      const locked = !cadrePrereqsMet(s);
       const available = !locked && !maxed && skillPoints >= s.cost;
+      const icon = SKILL_ICONS[s.id] || '🎖️';
+
       const node = document.createElement('div');
-      node.className = 'skillNode' + (maxed ? ' maxed owned' : available ? ' available' : locked ? ' locked' : ' owned');
+      node.className = 'skillNode' + (maxed ? ' maxed owned' : available ? ' available' : locked ? ' locked' : r > 0 ? ' owned' : '');
       node.setAttribute('role','button');
       node.setAttribute('tabindex','0');
-      node.innerHTML = '<div class="name">' + s.name + '</div>'
-        + '<div class="desc">' + s.desc + '</div>'
-        + '<div class="meta">Rank ' + r + '/' + s.max + '  |  Cost ' + s.cost + '⭐' + (locked ? '  |  LOCKED' : maxed ? '  |  MAX' : '') + '</div>';
+
+      let pipsHtml = '';
+      for(let p = 0; p < s.max; p++){
+        pipsHtml += `<div class="skillPip ${p < r ? (maxed ? 'filled max' : 'filled') : ''}"></div>`;
+      }
+
+      let costStatus = '';
+      if(maxed) costStatus = '<span class="skillCostBadge" style="color:#ffd35c;">★ MAXED</span>';
+      else if(locked) costStatus = '<span class="skillCostBadge" style="color:#768772;">🔒 LOCKED</span>';
+      else if(available) costStatus = `<span class="skillCostBadge" style="color:#8bff5c;">UPGRADE: ${s.cost}⭐</span>`;
+      else costStatus = `<span class="skillCostBadge" style="color:#ff8e78;">COST: ${s.cost}⭐</span>`;
+
+      let reqMsg = '';
+      if(locked && s.requires && s.requires.length){
+        const reqNames = s.requires.map(rid => {
+          const reqSkill = CADRE_SKILLS.find(x => x.id === rid);
+          return reqSkill ? reqSkill.name : rid;
+        }).join(', ');
+        reqMsg = `<div style="font-size:9px;color:#ff9f68;margin-top:4px;font-weight:700;">⚠️ REQUIRES: ${reqNames}</div>`;
+      }
+
+      const tagColor = branch === 'INFANTRY' ? 'background:rgba(139,255,92,0.2);color:#8bff5c;border:1px solid #8bff5c;' :
+                       branch === 'TECH OPS' ? 'background:rgba(199,168,255,0.2);color:#c7a8ff;border:1px solid #c7a8ff;' :
+                       'background:rgba(255,92,61,0.2);color:#ff5c3d;border:1px solid #ff5c3d;';
+
+      node.innerHTML = `
+        <div class="skillNodeHeader">
+          <div class="name"><span>${icon}</span> <span>${s.name}</span></div>
+          <span class="tag" style="${tagColor}">${s.tags || branch}</span>
+        </div>
+        <div class="desc">${s.desc}</div>
+        ${reqMsg}
+        <div class="skillPipsWrap">
+          <div class="skillPips">${pipsHtml}</div>
+          <div style="font-size:10px;color:#8fa385;font-weight:bold;">${r}/${s.max}</div>
+          ${costStatus}
+        </div>
+      `;
+
       if(available){
-        node.addEventListener('click', ()=> buySkill(s));
+        node.addEventListener('click', ()=> buyCadreSkill(s));
       }
       node.addEventListener('keydown', (e)=>{
         if(e.key === 'Enter' || e.key === ' '){
           e.preventDefault();
-          if(available) buySkill(s);
+          if(available) buyCadreSkill(s);
         }
       });
       col.appendChild(node);
