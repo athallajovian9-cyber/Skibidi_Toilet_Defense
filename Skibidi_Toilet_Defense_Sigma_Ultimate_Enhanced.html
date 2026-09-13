@@ -675,21 +675,47 @@
     /* Right Corner Pod for Right Thumb */
     #actionBar.rightPod {
       position: absolute;
-      right: max(8px, env(safe-area-inset-right));
-      bottom: calc(10px + env(safe-area-inset-bottom));
+      right: max(6px, env(safe-area-inset-right));
+      bottom: calc(6px + env(safe-area-inset-bottom));
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      width: 172px;
-      background: rgba(8, 12, 10, 0.94);
-      border: 1px solid rgba(80, 140, 105, 0.45);
+      gap: 3px;
+      width: 180px;
+      background: rgba(8, 12, 10, 0.95);
+      border: 1px solid rgba(80, 140, 105, 0.55);
       border-radius: 10px;
-      padding: 6px;
+      padding: 5px;
       z-index: 12;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.65);
     }
-    #actionBar .primaryAbility { width: 100%; min-height: 40px; font-size: 11px; }
-    #actionBar .gridRow { display: flex; gap: 4px; width: 100%; }
-    #actionBar .gridRow .miniBtn { flex: 1; min-width: 0; padding: 6px 2px; font-size: 10px; text-align: center; }
+    #actionBar .podHeader {
+      font-size: 9px; font-weight: 800; color: #8fa385;
+      text-align: center; margin-bottom: 2px; letter-spacing: 0.5px;
+    }
+    #actionBar .primaryAbility { width: 100%; min-height: 32px; font-size: 11px; font-weight: 800; }
+    #actionBar .gridRow { display: flex; gap: 3px; width: 100%; }
+    #actionBar .gridRow .miniBtn {
+      flex: 1;
+      min-width: 0;
+      height: 28px;
+      padding: 2px 3px;
+      font-size: 10px;
+      font-weight: 700;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      border-radius: 4px;
+    }
+    #actionBar .compactRow .miniBtn {
+      height: 24px;
+      font-size: 9px;
+      font-weight: 600;
+      padding: 1px 2px;
+    }
   }
 
   /* INFINITY MODE BUTTON & THEME */
@@ -851,23 +877,28 @@
 
   <!-- RIGHT THUMB POD: ABILITIES & OPS -->
   <div id="actionBar" class="thumbPod rightPod">
+    <div class="podHeader">⚡ TACTICAL OPS</div>
     <button id="abilityBtn" class="miniBtn primaryAbility">💥 BLAST 0%</button>
-    <button id="drillFissureBtn" class="miniBtn" style="color:#ff9f43;border-color:#ff9f43;" title="Titan Drill Fissure [F]">⛏️ FISSURE [F]</button>
     <div class="gridRow">
+      <button id="drillFissureBtn" class="miniBtn" style="color:#ff9f43;border-color:#ff9f43;" title="Titan Drill Fissure [F]">⛏️ FISSURE</button>
       <button id="tvHypnoBtn" class="miniBtn">📺 HYPNO</button>
-      <button id="bassBlastBtn" class="miniBtn">🔊 BASS</button>
     </div>
     <div class="gridRow">
-      <button id="hireBtn" class="miniBtn highlightBtn" title="Hire Allies [H]">⚔️ HIRE [H]</button>
-      <button id="cadreBtn" class="miniBtn" style="border-color:#6ad7ff;color:#6ad7ff;" title="Alliance Cadre Skill Tree [J]">🎖️ CADRE [J]</button>
-      <button id="skillsBtn" class="miniBtn" style="border-color:#ffd35c;color:#ffd35c;" title="Operative Passive Skills [K]">🌲 SKILLS [K]</button>
-      <button id="shopBtn" class="miniBtn" title="Weapon Arsenal Shop [S]">🛒 WEAPONS [S]</button>
+      <button id="bassBlastBtn" class="miniBtn">🔊 BASS</button>
+      <button id="hireBtn" class="miniBtn highlightBtn" title="Hire Allies [H]">⚔️ HIRE</button>
+    </div>
+    <div class="gridRow">
+      <button id="cadreBtn" class="miniBtn" style="border-color:#6ad7ff;color:#6ad7ff;" title="Alliance Cadre Skill Tree [J]">🎖️ CADRE</button>
+      <button id="skillsBtn" class="miniBtn" style="border-color:#ffd35c;color:#ffd35c;" title="Operative Passive Skills [K]">🌲 SKILLS</button>
+    </div>
+    <div class="gridRow">
+      <button id="shopBtn" class="miniBtn" title="Weapon Arsenal Shop [S]">🛒 WEAPONS</button>
+      <button id="modsBtn" class="miniBtn subtleBtn" style="border-color:#ff4d4d;color:#ff6a6a;font-weight:900;" title="Open Cheats & Mod Trainer [M]">⚡ CHEAT</button>
     </div>
     <div class="gridRow compactRow">
       <button id="inGameTutBtn" class="miniBtn subtleBtn">📖 GUIDE</button>
       <button id="pauseBtn" class="miniBtn subtleBtn">⏸️ PAUSE</button>
-      <button id="modsBtn" class="miniBtn subtleBtn" style="border-color:#ff4d4d;color:#ff6a6a;font-weight:900;" title="Open Cheats & Mod Trainer [M]">⚡ CHEAT [M]</button>
-      <button id="fsMobileBtn" class="miniBtn subtleBtn" style="border-color:#6ad7ff;color:#6ad7ff;">⛶</button>
+      <button id="fsMobileBtn" class="miniBtn subtleBtn" style="border-color:#6ad7ff;color:#6ad7ff;">⛶ FULL</button>
     </div>
   </div>
 
@@ -5214,7 +5245,9 @@ function spawnToilet(forcedType=null){
   toilets.push({
     // Anti-cluster randomized lane distribution (avoids spawning right on top of incoming units)
     x: (()=>{
-      let candidateX = 42 + Math.random() * Math.max(1, W - 84);
+      const leftCol = Math.max(50, W * 0.08 + 38);
+      const rightCol = Math.min(W - 50, W * 0.92 - 38);
+      let candidateX = leftCol + Math.random() * Math.max(1, rightCol - leftCol);
       for(let attempt = 0; attempt < 5; attempt++){
         const tooClose = toilets.some(other => other.y > H - 120 && Math.abs(other.x - candidateX) < 58);
         if(!tooClose) break;
@@ -6125,6 +6158,28 @@ function roundPath(x, y, w, h, r){
   else ctx.rect(x, y, w, h);
 }
 
+
+function drawSewerPipesForeground(){
+  ctx.save();
+  // Left heavy conduit pipe
+  ctx.strokeStyle = '#342f27'; ctx.lineWidth = 13;
+  ctx.beginPath(); ctx.moveTo(W * 0.08, 38); ctx.lineTo(W * 0.08, H * 0.4);
+  ctx.quadraticCurveTo(W * 0.08, H * 0.48, W * 0.16, H * 0.48); ctx.stroke();
+  ctx.strokeStyle = '#5a5042'; ctx.lineWidth = 4; ctx.stroke();
+  
+  // Right heavy drainage pipe
+  ctx.strokeStyle = '#1d3326'; ctx.lineWidth = 13;
+  ctx.beginPath(); ctx.moveTo(W * 0.92, 38); ctx.lineTo(W * 0.92, H * 0.55); ctx.stroke();
+  ctx.strokeStyle = '#325841'; ctx.lineWidth = 4; ctx.stroke();
+
+  // Pipe mounting steel brackets
+  ctx.fillStyle = '#4f483c';
+  ctx.fillRect(W * 0.08 - 14, H * 0.22, 28, 14);
+  ctx.fillStyle = '#263b2f';
+  ctx.fillRect(W * 0.92 - 14, H * 0.33, 28, 14);
+  ctx.restore();
+}
+
 function drawWorld(now){
   const t = now * 0.001;
   const sky = ctx.createLinearGradient(0, 0, 0, H);
@@ -6286,14 +6341,7 @@ function drawWorld(now){
     ctx.arc(lx, 32, 6, 0, Math.PI * 2); ctx.fill();
   });
 
-  ctx.strokeStyle = '#4a4338'; ctx.lineWidth = 10;
-  ctx.beginPath(); ctx.moveTo(W * 0.08, 40); ctx.lineTo(W * 0.08, H * 0.4);
-  ctx.quadraticCurveTo(W * 0.08, H * 0.48, W * 0.16, H * 0.48); ctx.stroke();
-  ctx.strokeStyle = '#2f4a3a';
-  ctx.beginPath(); ctx.moveTo(W * 0.92, 40); ctx.lineTo(W * 0.92, H * 0.55); ctx.stroke();
-  ctx.fillStyle = '#6a6254';
-  ctx.fillRect(W * 0.08 - 12, H * 0.22, 24, 14);
-  ctx.fillRect(W * 0.92 - 12, H * 0.33, 24, 14);
+  // (Background pipes relocated to foreground z-index via drawSewerPipesForeground)
 
   sewerSpores.forEach(sp => {
     sp.x += sp.vx * 0.003;
@@ -9312,6 +9360,18 @@ function loop(ts){
       }
       const stealth=t.type==='phantom' ? (0.32+0.24*Math.sin(t.phase)) : 1;
       t.y -= t.speed*moveFactor*dt; t.x += Math.sin(t.wobble)*0.6*dt;
+
+      // Physical Pillar & Pipe Collision (Deflection from side structures)
+      const leftPipeX = W * 0.08;
+      const rightPipeX = W * 0.92;
+      const tRad = t.r || 24;
+      if(t.x < leftPipeX + tRad + 14 && t.y < H * 0.52){
+        t.x = leftPipeX + tRad + 14;
+        t.wobble += 0.2;
+      } else if(t.x > rightPipeX - tRad - 14 && t.y < H * 0.60){
+        t.x = rightPipeX - tRad - 14;
+        t.wobble += 0.2;
+      }
       ctx.save();
       if(t.type==='phantom') ctx.globalAlpha=stealth;
       drawPorcelainToilet(t, now);
@@ -9516,6 +9576,7 @@ function loop(ts){
   drawTurret();
   drawHiredAllies(now);
   drawTitanBarrier(now);
+  drawSewerPipesForeground();
   drawParticles();
   drawFlushes(now);
   drawPlungerStamps();
