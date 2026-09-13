@@ -7316,6 +7316,7 @@ initTutorialUI();
       <button class="tutTabBtn" data-tab="tutTraps">2. Floor Traps & Physics</button>
       <button class="tutTabBtn" data-tab="tutAllies">3. Alliance Barracks</button>
       <button class="tutTabBtn" data-tab="tutControls">4. Hotkeys & Abilities</button>
+      <button class="tutTabBtn" data-tab="tutManagers" style="border-color:#6ad7ff;color:#6ad7ff;">5. Engine Managers</button>
     </div>
 
     <!-- TAB 1: BASICS -->
@@ -7398,6 +7399,41 @@ initTutorialUI();
         <div class="tutCard">
           <h4><span class="tutKey">[H] / [S]</span> Barracks & Shop</h4>
           <p>[H] opens the Alliance Barracks to recruit defenders. [S] opens the Weapon Shop to upgrade automated laser/rocket/turret defenses.</p>
+        </div>
+        <div class="tutCard">
+          <h4><span class="tutKey">[J] / [K]</span> Skill Trees</h4>
+          <p>[J] opens Alliance Cadre & Titan Skill Tree to upgrade your army. [K] opens the Operative Passive Skill Tree for personal base stats.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: ENGINE MANAGERS & ARCHITECTURE -->
+    <div id="tutManagers" class="tutContent">
+      <p style="color:#6ad7ff;font-size:13px;margin-bottom:14px;font-weight:bold;">ENTERPRISE SUBSYSTEM MANAGERS // ZERO-BUG SUPERVISION ARCHITECTURE:</p>
+      <div class="tutGrid">
+        <div class="tutCard" style="border-color:#2a4554;">
+          <h4 style="color:#6ad7ff;"><span class="tutKey">SPAWN</span> Concurrency Manager</h4>
+          <p>Controls wave density and prevents chaotic hordes. Waves 1–4 are throttled to a strict maximum of 3–6 active units at a time, spacing enemies across sewer lanes without overlapping.</p>
+        </div>
+        <div class="tutCard" style="border-color:#2a4554;">
+          <h4 style="color:#ffb06a;"><span class="tutKey">COMBAT</span> Combat & Hit Manager</h4>
+          <p>Calculates player click damage (3x baseline), critical strike multipliers, and armor-penetration. Ensures Juggernaut shields and boss hitboxes register cleanly every click.</p>
+        </div>
+        <div class="tutCard" style="border-color:#2a4554;">
+          <h4 style="color:#ffd35c;"><span class="tutKey">TRAP</span> Physical Hazard Manager</h4>
+          <p>Manages Spring Bouncer momentum, Acid Puddle armor melt, and Bio-Sludge Barrel detonations. Handles knockback cascades and cleans up depleted charges automatically.</p>
+        </div>
+        <div class="tutCard" style="border-color:#2a4554;">
+          <h4 style="color:#74e5b1;"><span class="tutKey">PHYSICS</span> Ragdoll & Debris Manager</h4>
+          <p>Supervises sewer floor bounce physics for blasted toilet debris. Caps active objects and despawns settled ragdolls to maintain locked 60 FPS performance.</p>
+        </div>
+        <div class="tutCard" style="border-color:#2a4554;">
+          <h4 style="color:#c7a8ff;"><span class="tutKey">WATCHDOG</span> Sanity Auto-Healer</h4>
+          <p>Scans the engine every 800ms. Instantly detects and purges null entities, NaN coordinates, or corrupted HP numbers so the game engine never freezes or crashes.</p>
+        </div>
+        <div class="tutCard" style="border-color:#2a4554;">
+          <h4 style="color:#ff5c3d;"><span class="tutKey">APEX</span> Infinity Mode & G-Man 1.0</h4>
+          <p>Infinity Mode unlocks endless escalating waves. At Wave 100 (and every 100 waves), the 3D-modeled G-Man 1.0 spawns as the ultimate Apex Overlord boss!</p>
         </div>
       </div>
     </div>
