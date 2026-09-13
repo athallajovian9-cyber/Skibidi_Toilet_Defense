@@ -760,7 +760,7 @@
 
   <!-- INFINITY MODE TOGGLE BUTTON -->
   <div style="margin: 12px 0 6px; text-align: center;">
-    <button id="infinityModeBtn" class="infinityToggleBtn" title="Toggle Infinite Waves Mode">
+    <button id="infinityModeBtn" class="infinityToggleBtn" onclick="toggleInfinityMode()" title="Toggle Infinite Waves Mode">
       ♾️ INFINITY MODE: <span id="infinityStateText" style="color:#ff4d4d;">OFF</span>
     </button>
   </div>
@@ -6926,6 +6926,8 @@ function closeTutorial(){
 }
 
 function initTutorialUI(){
+  const infBtn = document.getElementById('infinityModeBtn');
+  if(infBtn) infBtn.addEventListener('click', toggleInfinityMode);
   const openBtn = document.getElementById('openTutorialBtn');
   if(openBtn) openBtn.addEventListener('click', openTutorial);
   const inGameBtn = document.getElementById('inGameTutBtn');
