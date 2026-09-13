@@ -980,6 +980,142 @@
   </div>
 </div>
 
+
+<div id="tutorialScreen">
+  <div class="tutContainer">
+    <div class="tutHeader">
+      <h2>OPERATIVE'S TACTICAL MANUAL // INTEL</h2>
+      <button class="tutCloseBtn" id="tutCloseBtn" onclick="closeTutorial()">CLOSE [ESC / T]</button>
+    </div>
+
+    <div class="tutTabs">
+      <button class="tutTabBtn active" data-tab="tutBasics" onclick="switchTutTab('tutBasics', this)">1. Core Mission</button>
+      <button class="tutTabBtn" data-tab="tutTraps" onclick="switchTutTab('tutTraps', this)">2. Floor Traps & Physics</button>
+      <button class="tutTabBtn" data-tab="tutAllies" onclick="switchTutTab('tutAllies', this)">3. Alliance Barracks</button>
+      <button class="tutTabBtn" data-tab="tutControls" onclick="switchTutTab('tutControls', this)">4. Hotkeys & Abilities</button>
+      <button class="tutTabBtn" data-tab="tutManagers" onclick="switchTutTab('tutManagers', this)" style="border-color:#6ad7ff;color:#6ad7ff;">5. Engine Managers</button>
+    </div>
+
+    <!-- TAB 1: BASICS -->
+    <div id="tutBasics" class="tutContent active">
+      <p style="color:#d2e5ce;font-size:13px;margin-bottom:14px;">The sewer drainage facility is under assault by rogue toilet invaders. Hold the defensive perimeter at all costs!</p>
+      <div class="tutGrid">
+        <div class="tutCard">
+          <h4><span class="tutKey">THRESHOLD</span> Breach Line</h4>
+          <p>The yellow hazard line across the sewer floor is the reinforced breach threshold. Toilets that cross this line drain Lives. Prevent any enemy from passing!</p>
+        </div>
+        <div class="tutCard">
+          <h4><span class="tutKey">CLICK / TAP</span> Direct Strike</h4>
+          <p>Click or tap directly on approaching toilets to smack them with plungers. Rapid clicks build Combo Multipliers (up to 4.0x score & faster ability recharge).</p>
+        </div>
+        <div class="tutCard">
+          <h4><span class="tutKey">RELICS</span> Boss Protocols</h4>
+          <p>Defeat colossal Bosses every 5 waves to trigger the Sigma Relic Protocol: draft 1 of 3 permanent physical relics to create game-changing run synergies.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: TRAPS -->
+    <div id="tutTraps" class="tutContent">
+      <p style="color:#d2e5ce;font-size:13px;margin-bottom:14px;">Place interactive ground traps directly on the sewer floor using Sigma Energy:</p>
+      <div class="tutGrid">
+        <div class="tutCard">
+          <h4><span class="tutKey">[1]</span> Hydraulic Spring Bouncer (15⚡)</h4>
+          <p>Launches toilets backward with bowling-pin cascade physics! Flying toilets crash into trailing enemies behind them, delivering heavy impact stun.</p>
+        </div>
+        <div class="tutCard">
+          <h4><span class="tutKey">[2]</span> Corrosive Acid Puddle (20⚡)</h4>
+          <p>Lingering boiling acid pool that melts enemy armored plates and reduces movement traction so your defenders can easily pick them apart.</p>
+        </div>
+        <div class="tutCard">
+          <h4><span class="tutKey">[3]</span> Explosive Sludge Barrel (25⚡)</h4>
+          <p>Heavy volatile drum placed in the arena. Shoot, click, or detonate it when toilets swarm nearby for a massive 185px shockwave explosion!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: ALLIANCE -->
+    <div id="tutAllies" class="tutContent">
+      <p style="color:#d2e5ce;font-size:13px;margin-bottom:14px;">Recruit autonomous units that physically run and brawl across the sewer floor in the Barracks [H]:</p>
+      <div class="tutGrid">
+        <div class="tutCard">
+          <h4><span class="tutKey">🪠</span> Plungerman & Rushers</h4>
+          <p>Fast frontline sprinters wielding dual plungers. They chase down toilets and deliver rapid physical melee beatdowns.</p>
+        </div>
+        <div class="tutCard">
+          <h4><span class="tutKey">🔩</span> Titan Drillman (Legendary)</h4>
+          <p>Colossal armored titan! Slams a spinning diamond drill into the sewer floor to generate devastating seismic fissures across enemy lines.</p>
+        </div>
+        <div class="tutCard">
+          <h4><span class="tutKey">🐕</span> Camera Mech-Hound</h4>
+          <p>Four-legged cybernetic canine. Sprints at high speed, leaps onto toilets, and locks them in place with high-voltage jaw grapples.</p>
+        </div>
+        <div class="tutCard">
+          <h4><span class="tutKey">🚀</span> Jetpack Dual-Uzi</h4>
+          <p>Low-altitude airborne commando. Strafes across the battlefield spraying rapid twin-bullet volleys into the swarm below.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: CONTROLS -->
+    <div id="tutControls" class="tutContent">
+      <p style="color:#d2e5ce;font-size:13px;margin-bottom:14px;">Keyboard shortcuts & primary abilities:</p>
+      <div class="tutGrid">
+        <div class="tutCard">
+          <h4><span class="tutKey">SPACEBAR</span> Sigma Blast</h4>
+          <p>Fires a full-arena EMP pulse when the Sigma Meter reaches 100%. Wipes swarms and deals heavy damage to bosses.</p>
+        </div>
+        <div class="tutCard">
+          <h4><span class="tutKey">[V]</span> TV Man Hypno-Glow</h4>
+          <p>Broadcasts hypnotic purple CRT radiation across the facility, completely freezing all toilet enemies in place for 6 seconds.</p>
+        </div>
+        <div class="tutCard">
+          <h4><span class="tutKey">[B]</span> Speakerman Bass Drop</h4>
+          <p>Drops a massive sonic shockwave that knocks the entire enemy vanguard backward and inflicts concussive stun.</p>
+        </div>
+        <div class="tutCard">
+          <h4><span class="tutKey">[H] / [S]</span> Barracks & Shop</h4>
+          <p>[H] opens the Alliance Barracks to recruit defenders. [S] opens the Weapon Shop to upgrade automated laser/rocket/turret defenses.</p>
+        </div>
+        <div class="tutCard">
+          <h4><span class="tutKey">[J] / [K]</span> Skill Trees</h4>
+          <p>[J] opens Alliance Cadre & Titan Skill Tree to upgrade your army. [K] opens the Operative Passive Skill Tree for personal base stats.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: ENGINE MANAGERS & ARCHITECTURE -->
+    <div id="tutManagers" class="tutContent">
+      <p style="color:#6ad7ff;font-size:13px;margin-bottom:14px;font-weight:bold;">ENTERPRISE SUBSYSTEM MANAGERS // ZERO-BUG SUPERVISION ARCHITECTURE:</p>
+      <div class="tutGrid">
+        <div class="tutCard" style="border-color:#2a4554;">
+          <h4 style="color:#6ad7ff;"><span class="tutKey">SPAWN</span> Concurrency Manager</h4>
+          <p>Controls wave density and prevents chaotic hordes. Waves 1–4 are throttled to a strict maximum of 3–6 active units at a time, spacing enemies across sewer lanes without overlapping.</p>
+        </div>
+        <div class="tutCard" style="border-color:#2a4554;">
+          <h4 style="color:#ffb06a;"><span class="tutKey">COMBAT</span> Combat & Hit Manager</h4>
+          <p>Calculates player click damage (3x baseline), critical strike multipliers, and armor-penetration. Ensures Juggernaut shields and boss hitboxes register cleanly every click.</p>
+        </div>
+        <div class="tutCard" style="border-color:#2a4554;">
+          <h4 style="color:#ffd35c;"><span class="tutKey">TRAP</span> Physical Hazard Manager</h4>
+          <p>Manages Spring Bouncer momentum, Acid Puddle armor melt, and Bio-Sludge Barrel detonations. Handles knockback cascades and cleans up depleted charges automatically.</p>
+        </div>
+        <div class="tutCard" style="border-color:#2a4554;">
+          <h4 style="color:#74e5b1;"><span class="tutKey">PHYSICS</span> Ragdoll & Debris Manager</h4>
+          <p>Supervises sewer floor bounce physics for blasted toilet debris. Caps active objects and despawns settled ragdolls to maintain locked 60 FPS performance.</p>
+        </div>
+        <div class="tutCard" style="border-color:#2a4554;">
+          <h4 style="color:#c7a8ff;"><span class="tutKey">WATCHDOG</span> Sanity Auto-Healer</h4>
+          <p>Scans the engine every 800ms. Instantly detects and purges null entities, NaN coordinates, or corrupted HP numbers so the game engine never freezes or crashes.</p>
+        </div>
+        <div class="tutCard" style="border-color:#2a4554;">
+          <h4 style="color:#ff5c3d;"><span class="tutKey">APEX</span> Infinity Mode & G-Man 1.0</h4>
+          <p>Infinity Mode unlocks endless escalating waves. At Wave 100 (and every 100 waves), the 3D-modeled G-Man 1.0 spawns as the ultimate Apex Overlord boss!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 <script>
 /* ================= CONFIG / PERSISTENCE ================= */
 const DIFFICULTIES = {
@@ -7272,7 +7408,30 @@ function closeTutorial(){
   }
 }
 
+
+function switchTutTab(tabId, btnElement){
+  if(typeof sfx !== 'undefined' && sfx.uiClick) sfx.uiClick();
+  document.querySelectorAll('.tutTabBtn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tutContent').forEach(c => c.classList.remove('active'));
+  
+  if(btnElement){
+    btnElement.classList.add('active');
+  } else {
+    const btn = document.querySelector(`.tutTabBtn[data-tab="${tabId}"]`);
+    if(btn) btn.classList.add('active');
+  }
+
+  const targetContent = document.getElementById(tabId);
+  if(targetContent){
+    targetContent.classList.add('active');
+  }
+}
+
 function initTutorialUI(){
+  // Attach fallback listeners on DOM ready
+  const tutScreenCloseBtn = document.getElementById('tutCloseBtn');
+  if(tutScreenCloseBtn) tutScreenCloseBtn.onclick = closeTutorial;
+
   const infBtn = document.getElementById('infinityModeBtn');
   if(infBtn) infBtn.addEventListener('click', toggleInfinityMode);
   const openBtn = document.getElementById('openTutorialBtn');
@@ -7304,141 +7463,6 @@ initTutorialUI();
 /* Start by showing the boot screen (already visible) */
 </script>
 
-<div id="tutorialScreen">
-  <div class="tutContainer">
-    <div class="tutHeader">
-      <h2>OPERATIVE'S TACTICAL MANUAL // INTEL</h2>
-      <button class="tutCloseBtn" id="tutCloseBtn">CLOSE [ESC / T]</button>
-    </div>
-
-    <div class="tutTabs">
-      <button class="tutTabBtn active" data-tab="tutBasics">1. Core Mission</button>
-      <button class="tutTabBtn" data-tab="tutTraps">2. Floor Traps & Physics</button>
-      <button class="tutTabBtn" data-tab="tutAllies">3. Alliance Barracks</button>
-      <button class="tutTabBtn" data-tab="tutControls">4. Hotkeys & Abilities</button>
-      <button class="tutTabBtn" data-tab="tutManagers" style="border-color:#6ad7ff;color:#6ad7ff;">5. Engine Managers</button>
-    </div>
-
-    <!-- TAB 1: BASICS -->
-    <div id="tutBasics" class="tutContent active">
-      <p style="color:#d2e5ce;font-size:13px;margin-bottom:14px;">The sewer drainage facility is under assault by rogue toilet invaders. Hold the defensive perimeter at all costs!</p>
-      <div class="tutGrid">
-        <div class="tutCard">
-          <h4><span class="tutKey">THRESHOLD</span> Breach Line</h4>
-          <p>The yellow hazard line across the sewer floor is the reinforced breach threshold. Toilets that cross this line drain Lives. Prevent any enemy from passing!</p>
-        </div>
-        <div class="tutCard">
-          <h4><span class="tutKey">CLICK / TAP</span> Direct Strike</h4>
-          <p>Click or tap directly on approaching toilets to smack them with plungers. Rapid clicks build Combo Multipliers (up to 4.0x score & faster ability recharge).</p>
-        </div>
-        <div class="tutCard">
-          <h4><span class="tutKey">RELICS</span> Boss Protocols</h4>
-          <p>Defeat colossal Bosses every 5 waves to trigger the Sigma Relic Protocol: draft 1 of 3 permanent physical relics to create game-changing run synergies.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 2: TRAPS -->
-    <div id="tutTraps" class="tutContent">
-      <p style="color:#d2e5ce;font-size:13px;margin-bottom:14px;">Place interactive ground traps directly on the sewer floor using Sigma Energy:</p>
-      <div class="tutGrid">
-        <div class="tutCard">
-          <h4><span class="tutKey">[1]</span> Hydraulic Spring Bouncer (15⚡)</h4>
-          <p>Launches toilets backward with bowling-pin cascade physics! Flying toilets crash into trailing enemies behind them, delivering heavy impact stun.</p>
-        </div>
-        <div class="tutCard">
-          <h4><span class="tutKey">[2]</span> Corrosive Acid Puddle (20⚡)</h4>
-          <p>Lingering boiling acid pool that melts enemy armored plates and reduces movement traction so your defenders can easily pick them apart.</p>
-        </div>
-        <div class="tutCard">
-          <h4><span class="tutKey">[3]</span> Explosive Sludge Barrel (25⚡)</h4>
-          <p>Heavy volatile drum placed in the arena. Shoot, click, or detonate it when toilets swarm nearby for a massive 185px shockwave explosion!</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 3: ALLIANCE -->
-    <div id="tutAllies" class="tutContent">
-      <p style="color:#d2e5ce;font-size:13px;margin-bottom:14px;">Recruit autonomous units that physically run and brawl across the sewer floor in the Barracks [H]:</p>
-      <div class="tutGrid">
-        <div class="tutCard">
-          <h4><span class="tutKey">🪠</span> Plungerman & Rushers</h4>
-          <p>Fast frontline sprinters wielding dual plungers. They chase down toilets and deliver rapid physical melee beatdowns.</p>
-        </div>
-        <div class="tutCard">
-          <h4><span class="tutKey">🔩</span> Titan Drillman (Legendary)</h4>
-          <p>Colossal armored titan! Slams a spinning diamond drill into the sewer floor to generate devastating seismic fissures across enemy lines.</p>
-        </div>
-        <div class="tutCard">
-          <h4><span class="tutKey">🐕</span> Camera Mech-Hound</h4>
-          <p>Four-legged cybernetic canine. Sprints at high speed, leaps onto toilets, and locks them in place with high-voltage jaw grapples.</p>
-        </div>
-        <div class="tutCard">
-          <h4><span class="tutKey">🚀</span> Jetpack Dual-Uzi</h4>
-          <p>Low-altitude airborne commando. Strafes across the battlefield spraying rapid twin-bullet volleys into the swarm below.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 4: CONTROLS -->
-    <div id="tutControls" class="tutContent">
-      <p style="color:#d2e5ce;font-size:13px;margin-bottom:14px;">Keyboard shortcuts & primary abilities:</p>
-      <div class="tutGrid">
-        <div class="tutCard">
-          <h4><span class="tutKey">SPACEBAR</span> Sigma Blast</h4>
-          <p>Fires a full-arena EMP pulse when the Sigma Meter reaches 100%. Wipes swarms and deals heavy damage to bosses.</p>
-        </div>
-        <div class="tutCard">
-          <h4><span class="tutKey">[V]</span> TV Man Hypno-Glow</h4>
-          <p>Broadcasts hypnotic purple CRT radiation across the facility, completely freezing all toilet enemies in place for 6 seconds.</p>
-        </div>
-        <div class="tutCard">
-          <h4><span class="tutKey">[B]</span> Speakerman Bass Drop</h4>
-          <p>Drops a massive sonic shockwave that knocks the entire enemy vanguard backward and inflicts concussive stun.</p>
-        </div>
-        <div class="tutCard">
-          <h4><span class="tutKey">[H] / [S]</span> Barracks & Shop</h4>
-          <p>[H] opens the Alliance Barracks to recruit defenders. [S] opens the Weapon Shop to upgrade automated laser/rocket/turret defenses.</p>
-        </div>
-        <div class="tutCard">
-          <h4><span class="tutKey">[J] / [K]</span> Skill Trees</h4>
-          <p>[J] opens Alliance Cadre & Titan Skill Tree to upgrade your army. [K] opens the Operative Passive Skill Tree for personal base stats.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- TAB 5: ENGINE MANAGERS & ARCHITECTURE -->
-    <div id="tutManagers" class="tutContent">
-      <p style="color:#6ad7ff;font-size:13px;margin-bottom:14px;font-weight:bold;">ENTERPRISE SUBSYSTEM MANAGERS // ZERO-BUG SUPERVISION ARCHITECTURE:</p>
-      <div class="tutGrid">
-        <div class="tutCard" style="border-color:#2a4554;">
-          <h4 style="color:#6ad7ff;"><span class="tutKey">SPAWN</span> Concurrency Manager</h4>
-          <p>Controls wave density and prevents chaotic hordes. Waves 1–4 are throttled to a strict maximum of 3–6 active units at a time, spacing enemies across sewer lanes without overlapping.</p>
-        </div>
-        <div class="tutCard" style="border-color:#2a4554;">
-          <h4 style="color:#ffb06a;"><span class="tutKey">COMBAT</span> Combat & Hit Manager</h4>
-          <p>Calculates player click damage (3x baseline), critical strike multipliers, and armor-penetration. Ensures Juggernaut shields and boss hitboxes register cleanly every click.</p>
-        </div>
-        <div class="tutCard" style="border-color:#2a4554;">
-          <h4 style="color:#ffd35c;"><span class="tutKey">TRAP</span> Physical Hazard Manager</h4>
-          <p>Manages Spring Bouncer momentum, Acid Puddle armor melt, and Bio-Sludge Barrel detonations. Handles knockback cascades and cleans up depleted charges automatically.</p>
-        </div>
-        <div class="tutCard" style="border-color:#2a4554;">
-          <h4 style="color:#74e5b1;"><span class="tutKey">PHYSICS</span> Ragdoll & Debris Manager</h4>
-          <p>Supervises sewer floor bounce physics for blasted toilet debris. Caps active objects and despawns settled ragdolls to maintain locked 60 FPS performance.</p>
-        </div>
-        <div class="tutCard" style="border-color:#2a4554;">
-          <h4 style="color:#c7a8ff;"><span class="tutKey">WATCHDOG</span> Sanity Auto-Healer</h4>
-          <p>Scans the engine every 800ms. Instantly detects and purges null entities, NaN coordinates, or corrupted HP numbers so the game engine never freezes or crashes.</p>
-        </div>
-        <div class="tutCard" style="border-color:#2a4554;">
-          <h4 style="color:#ff5c3d;"><span class="tutKey">APEX</span> Infinity Mode & G-Man 1.0</h4>
-          <p>Infinity Mode unlocks endless escalating waves. At Wave 100 (and every 100 waves), the 3D-modeled G-Man 1.0 spawns as the ultimate Apex Overlord boss!</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 </body>
 </html>
