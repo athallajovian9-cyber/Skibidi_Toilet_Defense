@@ -760,7 +760,7 @@
 
   <!-- INFINITY MODE TOGGLE BUTTON -->
   <div style="margin: 12px 0 6px; text-align: center;">
-    <button id="infinityModeBtn" class="infinityToggleBtn" onclick="toggleInfinityMode()" title="Toggle Infinite Waves Mode">
+    <button id="infinityModeBtn" class="infinityToggleBtn" title="Toggle Infinite Waves Mode">
       ♾️ INFINITY MODE: <span id="infinityStateText" style="color:#ff4d4d;">OFF</span>
     </button>
   </div>
@@ -1011,7 +1011,13 @@ const storage = {
 /* ================= INFINITY MODE ENGINE ================= */
 let isInfinityMode = false;
 
-function toggleInfinityMode(){
+let lastInfToggleTime = 0;
+function toggleInfinityMode(e){
+  if(e && e.preventDefault) e.preventDefault();
+  const now = performance.now();
+  if(now - lastInfToggleTime < 300) return; // Prevent double-trigger!
+  lastInfToggleTime = now;
+
   isInfinityMode = !isInfinityMode;
   sfx.upgrade();
 
