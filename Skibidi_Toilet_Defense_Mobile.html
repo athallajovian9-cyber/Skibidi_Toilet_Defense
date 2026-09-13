@@ -5177,8 +5177,10 @@ function resetGame(){
   relicsCollected = []; activeTrapArm = null; bossSlowMoTimer = 0;
   updateRelicsHud(); updateTrapButtons();
   const rModal = document.getElementById('relicModal'); if(rModal) rModal.style.display = 'none';
-  score = 0; lives = 3; wave = 1; sigma = 0;
-  skillPoints = 2; // Starter budget to hire/upgrade immediately!
+  const hasDiscordBonus = storage.get('skibidiDiscordBonusClaimed', '0') === '1';
+  score = hasDiscordBonus ? 100 : 0;
+  lives = 3; wave = 1; sigma = 0;
+  skillPoints = hasDiscordBonus ? 3 : 2; // Starter budget + Discord reward
   abilityCharge = 0;
   combo = 0;
   comboTimer = 0;
@@ -7249,15 +7251,12 @@ function chargeAbility(amount){ abilityCharge = Math.min(100, abilityCharge + am
 
 
 function claimDiscordBonus(){
-  if(storage.get('skibidiDiscordBonusClaimed', '0') === '0'){
-    storage.set('skibidiDiscordBonusClaimed', '1');
-    skillPoints += 1;
-    score += 100;
-    showToast('🎁 ALLIANCE REWARD: +100 SCORE & +1 SKILL POINT!');
-    sfx.relicFanfare();
-  } else {
-    showToast('⚡ CONNECTED TO ALLIANCE DISCORD!');
-  }
+  storage.set('skibidiDiscordBonusClaimed', '1');
+  score = Math.max(score, 100);
+  skillPoints = Math.max(skillPoints, 3);
+  if(typeof updateHud === 'function') updateHud();
+  showToast('🎁 ALLIANCE REWARD ACTIVATED: +100 SCORE & +1 SKILL POINT!');
+  try { sfx.relicFanfare(); } catch(e){}
 }
 
 function showToast(text){
