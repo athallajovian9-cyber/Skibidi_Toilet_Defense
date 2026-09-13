@@ -846,11 +846,13 @@
     <button id="trapBouncerBtn" class="trapBtn" data-trap="spring">🪠 SPRING 15%</button>
     <button id="trapAcidBtn" class="trapBtn" data-trap="acid">🧪 ACID 20%</button>
     <button id="trapBarrelBtn" class="trapBtn" data-trap="barrel">🛢️ BARREL 25%</button>
+    <button id="trapTripwireBtn" class="trapBtn" data-trap="tripwire">⚡ TRIPWIRE 20%</button>
   </div>
 
   <!-- RIGHT THUMB POD: ABILITIES & OPS -->
   <div id="actionBar" class="thumbPod rightPod">
     <button id="abilityBtn" class="miniBtn primaryAbility">💥 BLAST 0%</button>
+    <button id="drillFissureBtn" class="miniBtn" style="color:#ff9f43;border-color:#ff9f43;" title="Titan Drill Fissure [F]">⛏️ FISSURE [F]</button>
     <div class="gridRow">
       <button id="tvHypnoBtn" class="miniBtn">📺 HYPNO</button>
       <button id="bassBlastBtn" class="miniBtn">🔊 BASS</button>
@@ -958,7 +960,19 @@
     <button id="skillsCloseBtn" style="margin-top:14px;width:100%;max-width:320px;">RESUME DEFENSE</button>
   </div>
 
-  <div id="upgradeScreen">
+  
+  <!-- DYNAMIC WAVE MUTATOR SELECTION MODAL -->
+  <div id="mutatorModal" class="screen" style="display:none;z-index:999995;background:rgba(8,12,16,0.92);backdrop-filter:blur(8px);">
+    <div style="background:#0c1219;border:2px solid #ffd35c;box-shadow:0 0 40px rgba(255,211,92,0.35);border-radius:10px;padding:24px;width:min(680px,92vw);text-align:center;">
+      <h2 style="color:#ffd35c;margin:0 0 6px;letter-spacing:1px;">⚡ TACTICAL MUTATION DIRECTIVE ⚡</h2>
+      <p style="color:#cbd9cc;font-size:13px;margin:0 0 18px;">Wave Milestone Reached! Choose 1 permanent physics mutation for your run:</p>
+      <div id="mutatorCardList" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px;">
+        <!-- Cards generated dynamically -->
+      </div>
+    </div>
+  </div>
+
+<div id="upgradeScreen">
     <h2 id="upgradeTitle">WEAPON ARSENAL SHOP</h2>
     <div id="skillPtsLine" style="margin: 6px 0 12px; font-size: 15px; color: var(--gold); font-weight: 800; letter-spacing: 1px;">
       AVAILABLE SKILL POINTS: <span id="skillPtsVal">0</span>⚡
@@ -5232,6 +5246,155 @@ function getBossName(w){
   return 'BOSS TOILET (WAVE ' + w + ')';
 }
 
+
+/* =========================================================================
+   APEX ULTRA EXPANSION: 4 PHYSICAL & TACTICAL GAMEPLAY SYSTEMS
+   1. Interactive Titan Ultimates (Mind Hijack & Ground Fissure)
+   2. Environmental Hazards (Sewer Valves & Tesla Tripwire)
+   3. Dynamic Wave Modifiers (Roguelike Mutators tiap 5 Wave)
+   4. Boss Breakable Parts (Destructible Armor Mechanics)
+   ========================================================================= */
+
+// 1. TITAN ULTIMATES
+function canMindHijack(){
+  const hasTitanTv = (typeof hiredRanks !== 'undefined' && hiredRanks['titanTv'] > 0) || deployedAllies.some(a => a.type === 'titanTv');
+  const hasTvMan = deployedAllies.some(a => a.type === 'tvman');
+  return hasTitanTv && hasTvMan;
+}
+
+const activeFissures = [];
+function triggerTitanDrillFissure(fx, fy){
+  const hasDrill = (typeof hiredRanks !== 'undefined' && hiredRanks['titanDrill'] > 0) || deployedAllies.some(a => a.type === 'titanDrill');
+  if(!hasDrill){
+    showToast('RECRUIT TITAN DRILLMAN [H] TO UNLEASH FISSURE!');
+    return false;
+  }
+  const x = typeof fx === 'number' ? fx : W / 2;
+  const y = typeof fy === 'number' ? fy : H * 0.62;
+  sfx.drillSlam();
+  if(typeof GameManagers !== 'undefined' && GameManagers.Juice){
+    GameManagers.Juice.screenPunch(18);
+    GameManagers.Juice.hitstop(4);
+  }
+  floorDecals.push({ type: 'fissure', x: x, y: y, len: W * 0.75, rot: (Math.random() - 0.5) * 0.15, alpha: 0.95, life: 480, maxLife: 480 });
+  popParticles(x, y, '#ff9f43', 38);
+  popParticles(x, y, '#ffd35c', 28);
+  showToast('⛏️ TITAN DRILL FISSURE SHATTERS SEWER FLOOR!');
+
+  for(let i = toilets.length - 1; i >= 0; i--){
+    const t = toilets[i];
+    if(t && Math.abs(t.y - y) < 85){
+      t.y = Math.min(H + 35, t.y + 150);
+      t.stunTimer = 85;
+      t.wobble += 5.5;
+      popOneToilet(i, { source: 'TITAN DRILL', dmg: 38 });
+    }
+  }
+  if(boss && Math.abs(boss.y - y) < 110){
+    hitBoss(48, boss.x, boss.y, 'TITAN DRILL');
+  }
+  return true;
+}
+
+// 2. ENVIRONMENTAL HAZARDS
+const sewerValves = [
+  { side: 'LEFT', x: 45, y: H * 0.58, r: 24, cooldown: 0 },
+  { side: 'RIGHT', x: W - 45, y: H * 0.58, r: 24, cooldown: 0 }
+];
+const waterTorrents = [];
+
+function triggerSewerValve(valve){
+  if(valve.cooldown > 0){
+    showToast('VALVE RE-PRESSURIZING (' + Math.ceil(valve.cooldown/60) + 's)');
+    return;
+  }
+  valve.cooldown = 600; // 10s cooldown
+  sfx.flush();
+  if(typeof GameManagers !== 'undefined' && GameManagers.Juice) GameManagers.Juice.screenPunch(12);
+  const dir = valve.side === 'LEFT' ? 1 : -1;
+  waterTorrents.push({ x: valve.x, y: valve.y, dir: dir, life: 90, maxLife: 90 });
+  popParticles(valve.x, valve.y, '#6ad7ff', 30);
+  showToast('🌊 HIGH-PRESSURE SEWER TORRENT FLUSHED!');
+
+  for(let i = toilets.length - 1; i >= 0; i--){
+    const t = toilets[i];
+    if(t && Math.abs(t.y - valve.y) < 120){
+      t.y = Math.min(H + 40, t.y + 160);
+      t.acidTimer = 160;
+      t.wobble += 4;
+      popParticles(t.x, t.y, '#6ad7ff', 10);
+      popOneToilet(i, { source: 'TORRENT', dmg: 16 });
+    }
+  }
+}
+
+// 3. ROGUELIKE MUTATORS (Every 5 Waves)
+const activeMutators = new Set();
+const MUTATOR_POOL = [
+  {
+    id: 'bowling_corpses',
+    title: '🎳 KINETIC BOWLING RAGDOLLS',
+    desc: 'Toilet corpses fling backward with 3.5x kinetic mass, bowling trailing hordes off their feet.'
+  },
+  {
+    id: 'low_gravity',
+    title: '🌌 LOW-GRAVITY SEWER',
+    desc: 'Explosions and bouncers launch enemies 2.2x higher into the air with slow float hang-time.'
+  },
+  {
+    id: 'heavy_artillery',
+    title: '💥 HEAVY ARTILLERY IMPACT',
+    desc: 'All player clicks trigger tactile screen-punch recoil and a 25px kinetic blast wave.'
+  },
+  {
+    id: 'tesla_grid',
+    title: '⚡ OVERVOLT TESLA GRID',
+    desc: 'Tesla tripwires and shock attacks chain to 2 additional nearby targets with critical stun.'
+  }
+];
+
+let mutatorWavePresented = 0;
+function openMutatorSelection(){
+  const modal = document.getElementById('mutatorModal');
+  const list = document.getElementById('mutatorCardList');
+  if(!modal || !list) return;
+
+  const available = MUTATOR_POOL.filter(m => !activeMutators.has(m.id));
+  if(available.length === 0) return;
+
+  const chosenCards = available.sort(() => Math.random() - 0.5).slice(0, 3);
+  list.innerHTML = chosenCards.map(m => `
+    <div onclick="selectMutator('${m.id}')" style="background:#111b26;border:2px solid #6ad7ff;border-radius:8px;padding:16px;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='0 0 18px rgba(106,215,255,0.4)';" onmouseout="this.style.transform='none';this.style.boxShadow='none';">
+      <div style="font-size:13px;font-weight:bold;color:#ffd35c;letter-spacing:1px;margin-bottom:8px;">${m.title}</div>
+      <div style="font-size:11px;color:#cbd9cc;line-height:1.4;">${m.desc}</div>
+      <button style="margin-top:14px;background:#1b334a;border:1px solid #6ad7ff;color:#6ad7ff;padding:6px 12px;border-radius:4px;font-family:inherit;font-weight:bold;cursor:pointer;width:100%;">EQUIP MUTATOR</button>
+    </div>
+  `).join('');
+
+  modal.style.display = 'flex';
+}
+
+function selectMutator(id){
+  activeMutators.add(id);
+  const modal = document.getElementById('mutatorModal');
+  if(modal) modal.style.display = 'none';
+  sfx.upgrade();
+  const m = MUTATOR_POOL.find(x => x.id === id);
+  showToast('⚡ MUTATOR ACTIVATED: ' + (m ? m.title : id));
+}
+
+// 4. BOSS BREAKABLE PARTS
+function initBossBreakableParts(targetBoss){
+  if(!targetBoss) return;
+  const baseHp = targetBoss.maxHp || targetBoss.hp || 300;
+  targetBoss.parts = {
+    leftSpeaker: { hp: Math.round(baseHp * 0.22), maxHp: Math.round(baseHp * 0.22), broken: false },
+    rightSpeaker: { hp: Math.round(baseHp * 0.22), maxHp: Math.round(baseHp * 0.22), broken: false },
+    jetpack: { hp: Math.round(baseHp * 0.28), maxHp: Math.round(baseHp * 0.28), broken: false }
+  };
+}
+
+
 function spawnBoss(){
   sfx.bossSpawn();
   const hp = Math.round((48 + wave*4.8) * diff.hpMult * (waveModifier==='LOW GRAV'?1.12:1));
@@ -5253,6 +5416,7 @@ function spawnBoss(){
   };
   bossBarWrap.style.display = 'block';
   bossBarFill.style.width = '100%';
+  initBossBreakableParts(boss);
   showToast('WARNING: ' + bossTitle + ' HAS ENTERED!');
 }
 
@@ -5283,6 +5447,7 @@ function spawnGManBoss(){
   };
   bossBarWrap.style.display = 'block';
   bossBarFill.style.width = '100%';
+  initBossBreakableParts(boss);
 }
 function spawnFinalBoss(){ spawnGManBoss(); }
 
@@ -5484,6 +5649,37 @@ function triggerTouchRipple(x, y){
 
 function handleCanvasTap(mx, my){
   triggerTouchRipple(mx, my);
+
+  // Environmental Sewer Valve Interaction
+  for(let v of sewerValves){
+    if(Math.hypot(mx - v.x, my - v.y) < v.r + 14){
+      triggerSewerValve(v);
+      return true;
+    }
+  }
+
+  // Titan TV Man Mind Hijack on Hypnotized Toilets
+  if(canMindHijack()){
+    for(let i = toilets.length - 1; i >= 0; i--){
+      const t = toilets[i];
+      if(t && t.hypnoTimer > 0 && !t.hijacked){
+        if(Math.hypot(mx - t.x, my - t.y) < (t.r || 24) + 38){
+          t.hijacked = true;
+          t.speed = -4.6;
+          t.hp = Math.max(t.hp, 30);
+          t.hypnoTimer = 0;
+          sfx.hypno();
+          sfx.bassDrop();
+          if(typeof GameManagers !== 'undefined' && GameManagers.Juice) GameManagers.Juice.screenPunch(14);
+          addDamageNumber(t.x, t.y - 20, '🧠 MIND HIJACKED!', '#c7a8ff');
+          popParticles(t.x, t.y, '#c7a8ff', 35);
+          showToast('🧠 MIND HIJACK: Enemy toilet turned against horde!');
+          return true;
+        }
+      }
+    }
+  }
+
   // Check explosive barrel tap
   for(let i = floorTraps.length - 1; i >= 0; i--){
     const tr = floorTraps[i];
@@ -5511,6 +5707,9 @@ function handleCanvasTap(mx, my){
         } else if(activeTrapArm === 'barrel'){
           floorTraps.push({ id: Math.random(), type:'barrel', x: mx, y: my, r: 22, hp: 12, maxHp: 12 });
           showToast('🛢️ SLUDGE BARREL PLACED!');
+        } else if(activeTrapArm === 'tripwire'){
+          floorTraps.push({ id: Math.random(), type:'tripwire', x: mx, y: my, r: 18, life: 900, maxLife: 900 });
+          showToast('⚡ TESLA TRIPWIRE PYLON PLACED!');
         }
         activeTrapArm = null;
         updateTrapButtons();
@@ -5614,6 +5813,16 @@ function toggleFullscreen(){
 document.getElementById('restartRunBtn').addEventListener('click', restartRun);
 document.getElementById('quitMenuBtn').addEventListener('click', quitToMainMenu);
 document.getElementById('quitGameBtn').addEventListener('click', quitGame);
+
+const drillFissureBtn = document.getElementById('drillFissureBtn');
+if(drillFissureBtn){
+  drillFissureBtn.onclick = () => triggerTitanDrillFissure();
+}
+const trapTripwireBtn = document.getElementById('trapTripwireBtn');
+if(trapTripwireBtn){
+  trapTripwireBtn.onclick = () => selectTrapArm('tripwire');
+}
+
 window.addEventListener('keydown', (e)=>{
   if(e.key === '1'){
     selectTrapArm('spring');
@@ -5621,6 +5830,10 @@ window.addEventListener('keydown', (e)=>{
     selectTrapArm('acid');
   } else if(e.key === '3'){
     selectTrapArm('barrel');
+  } else if(e.key === '4'){
+    selectTrapArm('tripwire');
+  } else if(e.key.toLowerCase() === 'f'){
+    triggerTitanDrillFissure();
   } else if(e.code === 'Space'){
     e.preventDefault();
     useSigmaBlast();
@@ -5772,6 +5985,10 @@ function saveCheckpoint(){
 
 function openUpgradeScreen(fromBoss){
   saveCheckpoint();
+  if(wave > 0 && wave % 5 === 0 && mutatorWavePresented !== wave){
+    mutatorWavePresented = wave;
+    setTimeout(() => openMutatorSelection(), 220);
+  }
   if(state==='waveClear' || state==='victory' || state==='gameover') return;
   state = 'waveClear';
   skillPoints += fromBoss ? 2 : (wave % 5 === 0 ? 2 : 1);
@@ -5949,6 +6166,35 @@ function drawWorld(now){
   floor.addColorStop(1, '#07110f');
   ctx.fillStyle = floor;
   ctx.fillRect(0, floorY, W, H - floorY);
+
+  // Environmental Sewer Pipe Valves
+  sewerValves.forEach(v => {
+    if(v.cooldown > 0) v.cooldown--;
+    ctx.save();
+    ctx.translate(v.x, v.y);
+    ctx.fillStyle = v.cooldown <= 0 ? '#ffd35c' : '#4a5348';
+    ctx.beginPath(); ctx.arc(0, 0, v.r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#080d0a'; ctx.lineWidth = 3; ctx.stroke();
+    ctx.fillStyle = '#080d0a';
+    ctx.beginPath(); ctx.arc(0, 0, 7, 0, Math.PI * 2); ctx.fill();
+    ctx.font = 'bold 9px monospace'; ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center';
+    ctx.fillText(v.cooldown <= 0 ? 'VALVE' : Math.ceil(v.cooldown/60) + 's', 0, 3);
+    ctx.restore();
+  });
+
+  // Render Water Torrents
+  for(let i = waterTorrents.length - 1; i >= 0; i--){
+    const wt = waterTorrents[i];
+    wt.life--;
+    if(wt.life <= 0){ waterTorrents.splice(i, 1); continue; }
+    const alpha = wt.life / wt.maxLife;
+    ctx.save();
+    ctx.fillStyle = `rgba(106, 215, 255, ${alpha * 0.48})`;
+    const tW = (1 - alpha) * W * 0.72;
+    if(wt.dir === 1) ctx.fillRect(wt.x, wt.y - 45, tW, 90);
+    else ctx.fillRect(wt.x - tW, wt.y - 45, tW, 90);
+    ctx.restore();
+  }
 
   // Perspective 3D floor tiles
   ctx.save();
@@ -6874,6 +7120,43 @@ function hitBoss(rawDamage, x, y, source='CLICK'){
   const crit=Math.random()<player.critChance;
   if(crit){dmg*=player.critMult;criticalHits++;}
   dmg=Math.max(1,Math.round(dmg));
+  // Destructible Boss Breakable Parts Logic
+  if(boss && boss.parts){
+    if(x < boss.x - 26 && !boss.parts.leftSpeaker.broken){
+      boss.parts.leftSpeaker.hp -= dmg;
+      if(boss.parts.leftSpeaker.hp <= 0){
+        boss.parts.leftSpeaker.broken = true;
+        sfx.armorBreak();
+        popParticles(boss.x - 38, boss.y, '#ff4d4d', 24);
+        addDamageNumber(boss.x - 38, boss.y - 14, '💥 LEFT SPEAKER DESTROYED!', '#ff4d4d');
+      } else {
+        addDamageNumber(boss.x - 38, boss.y - 14, '-' + dmg + ' 🔊', '#ffd35c');
+      }
+    } else if(x > boss.x + 26 && !boss.parts.rightSpeaker.broken){
+      boss.parts.rightSpeaker.hp -= dmg;
+      if(boss.parts.rightSpeaker.hp <= 0){
+        boss.parts.rightSpeaker.broken = true;
+        sfx.armorBreak();
+        popParticles(boss.x + 38, boss.y, '#ff4d4d', 24);
+        addDamageNumber(boss.x + 38, boss.y - 14, '💥 RIGHT SPEAKER DESTROYED!', '#ff4d4d');
+      } else {
+        addDamageNumber(boss.x + 38, boss.y - 14, '-' + dmg + ' 🔊', '#ffd35c');
+      }
+    } else if(y > boss.y + 16 && !boss.parts.jetpack.broken){
+      boss.parts.jetpack.hp -= dmg;
+      if(boss.parts.jetpack.hp <= 0){
+        boss.parts.jetpack.broken = true;
+        sfx.barrelExplode();
+        popParticles(boss.x, boss.y + 28, '#ff7a3d', 32);
+        addDamageNumber(boss.x, boss.y + 18, '🔥 JETPACK DESTROYED - GROUNDED!', '#ff7a3d');
+        boss.y = H * 0.58;
+        boss.vx *= 0.4;
+      } else {
+        addDamageNumber(boss.x, boss.y + 18, '-' + dmg + ' 🚀', '#ffd35c');
+      }
+    }
+  }
+
   boss.hp-=dmg;
   boss.hitFlash=7;
   shake=Math.min(12,shake+(crit?3:1));
@@ -8925,6 +9208,50 @@ function loop(ts){
 
     for(let i=toilets.length-1;i>=0;i--){
       const t=toilets[i];
+
+      // Hijacked Toilet Kamikaze Movement & Friendly Fire Logic
+      if(t && t.hijacked){
+        t.y += 4.5 * dt;
+        ctx.save();
+        ctx.strokeStyle = '#c7a8ff';
+        ctx.lineWidth = 3.5;
+        ctx.shadowColor = '#a855f7';
+        ctx.shadowBlur = 14;
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, (t.r || 24) + 8, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+        drawLabel('MIND HIJACKED', t.x, t.y - 55, '#c7a8ff');
+        drawPorcelainToilet(t, now);
+
+        let exploded = false;
+        for(let j = toilets.length - 1; j >= 0; j--){
+          const o = toilets[j];
+          if(o !== t && !o.hijacked && Math.hypot(o.x - t.x, o.y - t.y) < (t.r || 24) + (o.r || 24) + 12){
+            exploded = true;
+            break;
+          }
+        }
+        if(exploded || t.y >= H - 20){
+          sfx.barrelExplode();
+          sfx.bassDrop();
+          if(typeof GameManagers !== 'undefined' && GameManagers.Juice) GameManagers.Juice.screenPunch(16);
+          popParticles(t.x, t.y, '#c7a8ff', 40);
+          popParticles(t.x, t.y, '#ffd35c', 20);
+          addDamageNumber(t.x, t.y - 15, '💥 MIND NOVA -50', '#c7a8ff');
+          toilets.forEach((target, tIdx) => {
+            if(target !== t && !target.hijacked && Math.hypot(target.x - t.x, target.y - t.y) < 185){
+              target.y = Math.min(H + 35, target.y + 110);
+              target.stunTimer = 70;
+              popOneToilet(tIdx, { source: 'HIJACK_EXPLODE', dmg: 50 });
+            }
+          });
+          toilets.splice(i, 1);
+          continue;
+        }
+        continue;
+      }
+
       t.wobble += 0.05*dt;
       if(t.type === 'astro'){
         t.warpTimer = (t.warpTimer || 0) + dt;
