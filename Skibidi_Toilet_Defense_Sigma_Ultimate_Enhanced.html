@@ -1105,8 +1105,8 @@
           <p>Supervises sewer floor bounce physics for blasted toilet debris. Caps active objects and despawns settled ragdolls to maintain locked 60 FPS performance.</p>
         </div>
         <div class="tutCard" style="border-color:#2a4554;">
-          <h4 style="color:#6ad7ff;"><span class="tutKey">BUG</span> Bug Manager & Handler</h4>
-          <p>Real-time gameplay glitch sentinel! Scans every 500ms for stuck toilets, out-of-bounds wanderers, frozen wave timers, and menu collisions. BugHandler auto-fixes them on the fly!</p>
+          <h4 style="color:#6ad7ff;"><span class="tutKey">F9 / BUG</span> Bug Manager & Handler</h4>
+          <p>Real-time gameplay glitch sentinel! Scans every 200ms for stuck toilets, out-of-bounds wanderers, frozen wave timers, audio freezes, and menu collisions. Auto-fixes on the fly! Press <strong>F9</strong> for live telemetry dashboard.</p>
         </div>
         <div class="tutCard" style="border-color:#2a4554;">
           <h4 style="color:#ff4d4d;"><span class="tutKey">CRASH</span> Crash Manager & Handler</h4>
@@ -5376,9 +5376,13 @@ function popOneToilet(i, meta={}){
   t.hp-=damage; t.hitFlash=7;
   if(crit){
     criticalHits++;
-    shake=Math.min(12,shake+3);
-    flash=Math.min(0.15,flash+0.04);
-    hitstop = 3; // Cinematic impact freeze!
+    if(typeof GameManagers !== 'undefined' && GameManagers.Juice){
+      GameManagers.Juice.critImpact(t.x, t.y);
+    } else {
+      shake=Math.min(12,shake+3);
+      flash=Math.min(0.15,flash+0.04);
+      hitstop = 3;
+    }
     if(navigator.vibrate) { try { navigator.vibrate(28); } catch(e){} }
   }
   addDamageNumber(t.x,t.y-(t.r+8),(crit?'CRIT ':'')+'-'+damage,crit?'#fff1a1':'#d8f7cf');
@@ -5386,8 +5390,12 @@ function popOneToilet(i, meta={}){
     const base=t.type==='runner'?16:t.type==='tank'?34:t.type==='splitter'?23:t.type==='healer'?26:t.type==='phantom'?28:12;
     const pts=Math.round(base*player.scoreMult*comboMult()*(t.elite?1.75:1));
     popParticles(t.x,t.y,`hsl(${t.hue},80%,60%)`,t.type==='tank'?28:t.elite?24:15);
-    const panVal = Math.max(-0.9, Math.min(0.9, (t.x / Math.max(1, W)) * 2 - 1));
-    tone(700 + Math.random()*220, 0.09, 'square', 0.16, 0, 320, panVal);
+    if(typeof GameManagers !== 'undefined' && GameManagers.Sound){
+      GameManagers.Sound.playSpatialTone(700 + Math.random()*220, 0.09, 'square', 0.16, 0, 320, t.x);
+    } else {
+      const panVal = Math.max(-0.9, Math.min(0.9, (t.x / Math.max(1, W)) * 2 - 1));
+      tone(700 + Math.random()*220, 0.09, 'square', 0.16, 0, 320, panVal);
+    }
     const ox=t.x, oy=t.y, type=t.type, split=t.splitOnDeath;
     toilets.splice(i,1); score+=pts; totalPops++; waveKills++; addCombo();
     chargeAbility(t.type==='tank'?12:t.type==='phantom'?8:5);
@@ -5451,6 +5459,9 @@ function popOneToilet(i, meta={}){
 function checkWaveClear(){
   if(bossDefeatGuard > performance.now()) return;
   if(state === 'playing' && !boss && toiletsSpawnedThisWave >= toiletsToSpawnThisWave && toilets.length === 0){
+    if(typeof GameManagers !== 'undefined' && GameManagers.Save && typeof GameManagers.Save.autoBackup === 'function'){
+      GameManagers.Save.autoBackup();
+    }
     setTimeout(()=>openUpgradeScreen(false), 250);
   }
 }
@@ -5636,6 +5647,11 @@ window.addEventListener('keydown', (e)=>{
   } else if(e.key.toLowerCase() === 'm'){
     if(modsPanel.style.display === 'flex') modsCloseBtn.click();
     else modsBtn.click();
+  } else if(e.key === 'F9'){
+    e.preventDefault();
+    if(typeof BugHandler !== 'undefined' && typeof BugHandler.toggleTelemetryOverlay === 'function'){
+      BugHandler.toggleTelemetryOverlay();
+    }
   } else if(e.key === 'F11'){
     e.preventDefault();
     toggleFullscreen();
@@ -5647,6 +5663,10 @@ window.addEventListener('keydown', (e)=>{
 });
 window.addEventListener('blur', ()=>{
   if(!paused && state === 'playing') togglePause();
+  if(typeof isMouseDown !== 'undefined') isMouseDown = false;
+  if(typeof keys !== 'undefined' && typeof keys === 'object' && keys) {
+    Object.keys(keys).forEach(k => keys[k] = false);
+  }
 });
 document.addEventListener('touchmove', (e)=>{
   if(e.target === canvas) e.preventDefault();
@@ -7436,51 +7456,83 @@ const BugManager = {
     scansCompleted: 0,
     bugsIntercepted: 0,
     bugsHealed: 0,
-    healthyStreak: 0
+    healthyStreak: 0,
+    lastScanDurationMs: 0
   },
 
   init() {
-    console.log('[BugManager 99% Apex] Initializing hyper-vigilant 360° invariant surveillance sentinel...');
+    console.log('[BugManager 99% Apex Ultra] Initializing 360° deep-coverage invariant sentinel...');
     if(this.scanInterval) clearInterval(this.scanInterval);
-    // Ultra-fast 250ms scanning tick (4 scans per second) for zero-latency detection
     this.scanInterval = setInterval(() => {
       this.runComprehensiveScan();
-    }, 250);
+    }, 200);
+
+    const resumeAudio = () => {
+      if(window.audioCtx && window.audioCtx.state === 'suspended') {
+        window.audioCtx.resume().catch(() => {});
+      }
+    };
+    window.addEventListener('click', resumeAudio, { passive: true });
+    window.addEventListener('keydown', resumeAudio, { passive: true });
+    window.addEventListener('touchstart', resumeAudio, { passive: true });
   },
 
   runComprehensiveScan() {
+    const scanStart = performance.now();
     this.metrics.scansCompleted++;
-    const now = performance.now();
+    const now = scanStart;
 
-    // 1. DOM & CANVAS INTEGRITY CHECK
+    // 1. DOM & Canvas
     this.checkCanvasAndViewport();
 
-    // 2. MODAL & UI COLLISION CHECK
+    // 2. Modals & UI Collisions
     this.checkUIAndModalInvariants();
 
-    // 3. CURRENCY & HEALTH INVARIANTS (Lives, Score, Sigma, Skill Points)
+    // 3. Economy & Stats
     this.checkEconomyAndStats();
 
-    // If game is playing, perform intensive entity & loop checks
+    // 4. Audio Engine
+    this.checkAudioContext();
+
+    // 5. Player & Global Scalars
+    this.checkPlayerAndEngineScalars();
+
+    // 6. Game State & Wave Invariants
+    this.checkGameStateInvariants();
+
+    // 7. Buff & Ability Timers
+    this.checkAbilityAndBuffTimers();
+
+    // 8. Relics & Cadre Integrity
+    this.checkRelicsAndCadreInvariants();
+
+    // Playing-specific intensive checks
     if(typeof state !== 'undefined' && state === 'playing') {
-      // 4. TOILET ENTITY HYGIENE (Bounds, Velocities, HP, Stalls, NaN)
+      // 9. Loop Liveness
+      this.checkGameLoopLiveness(now);
+
+      // 10. Toilet Entities & Status Effects
       this.checkToiletEntities(now);
 
-      // 5. WAVE & BOSS PROGRESSION INTEGRITY (Stalls, Freezes, Zombie States)
+      // 11. Wave & Spawner Deadlocks
       this.checkWaveAndBossState(now);
 
-      // 6. ALLY & BARRACKS DEFENDER INTEGRITY
+      // 12. Allies & Turret
       this.checkAlliesAndTurret();
 
-      // 7. PHYSICS & PROJECTILE HYGIENE (Traps, Ragdolls, Bullets, Particles)
+      // 13. Physics & Projectiles
       this.checkPhysicsAndVFX();
 
-      // 8. SCREEN VISUAL EFFECTS INTEGRITY (Stuck Shake, Flash, Overlays)
+      // 14. Weapon Arrays & Timers
+      this.checkWeaponArraysAndTimers();
+
+      // 15. Screen Effects
       this.checkScreenEffects();
     } else if(state === 'bossIntro' || state === 'waveClear') {
-      // Check for stuck transitional states
       this.checkTransitionalStalls(now);
     }
+
+    this.metrics.lastScanDurationMs = Math.round((performance.now() - scanStart) * 100) / 100;
   },
 
   checkCanvasAndViewport() {
@@ -7506,12 +7558,10 @@ const BugManager = {
       { id: 'tutorialScreen', name: 'manual' },
       { id: 'trainerModal', name: 'cheat' }
     ];
-
     const openList = modals.filter(m => {
       const el = document.getElementById(m.id);
       return el && (el.style.display === 'flex' || el.style.display === 'block');
     });
-
     if(openList.length > 1) {
       this.reportBug({
         type: 'MULTIPLE_MODALS_COLLISION',
@@ -7520,7 +7570,6 @@ const BugManager = {
       });
     }
 
-    // Hypno Overlay Stuck Check (>8 seconds)
     const hypnoOverlay = document.getElementById('hypnoOverlay');
     if(hypnoOverlay && hypnoOverlay.style.display === 'block') {
       if(typeof hypnoActiveTimer !== 'undefined' && hypnoActiveTimer <= 0) {
@@ -7530,31 +7579,122 @@ const BugManager = {
   },
 
   checkEconomyAndStats() {
-    // Lives Integrity
     if(isNaN(lives) || lives < 0 || lives > 100) {
       this.reportBug({ type: 'CORRUPTED_LIVES', message: `Lives variable corrupted: ${lives}`, value: lives });
     }
-    // Lives zero check while state === 'playing'
     if(typeof lives === 'number' && lives <= 0 && state === 'playing') {
       this.reportBug({ type: 'LIVES_ZERO_BUT_PLAYING', message: 'Base lives reached 0 but GameOver state was not dispatched' });
     }
-
-    // Score & Multipliers
     if(isNaN(score) || score < 0) {
       this.reportBug({ type: 'CORRUPTED_SCORE', message: `Score corrupted: ${score}` });
     }
     if(isNaN(combo) || combo < 0) {
       this.reportBug({ type: 'CORRUPTED_COMBO', message: `Combo corrupted: ${combo}` });
     }
-
-    // Sigma Energy (0 - 100%)
     if(isNaN(sigma) || sigma < 0 || sigma > 105) {
       this.reportBug({ type: 'CORRUPTED_SIGMA', message: `Sigma energy out of valid 0-100 bounds: ${sigma}` });
     }
-
-    // Skill Points
     if(isNaN(skillPoints) || skillPoints < 0) {
       this.reportBug({ type: 'CORRUPTED_SKILL_POINTS', message: `Skill points corrupted: ${skillPoints}` });
+    }
+  },
+
+  checkAudioContext() {
+    if(window.audioCtx) {
+      if(window.audioCtx.state === 'suspended') {
+        window.audioCtx.resume().catch(() => {});
+      } else if(window.audioCtx.state === 'closed') {
+        this.reportBug({ type: 'AUDIO_CONTEXT_CLOSED', message: 'AudioContext unexpectedly closed' });
+      }
+    }
+  },
+
+  checkPlayerAndEngineScalars() {
+    if(typeof speedMultiplier !== 'undefined' && (isNaN(speedMultiplier) || speedMultiplier <= 0.1 || speedMultiplier > 10)) {
+      this.reportBug({ type: 'CORRUPTED_SPEED_MULTIPLIER', message: `Invalid speed multiplier: ${speedMultiplier}` });
+    }
+    if(typeof hitstop !== 'undefined' && (isNaN(hitstop) || hitstop < 0 || hitstop > 120)) {
+      this.reportBug({ type: 'CORRUPTED_HITSTOP', message: `Hitstop timer corrupted: ${hitstop}` });
+    }
+    if(typeof bossSlowMoTimer !== 'undefined' && (isNaN(bossSlowMoTimer) || bossSlowMoTimer < 0 || bossSlowMoTimer > 500)) {
+      this.reportBug({ type: 'CORRUPTED_SLOWMO', message: `SlowMo timer corrupted: ${bossSlowMoTimer}` });
+    }
+    if(typeof player !== 'undefined' && player) {
+      if(isNaN(player.turretLevel) || player.turretLevel < 0) player.turretLevel = 0;
+      if(isNaN(player.turretDamage) || player.turretDamage <= 0) player.turretDamage = 1;
+      if(isNaN(player.damageMult) || player.damageMult <= 0) player.damageMult = 1;
+      if(isNaN(player.clickRadiusBonus) || player.clickRadiusBonus < 0) player.clickRadiusBonus = 0;
+    }
+  },
+
+  checkGameStateInvariants() {
+    const validStates = ['title', 'difficulty', 'playing', 'paused', 'bossIntro', 'waveClear', 'gameOver', 'victory', 'shop', 'cadre', 'hire', 'skills'];
+    if(typeof state !== 'undefined' && !validStates.includes(state)) {
+      this.reportBug({ type: 'INVALID_GAME_STATE', message: `Unknown game state string: ${state}` });
+    }
+    if(typeof wave !== 'undefined' && (isNaN(wave) || wave < 1)) {
+      this.reportBug({ type: 'CORRUPTED_WAVE_NUMBER', message: `Corrupted wave counter: ${wave}` });
+    }
+    if(typeof streak !== 'undefined' && (isNaN(streak) || streak < 0)) {
+      this.reportBug({ type: 'CORRUPTED_STREAK', message: `Streak counter invalid: ${streak}` });
+    }
+    if(typeof totalPops !== 'undefined' && (isNaN(totalPops) || totalPops < 0)) {
+      this.reportBug({ type: 'CORRUPTED_TOTAL_POPS', message: `Total pops counter invalid: ${totalPops}` });
+    }
+    if(typeof paused === 'boolean' && paused && (state === 'gameOver' || state === 'victory' || state === 'title')) {
+      this.reportBug({ type: 'PAUSED_IN_TERMINAL_STATE', message: `Pause flag true in terminal state ${state}` });
+    }
+  },
+
+  checkAbilityAndBuffTimers() {
+    const buffs = [
+      { name: 'megaPlungerTimer', val: typeof megaPlungerTimer !== 'undefined' ? megaPlungerTimer : 0 },
+      { name: 'overclockTimer', val: typeof overclockTimer !== 'undefined' ? overclockTimer : 0 },
+      { name: 'titanBarrierTimer', val: typeof titanBarrierTimer !== 'undefined' ? titanBarrierTimer : 0 },
+      { name: 'chronoFreezeTimer', val: typeof chronoFreezeTimer !== 'undefined' ? chronoFreezeTimer : 0 },
+      { name: 'meltdownCooldown', val: typeof meltdownCooldown !== 'undefined' ? meltdownCooldown : 0 }
+    ];
+
+    for(const b of buffs) {
+      if(isNaN(b.val) || b.val < 0 || b.val > 3600) {
+        this.reportBug({ type: 'CORRUPTED_BUFF_TIMER', message: `${b.name} has anomalous value: ${b.val}`, timerName: b.name });
+      }
+    }
+
+    if(typeof abilityCharge !== 'undefined' && (isNaN(abilityCharge) || abilityCharge < 0 || abilityCharge > 100)) {
+      this.reportBug({ type: 'CORRUPTED_ABILITY_CHARGE', message: `abilityCharge out of bounds: ${abilityCharge}` });
+    }
+  },
+
+  checkRelicsAndCadreInvariants() {
+    if(typeof relicsCollected !== 'undefined' && Array.isArray(relicsCollected)) {
+      if(relicsCollected.some(r => !r || typeof r !== 'string')) {
+        this.reportBug({ type: 'CORRUPTED_RELICS_ARRAY', message: 'relicsCollected contains null or invalid elements' });
+      }
+      const unique = new Set(relicsCollected);
+      if(unique.size !== relicsCollected.length) {
+        this.reportBug({ type: 'DUPLICATE_RELICS_DETECTED', message: 'relicsCollected contains duplicate items' });
+      }
+    }
+
+    if(typeof cadreRanks === 'object' && cadreRanks !== null) {
+      for(const k in cadreRanks) {
+        if(isNaN(cadreRanks[k]) || cadreRanks[k] < 0 || cadreRanks[k] > 10) {
+          this.reportBug({ type: 'CORRUPTED_CADRE_RANK', message: `cadreRanks[${k}] invalid: ${cadreRanks[k]}`, rankKey: k });
+        }
+      }
+    }
+  },
+
+  checkGameLoopLiveness(now) {
+    if(typeof lastFrame === 'number' && lastFrame > 0) {
+      const gap = now - lastFrame;
+      if(gap > 3200) {
+        this.reportBug({
+          type: 'LOOP_TIMEOUT_STALL',
+          message: `Render animation loop froze for ${Math.round(gap)}ms`
+        });
+      }
     }
   },
 
@@ -7564,58 +7704,79 @@ const BugManager = {
       return;
     }
 
+    const badToilets = [];
     for(let i = toilets.length - 1; i >= 0; i--) {
       const t = toilets[i];
       if(!t || typeof t !== 'object') {
-        this.reportBug({ type: 'NULL_TOILET_IN_ARRAY', message: `Null toilet at index ${i}`, index: i });
+        badToilets.push({ type: 'NULL_TOILET_IN_ARRAY', message: `Null toilet at index ${i}`, entity: t, index: i });
         continue;
       }
 
-      // Check required entity fields
       if(isNaN(t.x) || isNaN(t.y) || isNaN(t.hp) || !t.type) {
-        this.reportBug({ type: 'CORRUPTED_TOILET_PROPERTIES', message: `Toilet has invalid properties at ${i}`, entity: t, index: i });
+        badToilets.push({ type: 'CORRUPTED_TOILET_PROPERTIES', message: `Toilet has invalid properties at ${i}`, entity: t, index: i });
         continue;
       }
 
-      // Out of Bounds check (Escaped the playable sewer floor)
-      if(t.x < -120 || t.x > W + 120 || t.y > H + 280 || t.y < -350) {
-        this.reportBug({ type: 'OUT_OF_BOUNDS_TOILET', message: `Toilet escaped to (${Math.round(t.x)}, ${Math.round(t.y)})`, entity: t, index: i });
+      if(t.x < -160 || t.x > W + 160 || t.y > H + 320 || t.y < -400) {
+        badToilets.push({ type: 'OUT_OF_BOUNDS_TOILET', message: `Toilet escaped to (${Math.round(t.x)}, ${Math.round(t.y)})`, entity: t, index: i });
         continue;
       }
 
-      // Zero or Negative HP Zombie Toilet
       if(t.hp <= 0) {
-        this.reportBug({ type: 'GHOST_ZOMBIE_TOILET', message: `Toilet ${t.type} active with non-positive HP (${t.hp})`, entity: t, index: i });
+        badToilets.push({ type: 'GHOST_ZOMBIE_TOILET', message: `Toilet ${t.type} active with non-positive HP (${t.hp})`, entity: t, index: i });
         continue;
       }
 
-      // Completely Frozen Speed Check (speed <= 0 when not stunned or frozen)
+      // Check Status Effects & Physics Scalars
+      if(isNaN(t.stunTimer) || t.stunTimer < 0 || t.stunTimer > 10000 ||
+         isNaN(t.freezeTimer) || t.freezeTimer < 0 || t.freezeTimer > 10000 ||
+         isNaN(t.acidTimer) || t.acidTimer < 0 || t.acidTimer > 10000 ||
+         isNaN(t.hypnoTimer) || t.hypnoTimer < 0 || t.hypnoTimer > 10000 ||
+         isNaN(t.wobble)) {
+        this.reportBug({ type: 'CORRUPTED_STATUS_EFFECT', message: `Toilet ${t.type} has invalid status timers`, entity: t });
+      }
+
+      if(isNaN(t.vx) || isNaN(t.vy)) {
+        this.reportBug({ type: 'CORRUPTED_TOILET_VELOCITY', message: `Toilet ${t.type} velocity corrupted: (${t.vx}, ${t.vy})`, entity: t });
+      }
+
       if(!t.stunTimer && !t.freezeTimer && !chronoFreezeTimer && (!t.speed || t.speed <= 0)) {
         this.reportBug({ type: 'STUCK_FROZEN_TOILET', message: `Toilet ${t.type} stationary with speed ${t.speed}`, entity: t, index: i });
       }
 
-      // Stuck behind breach line without breach triggering
       if(typeof floorEndY !== 'undefined' && t.y < floorEndY - 40) {
-        this.reportBug({ type: 'UNTRIGGERED_BREACH_TOILET', message: `Toilet past breach threshold (${Math.round(t.y)} < ${Math.round(floorEndY)}) without triggering event`, entity: t, index: i });
+        badToilets.push({ type: 'UNTRIGGERED_BREACH_TOILET', message: `Toilet past breach threshold (${Math.round(t.y)} < ${Math.round(floorEndY)}) without triggering event`, entity: t, index: i });
       }
+    }
+
+    for(const bad of badToilets) {
+      this.reportBug(bad);
     }
   },
 
   checkWaveAndBossState(now) {
-    // Wave Clear Stall Check: all enemies spawned & died, but next wave doesn't start
     if(typeof toiletsSpawnedThisWave !== 'undefined' && typeof toiletsToSpawnThisWave !== 'undefined') {
       if(!boss && toiletsSpawnedThisWave >= toiletsToSpawnThisWave && Array.isArray(toilets) && toilets.length === 0) {
         if(!this._waveStallTime) this._waveStallTime = now;
-        else if(now - this._waveStallTime > 3000) { // Stalled for > 3 seconds
+        else if(now - this._waveStallTime > 2500) {
           this.reportBug({ type: 'WAVE_PROGRESSION_STALLED', message: `Wave ${wave} cleared but progression stalled for ${Math.round(now - this._waveStallTime)}ms` });
           this._waveStallTime = null;
         }
       } else {
         this._waveStallTime = null;
       }
+
+      if(!boss && toiletsSpawnedThisWave < toiletsToSpawnThisWave && Array.isArray(toilets) && toilets.length === 0) {
+        if(!this._spawnStallTime) this._spawnStallTime = now;
+        else if(now - this._spawnStallTime > 4500) {
+          this.reportBug({ type: 'SPAWN_QUEUE_DEADLOCK', message: `Wave ${wave} spawner deadlocked with 0 active enemies for ${Math.round(now - this._spawnStallTime)}ms` });
+          this._spawnStallTime = null;
+        }
+      } else {
+        this._spawnStallTime = null;
+      }
     }
 
-    // Boss Invariant Checks
     if(boss) {
       if(isNaN(boss.x) || isNaN(boss.y) || isNaN(boss.hp)) {
         this.reportBug({ type: 'CORRUPTED_BOSS_COORDINATES', message: `Boss numbers corrupted: hp=${boss.hp}, x=${boss.x}, y=${boss.y}`, boss });
@@ -7625,6 +7786,13 @@ const BugManager = {
       }
       if(boss.x < -100 || boss.x > W + 100 || boss.y > H + 250) {
         this.reportBug({ type: 'OUT_OF_BOUNDS_BOSS', message: `Boss out of arena bounds at (${Math.round(boss.x)}, ${Math.round(boss.y)})` });
+      }
+      // Boss Skill and Shield Timers
+      if(isNaN(boss.laserTimer) || isNaN(boss.missileTimer) || isNaN(boss.attackTimer)) {
+        this.reportBug({ type: 'CORRUPTED_BOSS_SKILL', message: 'Boss skill attack timers corrupted', boss });
+      }
+      if(typeof boss.shield === 'number' && (isNaN(boss.shield) || boss.shield < 0)) {
+        this.reportBug({ type: 'CORRUPTED_BOSS_SKILL', message: 'Boss shield value corrupted', boss });
       }
     }
   },
@@ -7644,7 +7812,6 @@ const BugManager = {
   },
 
   checkPhysicsAndVFX() {
-    // Ragdolls limit & NaN scrubbing
     if(Array.isArray(ragdolls)) {
       if(ragdolls.length > 35) {
         this.reportBug({ type: 'RAGDOLL_ARRAY_OVERFLOW', message: `Ragdoll count exceeded safety threshold (${ragdolls.length})` });
@@ -7657,7 +7824,6 @@ const BugManager = {
       }
     }
 
-    // Traps limit & NaN scrubbing
     if(Array.isArray(floorTraps)) {
       if(floorTraps.length > 25) {
         this.reportBug({ type: 'TRAP_ARRAY_OVERFLOW', message: `Floor trap density overflow (${floorTraps.length})` });
@@ -7670,14 +7836,55 @@ const BugManager = {
       }
     }
 
-    // Bullets Limit Check
     if(Array.isArray(bullets) && bullets.length > 80) {
       this.reportBug({ type: 'BULLET_ARRAY_OVERFLOW', message: `Bullet queue overflow (${bullets.length})` });
     }
 
-    // Particles Memory Cap
     if(Array.isArray(particles) && particles.length > 250) {
       this.reportBug({ type: 'PARTICLE_OVERFLOW_LEAK', message: `Particle count exceeded budget (${particles.length})` });
+    }
+  },
+
+  checkWeaponArraysAndTimers() {
+    if(Array.isArray(drones)) {
+      if(drones.length > 12) {
+        this.reportBug({ type: 'WEAPON_ARRAY_OVERFLOW', message: `Drones array overflow (${drones.length})` });
+      }
+      for(let i = drones.length - 1; i >= 0; i--) {
+        const d = drones[i];
+        if(!d || isNaN(d.x) || isNaN(d.y)) {
+          this.reportBug({ type: 'CORRUPTED_DRONE', message: `Corrupted drone entity at ${i}`, index: i });
+        }
+      }
+    }
+
+    if(Array.isArray(teslaArcs) && teslaArcs.length > 25) {
+      this.reportBug({ type: 'WEAPON_ARRAY_OVERFLOW', message: `Tesla arcs queue overflow (${teslaArcs.length})` });
+    }
+    if(Array.isArray(cryoRings) && cryoRings.length > 20) {
+      this.reportBug({ type: 'WEAPON_ARRAY_OVERFLOW', message: `Cryo rings queue overflow (${cryoRings.length})` });
+    }
+    if(Array.isArray(sonicRings) && sonicRings.length > 20) {
+      this.reportBug({ type: 'WEAPON_ARRAY_OVERFLOW', message: `Sonic rings queue overflow (${sonicRings.length})` });
+    }
+
+    const weaponTimers = [
+      { name: 'gunTimer', val: typeof gunTimer !== 'undefined' ? gunTimer : 0 },
+      { name: 'laserTimer', val: typeof laserTimer !== 'undefined' ? laserTimer : 0 },
+      { name: 'laserBeam', val: typeof laserBeam !== 'undefined' ? laserBeam : 0 },
+      { name: 'minigunTimer', val: typeof minigunTimer !== 'undefined' ? minigunTimer : 0 },
+      { name: 'rocketTimer', val: typeof rocketTimer !== 'undefined' ? rocketTimer : 0 },
+      { name: 'teslaTimer', val: typeof teslaTimer !== 'undefined' ? teslaTimer : 0 },
+      { name: 'flameTimer', val: typeof flameTimer !== 'undefined' ? flameTimer : 0 },
+      { name: 'flameSpray', val: typeof flameSpray !== 'undefined' ? flameSpray : 0 },
+      { name: 'cryoTimer', val: typeof cryoTimer !== 'undefined' ? cryoTimer : 0 },
+      { name: 'sonicTimer', val: typeof sonicTimer !== 'undefined' ? sonicTimer : 0 }
+    ];
+
+    for(const wt of weaponTimers) {
+      if(isNaN(wt.val) || wt.val < 0 || wt.val > 3000) {
+        this.reportBug({ type: 'CORRUPTED_WEAPON_TIMER', message: `${wt.name} corrupted: ${wt.val}`, timerName: wt.name });
+      }
     }
   },
 
@@ -7692,7 +7899,7 @@ const BugManager = {
 
   checkTransitionalStalls(now) {
     if(!this._transitionalTimer) this._transitionalTimer = now;
-    else if(now - this._transitionalTimer > 6000) { // In bossIntro or waveClear for > 6s!
+    else if(now - this._transitionalTimer > 5000) {
       this.reportBug({
         type: 'TRANSITIONAL_STATE_LOCK',
         message: `Game stuck in transition (${state}) for ${Math.round(now - this._transitionalTimer)}ms`
@@ -7706,14 +7913,60 @@ const BugManager = {
     this.activeBugs.push(bugData);
     this.bugCount++;
 
-    // Forward immediately to BugHandler for automated diagnosis and hot-fix
     BugHandler.handleBug(bugData);
+  },
+
+  forceDeepClean() {
+    console.log('[BugSentinel] Executing manual deep engine sanitize...');
+    let cleaned = 0;
+
+    if(Array.isArray(toilets)) {
+      const before = toilets.length;
+      toilets = toilets.filter(t => t && !isNaN(t.x) && !isNaN(t.y) && !isNaN(t.hp) && t.hp > 0 && t.type);
+      cleaned += (before - toilets.length);
+    }
+
+    if(Array.isArray(particles)) { cleaned += Math.max(0, particles.length - 100); particles.length = Math.min(particles.length, 100); }
+    if(Array.isArray(bullets)) { cleaned += Math.max(0, bullets.length - 20); bullets.length = Math.min(bullets.length, 20); }
+    if(Array.isArray(ragdolls)) { cleaned += Math.max(0, ragdolls.length - 10); ragdolls.length = Math.min(ragdolls.length, 10); }
+    if(Array.isArray(drones)) { cleaned += Math.max(0, drones.length - 6); drones.length = Math.min(drones.length, 6); }
+    if(Array.isArray(teslaArcs)) { teslaArcs.length = 0; }
+    if(Array.isArray(cryoRings)) { cryoRings.length = 0; }
+    if(Array.isArray(sonicRings)) { sonicRings.length = 0; }
+
+    if(Array.isArray(floorTraps)) {
+      const beforeTr = floorTraps.length;
+      floorTraps = floorTraps.filter(tr => tr && !isNaN(tr.x) && !isNaN(tr.y) && tr.charges > 0);
+      cleaned += (beforeTr - floorTraps.length);
+    }
+
+    shake = 0; flash = 0; speedMultiplier = 1.0; hitstop = 0; bossSlowMoTimer = 0;
+    laserBeam = 0; flameSpray = 0;
+    const hypnoOv = document.getElementById('hypnoOverlay');
+    if(hypnoOv) hypnoOv.style.display = 'none';
+
+    if(isNaN(lives) || lives < 0) lives = 3;
+    if(isNaN(score) || score < 0) score = 0;
+    if(isNaN(sigma) || sigma < 0) sigma = 0;
+    if(sigma > 100) sigma = 100;
+
+    if(window.audioCtx && window.audioCtx.state === 'suspended') {
+      window.audioCtx.resume().catch(() => {});
+    }
+
+    if(typeof updateHud === 'function') updateHud();
+    if(typeof checkWaveClear === 'function' && Array.isArray(toilets) && toilets.length === 0) checkWaveClear();
+
+    return cleaned;
   }
 };
 
 const BugHandler = {
   fixedBugHistory: [],
   _hudTimer: null,
+  _pendingBatchCount: 0,
+  _batchTimer: null,
+  _latestAnalysis: null,
 
   handleBug(bug) {
     const analysis = this.diagnose(bug);
@@ -7721,7 +7974,7 @@ const BugHandler = {
     
     if(success) BugManager.metrics.bugsHealed++;
     this.recordBugResolution(bug, analysis, success);
-    this.showBugHUD(analysis, success);
+    this.queueBugHUD(analysis, success);
   },
 
   diagnose(bug) {
@@ -7740,6 +7993,14 @@ const BugHandler = {
           rootCause: 'Dead, null, or corrupted entity lingering in active memory array',
           category: 'ZOMBIE_ENTITY',
           fixPlan: 'Surgically excise corrupted object from array and burst pop particles'
+        };
+
+      case 'CORRUPTED_STATUS_EFFECT':
+      case 'CORRUPTED_TOILET_VELOCITY':
+        return {
+          rootCause: 'Toilet status timers or velocity deltas corrupted by arithmetic overflow',
+          category: 'ENTITY_STATUS_CORRUPTION',
+          fixPlan: 'Sanitize status timers, zero out erratic velocity deltas'
         };
 
       case 'STUCK_FROZEN_TOILET':
@@ -7764,13 +8025,28 @@ const BugHandler = {
           fixPlan: 'Unlock state gate, force execute checkWaveClear(), and synchronize HUD'
         };
 
+      case 'SPAWN_QUEUE_DEADLOCK':
+        return {
+          rootCause: 'Spawner interval stalled while wave enemies remain queued',
+          category: 'SPAWN_DEADLOCK',
+          fixPlan: 'Force trigger spawn timer and invoke spawner pacing immediately'
+        };
+
+      case 'LOOP_TIMEOUT_STALL':
+        return {
+          rootCause: 'Main game render loop halted or suspended by host process',
+          category: 'RENDER_LOOP_STALL',
+          fixPlan: 'Re-synchronize timestamp buffer and restart requestAnimationFrame cycle'
+        };
+
       case 'CORRUPTED_BOSS_COORDINATES':
       case 'ZOMBIE_BOSS_ACTIVE':
       case 'OUT_OF_BOUNDS_BOSS':
+      case 'CORRUPTED_BOSS_SKILL':
         return {
-          rootCause: 'Boss object coordinates, HP, or lifecycle desynchronized',
+          rootCause: 'Boss object coordinates, HP, or attack lifecycle desynchronized',
           category: 'BOSS_ANOMALY',
-          fixPlan: 'Normalize Boss position, clamp HP, or finalize boss defeat protocol'
+          fixPlan: 'Normalize Boss position, clamp HP, sanitize attack timers or finalize victory'
         };
 
       case 'LIVES_ZERO_BUT_PLAYING':
@@ -7789,6 +8065,59 @@ const BugHandler = {
           rootCause: 'Economy variable encountered NaN or arithmetic overflow/underflow',
           category: 'ECONOMY_CORRUPTION',
           fixPlan: 'Sanitize metrics back into valid ranges and force update HUD'
+        };
+
+      case 'CORRUPTED_SPEED_MULTIPLIER':
+      case 'CORRUPTED_HITSTOP':
+      case 'CORRUPTED_SLOWMO':
+        return {
+          rootCause: 'Engine timing scalars encountered NaN or extreme value',
+          category: 'TIMING_SCALAR_CORRUPTION',
+          fixPlan: 'Reset speedMultiplier, clear hitstop impact frame, and normalize slow-mo'
+        };
+
+      case 'CORRUPTED_BUFF_TIMER':
+      case 'CORRUPTED_ABILITY_CHARGE':
+        return {
+          rootCause: 'Ability charge or buff duration timer overflowed or became NaN',
+          category: 'BUFF_TIMER_CORRUPTION',
+          fixPlan: 'Clamp buff timers to safety envelope and sanitize ability charge'
+        };
+
+      case 'CORRUPTED_RELICS_ARRAY':
+      case 'DUPLICATE_RELICS_DETECTED':
+      case 'CORRUPTED_CADRE_RANK':
+        return {
+          rootCause: 'Relic inventory or Cadre skill rank metadata corrupted',
+          category: 'PROGRESSION_METADATA_CORRUPTION',
+          fixPlan: 'Deduplicate relics, purge nulls, clamp cadre ranks to allowed limits'
+        };
+
+      case 'INVALID_GAME_STATE':
+      case 'CORRUPTED_WAVE_NUMBER':
+      case 'CORRUPTED_STREAK':
+      case 'CORRUPTED_TOTAL_POPS':
+      case 'PAUSED_IN_TERMINAL_STATE':
+        return {
+          rootCause: 'Global game progression or state machine reached an illegal condition',
+          category: 'STATE_MACHINE_DESYNC',
+          fixPlan: 'Reset state machine to playing/nominal values and synchronize HUD'
+        };
+
+      case 'WEAPON_ARRAY_OVERFLOW':
+      case 'CORRUPTED_DRONE':
+      case 'CORRUPTED_WEAPON_TIMER':
+        return {
+          rootCause: 'Weapon projectile queue overflowed or weapon cooldown timer corrupted',
+          category: 'WEAPON_SYSTEM_ANOMALY',
+          fixPlan: 'Prune excess weapon entities, clear stuck laser/flame timers, reset cooldown'
+        };
+
+      case 'AUDIO_CONTEXT_CLOSED':
+        return {
+          rootCause: 'AudioContext closed by host device power or permission event',
+          category: 'AUDIO_DEVICE_ERROR',
+          fixPlan: 'Re-instantiate Web Audio context and restore master gain'
         };
 
       case 'MULTIPLE_MODALS_COLLISION':
@@ -7851,18 +8180,28 @@ const BugHandler = {
         case 'BOUNDARY_VIOLATION':
         case 'ZOMBIE_ENTITY':
           if(Array.isArray(toilets)) {
-            if(typeof bug.index === 'number' && toilets[bug.index]) {
-              const t = toilets[bug.index];
+            let targetIdx = -1;
+            if(bug.entity) targetIdx = toilets.indexOf(bug.entity);
+            if(targetIdx === -1 && typeof bug.index === 'number' && toilets[bug.index]) targetIdx = bug.index;
+
+            if(targetIdx !== -1 && toilets[targetIdx]) {
+              const t = toilets[targetIdx];
               if(t && typeof popParticles === 'function') popParticles(t.x, t.y, '#ffd35c', 8);
-              toilets.splice(bug.index, 1);
-            } else if(bug.entity) {
-              const idx = toilets.indexOf(bug.entity);
-              if(idx !== -1) {
-                if(typeof popParticles === 'function') popParticles(bug.entity.x, bug.entity.y, '#ffd35c', 8);
-                toilets.splice(idx, 1);
-              }
+              toilets.splice(targetIdx, 1);
             }
             if(typeof updateHud === 'function') updateHud();
+          }
+          return true;
+
+        case 'ENTITY_STATUS_CORRUPTION':
+          if(bug.entity) {
+            bug.entity.stunTimer = Math.max(0, Math.min(300, bug.entity.stunTimer || 0));
+            bug.entity.freezeTimer = Math.max(0, Math.min(300, bug.entity.freezeTimer || 0));
+            bug.entity.acidTimer = Math.max(0, Math.min(300, bug.entity.acidTimer || 0));
+            bug.entity.hypnoTimer = Math.max(0, Math.min(300, bug.entity.hypnoTimer || 0));
+            bug.entity.wobble = 0;
+            if(isNaN(bug.entity.vx)) bug.entity.vx = 0;
+            if(isNaN(bug.entity.vy)) bug.entity.vy = 0;
           }
           return true;
 
@@ -7875,15 +8214,18 @@ const BugHandler = {
           return true;
 
         case 'BREACH_MISFIRE':
-          if(Array.isArray(toilets) && typeof bug.index === 'number' && toilets[bug.index]) {
-            toilets.splice(bug.index, 1);
-            if(titanBarrierTimer <= 0) {
-              lives = Math.max(0, lives - (diff?.breachDamage || 1));
-              sfx.breach();
-              flash = 0.25; shake = 8;
+          if(Array.isArray(toilets)) {
+            let idx = bug.entity ? toilets.indexOf(bug.entity) : bug.index;
+            if(idx !== -1 && toilets[idx]) {
+              toilets.splice(idx, 1);
+              if(titanBarrierTimer <= 0) {
+                lives = Math.max(0, lives - (diff?.breachDamage || 1));
+                if(window.sfx && typeof sfx.breach === 'function') sfx.breach();
+                flash = 0.25; shake = 8;
+              }
+              if(typeof updateHud === 'function') updateHud();
+              if(typeof checkWaveClear === 'function') checkWaveClear();
             }
-            if(typeof updateHud === 'function') updateHud();
-            if(typeof checkWaveClear === 'function') checkWaveClear();
           }
           return true;
 
@@ -7892,18 +8234,101 @@ const BugHandler = {
           if(typeof checkWaveClear === 'function') checkWaveClear();
           return true;
 
+        case 'SPAWN_DEADLOCK':
+          if(typeof spawnTimer !== 'undefined') spawnTimer = 9999;
+          if(typeof GameManagers !== 'undefined' && GameManagers.Spawn && typeof GameManagers.Spawn.checkPacing === 'function') {
+            GameManagers.Spawn.checkPacing(16);
+          }
+          return true;
+
+        case 'RENDER_LOOP_STALL':
+          lastFrame = performance.now();
+          if(typeof loop === 'function') requestAnimationFrame(loop);
+          return true;
+
+        case 'TIMING_SCALAR_CORRUPTION':
+          speedMultiplier = 1.0;
+          hitstop = 0;
+          bossSlowMoTimer = 0;
+          return true;
+
+        case 'BUFF_TIMER_CORRUPTION':
+          if(typeof megaPlungerTimer !== 'undefined' && (isNaN(megaPlungerTimer) || megaPlungerTimer < 0 || megaPlungerTimer > 3600)) megaPlungerTimer = 0;
+          if(typeof overclockTimer !== 'undefined' && (isNaN(overclockTimer) || overclockTimer < 0 || overclockTimer > 3600)) overclockTimer = 0;
+          if(typeof titanBarrierTimer !== 'undefined' && (isNaN(titanBarrierTimer) || titanBarrierTimer < 0 || titanBarrierTimer > 3600)) titanBarrierTimer = 0;
+          if(typeof chronoFreezeTimer !== 'undefined' && (isNaN(chronoFreezeTimer) || chronoFreezeTimer < 0 || chronoFreezeTimer > 3600)) chronoFreezeTimer = 0;
+          if(typeof meltdownCooldown !== 'undefined' && (isNaN(meltdownCooldown) || meltdownCooldown < 0 || meltdownCooldown > 3600)) meltdownCooldown = 0;
+          if(typeof abilityCharge !== 'undefined' && (isNaN(abilityCharge) || abilityCharge < 0)) abilityCharge = 0;
+          if(abilityCharge > 100) abilityCharge = 100;
+          return true;
+
+        case 'PROGRESSION_METADATA_CORRUPTION':
+          if(Array.isArray(relicsCollected)) {
+            relicsCollected = Array.from(new Set(relicsCollected.filter(r => r && typeof r === 'string')));
+          }
+          if(typeof cadreRanks === 'object' && cadreRanks !== null) {
+            for(const k in cadreRanks) {
+              if(isNaN(cadreRanks[k]) || cadreRanks[k] < 0) cadreRanks[k] = 0;
+              if(cadreRanks[k] > 5) cadreRanks[k] = 3;
+            }
+          }
+          return true;
+
+        case 'STATE_MACHINE_DESYNC':
+          if(typeof wave !== 'undefined' && (isNaN(wave) || wave < 1)) wave = 1;
+          if(typeof streak !== 'undefined' && (isNaN(streak) || streak < 0)) streak = 0;
+          if(typeof totalPops !== 'undefined' && (isNaN(totalPops) || totalPops < 0)) totalPops = 0;
+          if(typeof paused === 'boolean' && (state === 'gameOver' || state === 'victory' || state === 'title')) paused = false;
+          const valids = ['title', 'difficulty', 'playing', 'paused', 'bossIntro', 'waveClear', 'gameOver', 'victory', 'shop', 'cadre', 'hire', 'skills'];
+          if(typeof state !== 'undefined' && !valids.includes(state)) state = 'playing';
+          if(typeof updateHud === 'function') updateHud();
+          return true;
+
+        case 'WEAPON_SYSTEM_ANOMALY':
+          if(Array.isArray(drones)) {
+            for(let i = drones.length - 1; i >= 0; i--) {
+              if(!drones[i] || isNaN(drones[i].x) || isNaN(drones[i].y)) drones.splice(i, 1);
+            }
+            if(drones.length > 8) drones.length = 6;
+          }
+          if(Array.isArray(teslaArcs) && teslaArcs.length > 15) teslaArcs.length = 5;
+          if(Array.isArray(cryoRings) && cryoRings.length > 10) cryoRings.length = 5;
+          if(Array.isArray(sonicRings) && sonicRings.length > 10) sonicRings.length = 5;
+          if(typeof gunTimer !== 'undefined' && (isNaN(gunTimer) || gunTimer > 1000)) gunTimer = 0;
+          if(typeof laserTimer !== 'undefined' && (isNaN(laserTimer) || laserTimer > 1000)) laserTimer = 0;
+          if(typeof laserBeam !== 'undefined' && (isNaN(laserBeam) || laserBeam > 1000)) laserBeam = 0;
+          if(typeof minigunTimer !== 'undefined' && (isNaN(minigunTimer) || minigunTimer > 1000)) minigunTimer = 0;
+          if(typeof rocketTimer !== 'undefined' && (isNaN(rocketTimer) || rocketTimer > 1000)) rocketTimer = 0;
+          if(typeof teslaTimer !== 'undefined' && (isNaN(teslaTimer) || teslaTimer > 1000)) teslaTimer = 0;
+          if(typeof flameTimer !== 'undefined' && (isNaN(flameTimer) || flameTimer > 1000)) flameTimer = 0;
+          if(typeof flameSpray !== 'undefined' && (isNaN(flameSpray) || flameSpray > 1000)) flameSpray = 0;
+          if(typeof cryoTimer !== 'undefined' && (isNaN(cryoTimer) || cryoTimer > 1000)) cryoTimer = 0;
+          if(typeof sonicTimer !== 'undefined' && (isNaN(sonicTimer) || sonicTimer > 1000)) sonicTimer = 0;
+          return true;
+
+        case 'AUDIO_DEVICE_ERROR':
+          try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            if(AudioCtx) window.audioCtx = new AudioCtx();
+          } catch(e) {}
+          return true;
+
         case 'BOSS_ANOMALY':
           if(boss) {
             if(boss.hp <= 0) {
-              bossBarWrap.style.display = 'none';
-              sfx.bossDown();
-              popParticles(boss.x, boss.y, '#ffd35c', 40);
+              if(bossBarWrap) bossBarWrap.style.display = 'none';
+              if(window.sfx && typeof sfx.bossDown === 'function') sfx.bossDown();
+              if(typeof popParticles === 'function') popParticles(boss.x, boss.y, '#ffd35c', 40);
               boss = null;
               if(typeof openRelicModal === 'function') openRelicModal();
             } else {
               if(isNaN(boss.x) || boss.x < 60 || boss.x > W - 60) boss.x = W / 2;
               if(isNaN(boss.y) || boss.y < 50) boss.y = H * 0.28;
               if(isNaN(boss.hp)) boss.hp = Math.round(boss.maxHp || 600);
+              if(isNaN(boss.laserTimer)) boss.laserTimer = 0;
+              if(isNaN(boss.missileTimer)) boss.missileTimer = 0;
+              if(isNaN(boss.attackTimer)) boss.attackTimer = 0;
+              if(typeof boss.shield === 'number' && (isNaN(boss.shield) || boss.shield < 0)) boss.shield = 0;
               if(bossBarFill) bossBarFill.style.width = Math.max(0, (boss.hp / boss.maxHp) * 100) + '%';
             }
           }
@@ -8000,7 +8425,20 @@ const BugHandler = {
     if(this.fixedBugHistory.length > 50) this.fixedBugHistory.shift();
   },
 
-  showBugHUD(analysis, success) {
+  queueBugHUD(analysis, success) {
+    this._pendingBatchCount++;
+    this._latestAnalysis = analysis;
+
+    if(!this._batchTimer) {
+      this._batchTimer = setTimeout(() => {
+        this.renderBugHUD(this._latestAnalysis, this._pendingBatchCount, success);
+        this._pendingBatchCount = 0;
+        this._batchTimer = null;
+      }, 350);
+    }
+  },
+
+  renderBugHUD(analysis, count, success) {
     let banner = document.getElementById('bugSentinelHUD');
     if(!banner) {
       banner = document.createElement('div');
@@ -8010,21 +8448,22 @@ const BugHandler = {
       banner.style.left = '50%';
       banner.style.transform = 'translateX(-50%)';
       banner.style.zIndex = '999998';
-      banner.style.background = 'linear-gradient(90deg, #101924, #192535)';
+      banner.style.background = 'linear-gradient(90deg, #0d141e, #131f2f)';
       banner.style.border = '1px solid #6ad7ff';
       banner.style.borderRadius = '6px';
       banner.style.padding = '8px 16px';
-      banner.style.boxShadow = '0 0 22px rgba(106, 215, 255, 0.4)';
-      banner.style.fontFamily = 'monospace';
+      banner.style.boxShadow = '0 0 22px rgba(106, 215, 255, 0.45)';
+      banner.style.fontFamily = "'Consolas', 'Courier New', monospace";
       banner.style.fontSize = '12px';
       banner.style.color = '#e4f4ff';
       banner.style.pointerEvents = 'none';
-      banner.style.transition = 'opacity 0.4s ease, transform 0.3s ease';
+      banner.style.transition = 'opacity 0.35s ease, transform 0.25s ease';
       document.body.appendChild(banner);
     }
 
     const icon = success ? '🔧' : '⚠️';
-    const statusText = success ? 'APEX BUG SENTINEL // AUTO-HEALED 100%' : 'AUTO-HEAL IN PROGRESS';
+    const batchLabel = count > 1 ? ` (${count} ANOMALIES HEALED)` : '';
+    const statusText = success ? `APEX BUG SENTINEL // AUTO-HEALED 100%${batchLabel}` : 'AUTO-HEAL IN PROGRESS';
     banner.innerHTML = `
       <div style="display:flex;align-items:center;gap:10px;">
         <span style="font-size:18px;">${icon}</span>
@@ -8049,7 +8488,131 @@ const BugHandler = {
         banner.style.opacity = '0';
         banner.style.transform = 'translateX(-50%) translateY(-12px)';
       }
-    }, 3800);
+    }, 3600);
+  },
+
+  toggleTelemetryOverlay() {
+    let modal = document.getElementById('bugSentinelTelemetryModal');
+    if(modal) {
+      if(modal.style.display === 'flex') {
+        modal.style.display = 'none';
+        return;
+      } else {
+        this.updateTelemetryContent(modal);
+        modal.style.display = 'flex';
+        return;
+      }
+    }
+
+    modal = document.createElement('div');
+    modal.id = 'bugSentinelTelemetryModal';
+    modal.style.position = 'fixed';
+    modal.style.inset = '0';
+    modal.style.zIndex = '999999';
+    modal.style.background = 'rgba(7, 10, 14, 0.88)';
+    modal.style.backdropFilter = 'blur(6px)';
+    modal.style.display = 'flex';
+    modal.style.alignItems = 'center';
+    modal.style.justifyContent = 'center';
+    modal.style.fontFamily = "'Consolas', 'Courier New', monospace";
+    modal.style.color = '#eef5ea';
+
+    this.updateTelemetryContent(modal);
+    document.body.appendChild(modal);
+  },
+
+  updateTelemetryContent(modal) {
+    const historyRows = this.fixedBugHistory.slice(-8).reverse().map(h => {
+      const timeStr = new Date(h.timestamp).toLocaleTimeString();
+      return `<tr style="border-bottom:1px solid #1a2838;">
+        <td style="padding:4px 8px;color:#8bff5c;">${timeStr}</td>
+        <td style="padding:4px 8px;color:#6ad7ff;font-weight:bold;">${h.category}</td>
+        <td style="padding:4px 8px;color:#cbd9cc;">${h.rootCause}</td>
+        <td style="padding:4px 8px;color:#ffd35c;">${h.fixPlan}</td>
+      </tr>`;
+    }).join('') || '<tr><td colspan="4" style="padding:10px;text-align:center;color:#6f8a63;">No anomalies recorded. Engine operating at 100% nominal hygiene.</td></tr>';
+
+    const toiletCount = Array.isArray(toilets) ? toilets.length : 0;
+    const bulletCount = Array.isArray(bullets) ? bullets.length : 0;
+    const droneCount = Array.isArray(drones) ? drones.length : 0;
+    const trapCount = Array.isArray(floorTraps) ? floorTraps.length : 0;
+    const ragdollCount = Array.isArray(ragdolls) ? ragdolls.length : 0;
+    const particleCount = Array.isArray(particles) ? particles.length : 0;
+    const audioStatus = window.audioCtx ? window.audioCtx.state.toUpperCase() : 'UNINITIALIZED';
+
+    modal.innerHTML = `
+      <div style="background:#0c1219;border:2px solid #6ad7ff;box-shadow:0 0 35px rgba(106,215,255,0.35);border-radius:8px;width:min(880px,94vw);max-height:88vh;display:flex;flex-direction:column;padding:20px;overflow:hidden;">
+        <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #1a2f44;padding-bottom:12px;">
+          <div>
+            <div style="font-size:18px;font-weight:bold;color:#6ad7ff;letter-spacing:1.5px;display:flex;align-items:center;gap:8px;">
+              <span>🛡️</span> APEX BUG SENTINEL TELEMETRY
+            </div>
+            <div style="font-size:11px;color:#7e9eb8;margin-top:2px;">Real-Time Glitch Interceptor, Diagnostic Engine & Invariant Healer</div>
+          </div>
+          <button id="closeTelemetryBtn" style="background:#152230;border:1px solid #6ad7ff;color:#6ad7ff;padding:6px 14px;border-radius:4px;cursor:pointer;font-family:inherit;font-weight:bold;">CLOSE [F9 / ESC]</button>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(130px, 1fr));gap:10px;margin-top:16px;">
+          <div style="background:#111b26;border:1px solid #1e3347;border-radius:6px;padding:10px;text-align:center;">
+            <div style="font-size:10px;color:#7e9eb8;text-transform:uppercase;">Surveillance Scans</div>
+            <div style="font-size:20px;font-weight:bold;color:#8bff5c;margin-top:4px;">${BugManager.metrics.scansCompleted}</div>
+          </div>
+          <div style="background:#111b26;border:1px solid #1e3347;border-radius:6px;padding:10px;text-align:center;">
+            <div style="font-size:10px;color:#7e9eb8;text-transform:uppercase;">Glitches Caught</div>
+            <div style="font-size:20px;font-weight:bold;color:#ffd35c;margin-top:4px;">${BugManager.metrics.bugsIntercepted}</div>
+          </div>
+          <div style="background:#111b26;border:1px solid #1e3347;border-radius:6px;padding:10px;text-align:center;">
+            <div style="font-size:10px;color:#7e9eb8;text-transform:uppercase;">Auto-Healed</div>
+            <div style="font-size:20px;font-weight:bold;color:#6ad7ff;margin-top:4px;">${BugManager.metrics.bugsHealed}</div>
+          </div>
+          <div style="background:#111b26;border:1px solid #1e3347;border-radius:6px;padding:10px;text-align:center;">
+            <div style="font-size:10px;color:#7e9eb8;text-transform:uppercase;">Audio Engine</div>
+            <div style="font-size:14px;font-weight:bold;color:${audioStatus==='RUNNING'?'#8bff5c':'#ff4d4d'};margin-top:7px;">${audioStatus}</div>
+          </div>
+          <div style="background:#111b26;border:1px solid #1e3347;border-radius:6px;padding:10px;text-align:center;">
+            <div style="font-size:10px;color:#7e9eb8;text-transform:uppercase;">Active Entities</div>
+            <div style="font-size:12px;color:#cbd9cc;margin-top:7px;">T:${toiletCount} | B:${bulletCount} | D:${droneCount} | P:${particleCount}</div>
+          </div>
+        </div>
+
+        <div style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:12px;font-weight:bold;color:#ffd35c;text-transform:uppercase;letter-spacing:1px;">Recent Auto-Healing Logs</div>
+          <button id="deepCleanSentinelBtn" style="background:linear-gradient(90deg, #1f3922, #294e2e);border:1px solid #8bff5c;color:#8bff5c;padding:5px 12px;border-radius:4px;cursor:pointer;font-family:inherit;font-size:11px;font-weight:bold;">⚡ PURGE & DEEP CLEAN ENGINE</button>
+        </div>
+
+        <div style="margin-top:8px;flex:1;overflow-y:auto;border:1px solid #1e3347;border-radius:6px;background:#080d12;">
+          <table style="width:100%;border-collapse:collapse;font-size:11px;text-align:left;">
+            <thead>
+              <tr style="background:#111b26;color:#7e9eb8;border-bottom:1px solid #1e3347;">
+                <th style="padding:6px 8px;">Time</th>
+                <th style="padding:6px 8px;">Category</th>
+                <th style="padding:6px 8px;">Root Cause</th>
+                <th style="padding:6px 8px;">Auto-Fix Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${historyRows}
+            </tbody>
+          </table>
+        </div>
+
+        <div style="margin-top:12px;font-size:10px;color:#5a758d;text-align:right;">
+          Tactical Hotkey: [F9] to toggle sentinel dashboard | Autonomous 200ms Invariant Loop
+        </div>
+      </div>
+    `;
+
+    setTimeout(() => {
+      const closeBtn = document.getElementById('closeTelemetryBtn');
+      if(closeBtn) closeBtn.onclick = () => { modal.style.display = 'none'; };
+      const cleanBtn = document.getElementById('deepCleanSentinelBtn');
+      if(cleanBtn) cleanBtn.onclick = () => {
+        const purged = BugManager.forceDeepClean();
+        cleanBtn.textContent = `PURGED ${purged} OBJECTS!`;
+        setTimeout(() => { cleanBtn.textContent = '⚡ PURGE & DEEP CLEAN ENGINE'; }, 1800);
+        this.updateTelemetryContent(modal);
+      };
+    }, 10);
   }
 };
 
@@ -8068,9 +8631,10 @@ const GameManagers = {
       if(toilets.length >= maxConcurrent) return;
 
       spawnTimer += dt;
-      // Staggered pacing using golden-ratio harmonic distribution
-      const stagger = 0.85 + Math.sin(toiletsSpawnedThisWave * 1.618) * 0.25;
-      const targetInterval = Math.max(14, spawnInterval * stagger);
+      const directorMult = (typeof GameManagers !== 'undefined' && GameManagers.Director) ? GameManagers.Director.getPacingMult() : 1.0;
+      // Staggered pacing using golden-ratio harmonic distribution & adaptive director
+      const stagger = (0.85 + Math.sin(toiletsSpawnedThisWave * 1.618) * 0.25) * directorMult;
+      const targetInterval = Math.max(12, spawnInterval * stagger);
 
       if(spawnTimer >= targetInterval) {
         spawnTimer = 0;
@@ -8162,7 +8726,6 @@ const GameManagers = {
       if(now - this.lastCheck < 800) return;
       this.lastCheck = now;
 
-      // Clean invalid or dead toilets
       for(let i = toilets.length - 1; i >= 0; i--){
         const t = toilets[i];
         if(!t || isNaN(t.x) || isNaN(t.y) || isNaN(t.hp) || t.hp <= 0){
@@ -8170,16 +8733,97 @@ const GameManagers = {
         }
       }
 
-      // Cap particle memory pressure
       if(particles.length > 250){
         particles.splice(0, particles.length - 200);
       }
 
-      // Safeguard values against NaN bugs
       if(isNaN(lives) || lives < 0) lives = 0;
       if(isNaN(score)) score = 0;
       if(isNaN(sigma)) sigma = 0;
       if(isNaN(skillPoints)) skillPoints = 0;
+    }
+  },
+
+  // 5. JUICE & GAME FEEL MANAGER (Tactical Screen Punch, Hitstop & Dynamic Impact)
+  Juice: {
+    hitstop(frames = 3) {
+      hitstop = Math.max(hitstop, frames);
+    },
+    screenPunch(strength = 6) {
+      if(!screenShakeEnabled) return;
+      shake = Math.min(32, shake + strength);
+    },
+    critImpact(x, y) {
+      this.hitstop(4);
+      this.screenPunch(10);
+      flash = Math.max(flash, 0.12);
+      if(typeof popParticles === 'function') popParticles(x, y, '#ffd35c', 16);
+    }
+  },
+
+  // 6. SOUND DIRECTOR (Spatial Panning & Dynamic Combo Pitch Escalation)
+  Sound: {
+    getPan(x) {
+      if(typeof x !== 'number' || typeof W !== 'number' || W <= 0) return 0;
+      return Math.max(-1, Math.min(1, (x / W - 0.5) * 1.8));
+    },
+    getPitchMult() {
+      const c = typeof combo === 'number' ? combo : 0;
+      return 1.0 + Math.min(0.55, c * 0.035);
+    },
+    playSpatialTone(freq, dur, type='sine', vol=0.2, delay=0, glideTo=null, x=null) {
+      const p = x !== null ? this.getPan(x) : 0;
+      const pitch = this.getPitchMult();
+      const scaledFreq = freq * pitch;
+      const scaledGlide = glideTo ? glideTo * pitch : null;
+      if(typeof tone === 'function') {
+        tone(scaledFreq, dur, type, vol, delay, scaledGlide, p);
+      }
+    }
+  },
+
+  // 7. SAVE MANAGER (Dual-Slot Anti-Corruption Auto-Backup)
+  Save: {
+    autoBackup() {
+      try {
+        const payload = {
+          bestScore: typeof bestScore === 'number' ? bestScore : 0,
+          relics: Array.isArray(relicsCollected) ? relicsCollected : [],
+          cadre: typeof cadreRanks === 'object' ? cadreRanks : {},
+          skillPoints: typeof skillPoints === 'number' ? skillPoints : 0,
+          timestamp: Date.now()
+        };
+        const raw = JSON.stringify(payload);
+        localStorage.setItem('skibidi_save_slot_a', raw);
+        localStorage.setItem('skibidi_save_slot_b', raw);
+      } catch(e) {
+        console.warn('[SaveManager] Auto-backup failed:', e);
+      }
+    }
+  },
+
+  // 8. ADAPTIVE DIRECTOR (AI Dynamic Pacing, Clutch Breathers & Dominance Surge)
+  Director: {
+    getPacingMult() {
+      if(typeof lives !== 'number' || typeof toilets === 'undefined' || !Array.isArray(toilets)) return 1.0;
+      // Critical Clutch Window: When at 1 HP and toilets threaten base, give a 40% breathing window
+      const threatened = toilets.some(t => t && t.y < (typeof floorEndY === 'number' ? floorEndY + 65 : 250));
+      if(lives === 1 && threatened) {
+        return 1.40;
+      }
+      // Dominance Surge: When player has huge combo streak and clears fast, accelerate pacing by 18%
+      const c = typeof combo === 'number' ? combo : 0;
+      if(c >= 12 && toilets.length <= 3 && lives >= 3) {
+        return 0.82;
+      }
+      return 1.0;
+    },
+    evaluateThreatLevel() {
+      if(!Array.isArray(toilets)) return 'LOW';
+      const nearBreach = toilets.filter(t => t && t.y < (typeof floorEndY === 'number' ? floorEndY + 80 : 260)).length;
+      if(nearBreach >= 3 || (lives === 1 && nearBreach >= 1)) return 'CRITICAL';
+      if(nearBreach >= 1 || toilets.length >= 6) return 'HIGH';
+      return 'NORMAL';
     }
   }
 };
