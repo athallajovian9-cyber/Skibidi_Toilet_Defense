@@ -4923,7 +4923,7 @@ function spawnToilet(forcedType=null){
   const speedScale = Math.min(wave, 80);
   const base = type === 'runner' ? 1.05 : type === 'astro' ? 1.15 : type === 'tank' ? 0.31 : type === 'juggernaut' ? 0.34 : type === 'mutant' ? 0.40 : type === 'glitch' ? 0.95 : type === 'copter' ? 0.82 : type === 'nitro' ? 0.78 : type === 'phantom' ? 0.92 : type === 'healer' ? 0.43 : type === 'splitter' ? 0.58 : 0.52;
   const variance = type === 'runner' ? 0.34 : type === 'tank' ? 0.12 : 0.22;
-  let hpBase = type === 'tank' ? Math.min(16, 4 + Math.floor(wave/10)) : type === 'juggernaut' ? Math.min(18, 5 + Math.floor(wave/8)) : type === 'mutant' ? Math.min(22, 6 + Math.floor(wave/7)) : type === 'astro' ? 2 + Math.floor(wave/20) : type === 'splitter' ? 2 + Math.floor(wave/26) : type === 'healer' ? 3 + Math.floor(wave/24) : type === 'phantom' ? 2 + Math.floor(wave/20) : (wave > 45 ? 2 : 1);
+  let hpBase = type === 'tank' ? Math.min(8, 3 + Math.floor(wave/12)) : type === 'juggernaut' ? Math.min(9, 4 + Math.floor(wave/10)) : type === 'mutant' ? Math.min(10, 4 + Math.floor(wave/9)) : type === 'astro' ? 2 : type === 'splitter' ? 2 : type === 'healer' ? 2 : type === 'phantom' ? 2 : 1;
   const modHp = waveModifier === 'LOW GRAV' && (type === 'tank' || type === 'splitter') ? 1.18 : 1;
   const hp = Math.max(1, Math.round(hpBase * diff.hpMult * (1 + wave * 0.020) * modHp));
   const armored = type === 'tank' || (wave > 8 && Math.random() < Math.min(0.44, 0.08 + wave*0.004) && type !== 'phantom');
@@ -4937,7 +4937,7 @@ function spawnToilet(forcedType=null){
     hue: type === 'glitch' ? 180+Math.random()*30 : type === 'copter' ? 280+Math.random()*20 : type === 'nitro' ? 15+Math.random()*20 : type === 'runner' ? 35+Math.random()*20 : type === 'tank' ? 205+Math.random()*25 : type === 'phantom' ? 270+Math.random()*35 : type === 'healer' ? 150+Math.random()*20 : 90+Math.random()*40,
     hp: Math.round(hp*eliteMult), maxHp: Math.round(hp*eliteMult), armored, elite, type,
     splitOnDeath: type === 'splitter', healTimer: 0, phase: type === 'phantom' ? Math.random()*Math.PI*2 : 0,
-    armorShieldHp: type === 'juggernaut' ? Math.min(28, 12 + Math.floor(wave/5)) : 0,
+    armorShieldHp: type === 'juggernaut' ? Math.min(6, 3 + Math.floor(wave/8)) : 0,
     maxShieldHp: type === 'juggernaut' ? Math.min(28, 12 + Math.floor(wave/5)) : 0,
     warpTimer: 0, acidTimer: 0,
     skin: 18 + Math.random()*16, hair: Math.random(), blink: Math.random()*180, hitFlash:0,
@@ -5063,28 +5063,28 @@ function popOneToilet(i, meta={}){
   const crit=Math.random()<player.critChance;
   const extra=(meta && meta.dmg) || 0;
   let bonusDmg = (megaPlungerTimer > 0 ? 4 : 0) + (t.hypnoTimer > 0 ? 2 : 0);
-  const isExplosive = (meta && (meta.source === 'ROCKET' || meta.source === 'NUKE' || meta.source === 'BARREL' || meta.source === 'TITAN DRILL'));
-  if(t.type === 'juggernaut' && t.armorShieldHp > 0 && !isExplosive && (meta.source !== 'BURN')){
-    t.armorShieldHp -= 1;
+  const isExplosive = (meta && (meta.source === 'ROCKET' || meta.source === 'NUKE' || meta.source === 'BARREL' || meta.source === 'TITAN DRILL' || meta.source === 'HAMMER_SLAM'));
+  
+  // High-impact Base Click Damage (3 DMG base, so early toilets die in 1 crisp pop!)
+  const baseDmg = meta.source === 'CLICK' ? 3 : 1;
+  const plungerBonus = weaponRank('plunger') * 2; // +2 DMG per plunger rank
+  let damage = (crit ? Math.max(8, Math.round(baseDmg * (player.critMult || 2.5))) : baseDmg) + extra + plungerBonus + bonusDmg;
+
+  // Juggernaut Front Armor Shield (Breaks after 4-6 hits, allows damage bleed-through)
+  if(t.type === 'juggernaut' && t.armorShieldHp > 0){
+    const shieldDmg = isExplosive ? damage * 2.5 : Math.max(2, damage * 0.7);
+    t.armorShieldHp -= shieldDmg;
     sfx.armorRicochet();
-    popParticles(t.x, t.y, '#ffe27c', 4);
-    addDamageNumber(t.x, t.y - 14, 'DEFLECT', '#ffe27c');
+    popParticles(t.x, t.y, '#ffe27c', 6);
     if(t.armorShieldHp <= 0){
       sfx.armorBreak();
-      shake = Math.min(14, shake + 6);
-      popParticles(t.x, t.y, '#ffffff', 18);
-      addDamageNumber(t.x, t.y - 14, 'SHIELD BROKEN!', '#ff4d4d');
-    }
-    return;
-  }
-  let damage=(crit?Math.max(2,Math.round(player.critMult)):1) + extra + Math.max(0, weaponRank('plunger') - 1) + bonusDmg;
-  if(t.type === 'juggernaut' && t.armorShieldHp > 0 && isExplosive){
-    t.armorShieldHp -= damage * 2;
-    if(t.armorShieldHp <= 0){
-      sfx.armorBreak();
-      shake = Math.min(14, shake + 6);
-      popParticles(t.x, t.y, '#ffffff', 18);
-      addDamageNumber(t.x, t.y - 14, 'ARMOR SHATTERED!', '#ff4d4d');
+      shake = Math.min(16, shake + 8);
+      popParticles(t.x, t.y, '#ffffff', 22);
+      addDamageNumber(t.x, t.y - 14, 'SHIELD CRUSHED!', '#ff4d4d');
+      damage = Math.max(2, damage * 0.8); // Bleed over remaining damage to HP!
+    } else {
+      addDamageNumber(t.x, t.y - 14, '-' + Math.round(shieldDmg) + ' 🛡️', '#ffe27c');
+      damage = Math.max(1, damage * 0.35); // Small chip damage through shield
     }
   }
   t.hp-=damage; t.hitFlash=7;
