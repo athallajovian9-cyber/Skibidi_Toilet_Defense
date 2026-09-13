@@ -481,9 +481,10 @@
 
   /* ================= OPERATIVE FIELD MANUAL / TUTORIAL ================= */
   #tutorialScreen {
-    position: absolute; inset: 0; display: none;
+    position: fixed !important; inset: 0 !important; display: none;
     align-items: center; justify-content: center; flex-direction: column;
-    background: rgba(5, 8, 6, 0.98); z-index: 35;
+    background: rgba(5, 8, 6, 0.98) !important; z-index: 999999 !important;
+    pointer-events: auto !important;
     padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
     box-sizing: border-box; text-align: left;
   }
@@ -8887,7 +8888,7 @@ const BugHandler = {
 
         case 'MANUAL_BUTTON_UNRESPONSIVE':
         return {
-          rootCause: `Manual / Tutorial button #${bug.buttonId || 'manual'} missing click binding`,
+          rootCause: `Field Manual / Tutorial button #${bug.buttonId || 'manual'} click interaction restored`,
           category: 'UI_INTERACTION_ANOMALY',
           fixPlan: 'Re-bind onclick and ontouchend handlers to openTutorial()'
         };
@@ -9909,22 +9910,45 @@ let tutorialPrevState = null;
 function openTutorial(e){
   if(e){
     if(e.stopPropagation) e.stopPropagation();
-    if(e.type === 'touchend' && e.preventDefault) e.preventDefault();
+    if(e.preventDefault) e.preventDefault();
   }
   try { ensureAudio(); if(window.sfx && typeof sfx.uiClick === 'function') sfx.uiClick(); } catch(err){}
   tutorialPrevState = state;
   if(state === 'playing') state = 'tutorial';
+
+  // If opened from difficulty screen, cleanly hide it so tutorial is 100% visible
+  const diffScreen = document.getElementById('difficultyScreen');
+  if(diffScreen && diffScreen.style.display !== 'none'){
+    diffScreen.setAttribute('data-was-open', 'true');
+    diffScreen.style.display = 'none';
+  }
+
   const tut = document.getElementById('tutorialScreen');
   if(tut) {
     tut.style.display = 'flex';
-    tut.style.zIndex = '99999';
+    tut.style.zIndex = '999999';
+    // Ensure Tab 1 (Core Mission) is active
+    if(typeof switchTutTab === 'function') switchTutTab('tutBasics');
   }
 }
 
 function closeTutorial(e){
-  if(e && e.stopPropagation) e.stopPropagation();
+  if(e){
+    if(e.stopPropagation) e.stopPropagation();
+    if(e.preventDefault) e.preventDefault();
+  }
+  try { ensureAudio(); if(window.sfx && typeof sfx.uiClick === 'function') sfx.uiClick(); } catch(err){}
+
   const tut = document.getElementById('tutorialScreen');
   if(tut) tut.style.display = 'none';
+
+  // Restore difficulty screen if it was open
+  const diffScreen = document.getElementById('difficultyScreen');
+  if(diffScreen && diffScreen.getAttribute('data-was-open') === 'true'){
+    diffScreen.removeAttribute('data-was-open');
+    diffScreen.style.display = 'flex';
+  }
+
   if(tutorialPrevState){
     state = tutorialPrevState;
     tutorialPrevState = null;
