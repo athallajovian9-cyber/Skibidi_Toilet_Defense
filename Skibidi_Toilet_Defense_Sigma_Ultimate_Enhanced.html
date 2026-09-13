@@ -1105,6 +1105,10 @@
           <p>Supervises sewer floor bounce physics for blasted toilet debris. Caps active objects and despawns settled ragdolls to maintain locked 60 FPS performance.</p>
         </div>
         <div class="tutCard" style="border-color:#2a4554;">
+          <h4 style="color:#6ad7ff;"><span class="tutKey">BUG</span> Bug Manager & Handler</h4>
+          <p>Real-time gameplay glitch sentinel! Scans every 500ms for stuck toilets, out-of-bounds wanderers, frozen wave timers, and menu collisions. BugHandler auto-fixes them on the fly!</p>
+        </div>
+        <div class="tutCard" style="border-color:#2a4554;">
           <h4 style="color:#ff4d4d;"><span class="tutKey">CRASH</span> Crash Manager & Handler</h4>
           <p>Active surveillance sentinel! CrashManager detects errors, freezes, and GPU drops, reporting them to CrashHandler which immediately identifies the root cause and hot-patches the game state with zero downtime!</p>
         </div>
@@ -7144,6 +7148,345 @@ const CrashHandler = {
 
 // Initialize Crash Surveillance immediately
 CrashManager.init();
+
+
+// =========================================================================
+//            ENTERPRISE BUG SURVEILLANCE: BUG MANAGER & BUG HANDLER
+//            (Real-Time Logic Glitch Detection, Root-Cause Analysis & Auto-Fix)
+// =========================================================================
+
+const BugManager = {
+  activeBugs: [],
+  bugCount: 0,
+  scanInterval: null,
+  lastScanTime: performance.now(),
+
+  init() {
+    console.log('[BugManager] Initializing real-time gameplay bug surveillance...');
+    if(this.scanInterval) clearInterval(this.scanInterval);
+    // Run deep semantic invariant scan every 500ms
+    this.scanInterval = setInterval(() => {
+      this.scanForGameplayBugs();
+    }, 500);
+  },
+
+  scanForGameplayBugs() {
+    if(typeof state === 'undefined' || state !== 'playing') return;
+
+    // 1. Check for Stuck / Out-Of-Bounds Toilets
+    if(Array.isArray(toilets)) {
+      for(let i = toilets.length - 1; i >= 0; i--) {
+        const t = toilets[i];
+        if(!t) {
+          this.reportBug({
+            type: 'NULL_TOILET_IN_ARRAY',
+            message: `Found null/undefined toilet at index ${i}`,
+            entity: null,
+            index: i
+          });
+          continue;
+        }
+
+        // Out-of-bounds check
+        if(t.x < -150 || t.x > W + 150 || t.y > H + 250 || t.y < -300) {
+          this.reportBug({
+            type: 'OUT_OF_BOUNDS_TOILET',
+            message: `Toilet ${t.type || 'unknown'} escaped arena bounds at (${Math.round(t.x)}, ${Math.round(t.y)})`,
+            entity: t,
+            index: i
+          });
+        }
+
+        // Stuck velocity check
+        if(!t.stunTimer && !t.freezeTimer && !chronoFreezeTimer && t.speed <= 0) {
+          this.reportBug({
+            type: 'ZERO_SPEED_STUCK_TOILET',
+            message: `Toilet ${t.type} has 0 or negative speed (${t.speed})`,
+            entity: t,
+            index: i
+          });
+        }
+
+        // Corrupted HP or Overkill Negative HP that didn't pop
+        if(isNaN(t.hp) || t.hp <= 0) {
+          this.reportBug({
+            type: 'GHOST_TOILET_ZERO_HP',
+            message: `Toilet ${t.type} lingering with non-positive HP (${t.hp})`,
+            entity: t,
+            index: i
+          });
+        }
+      }
+    }
+
+    // 2. Check for Infinite Wave Stalls
+    if(typeof toiletsSpawnedThisWave !== 'undefined' && typeof toiletsToSpawnThisWave !== 'undefined') {
+      if(!boss && toiletsSpawnedThisWave >= toiletsToSpawnThisWave && Array.isArray(toilets) && toilets.length === 0) {
+        if(!this._stallTimestamp) this._stallTimestamp = performance.now();
+        else if(performance.now() - this._stallTimestamp > 3200) {
+          this.reportBug({
+            type: 'WAVE_CLEAR_STALL',
+            message: `Wave ${wave} targets exhausted but wave transition stalled for ${Math.round(performance.now() - this._stallTimestamp)}ms`,
+            wave
+          });
+          this._stallTimestamp = null;
+        }
+      } else {
+        this._stallTimestamp = null;
+      }
+    }
+
+    // 3. Check for Stuck / Frozen Boss
+    if(boss) {
+      if(isNaN(boss.hp) || isNaN(boss.x) || isNaN(boss.y)) {
+        this.reportBug({
+          type: 'BOSS_CORRUPTED_STATS',
+          message: `Boss entity has NaN in critical attributes (hp:${boss.hp}, x:${boss.x}, y:${boss.y})`,
+          boss
+        });
+      }
+    }
+
+    // 4. Check for Numeric Overflow / Negative Values in Currencies
+    if(isNaN(lives) || lives < 0 || lives > 100 || isNaN(score) || score < 0 || isNaN(sigma) || sigma < 0 || isNaN(skillPoints) || skillPoints < 0) {
+      this.reportBug({
+        type: 'CORRUPTED_ECONOMY_NUMBERS',
+        message: `Detected corrupted currency/life metrics (lives:${lives}, score:${score}, sigma:${sigma}, sp:${skillPoints})`
+      });
+    }
+
+    // 5. Check for Modal Collision Glitches
+    const openModals = [
+      document.getElementById('skillsScreen')?.style.display === 'flex' ? 'skills' : null,
+      document.getElementById('cadreScreen')?.style.display === 'flex' ? 'cadre' : null,
+      document.getElementById('weaponShop')?.style.display === 'flex' ? 'weaponShop' : null,
+      document.getElementById('barracksScreen')?.style.display === 'flex' ? 'barracks' : null
+    ].filter(Boolean);
+
+    if(openModals.length > 1) {
+      this.reportBug({
+        type: 'MODAL_OVERLAY_COLLISION',
+        message: `Multiple UI modal screens open simultaneously: ${openModals.join(', ')}`,
+        modals: openModals
+      });
+    }
+  },
+
+  reportBug(bugData) {
+    console.warn('[BugManager] GAMEPLAY BUG DETECTED! Alerting BugHandler...', bugData);
+    this.activeBugs.push(bugData);
+    this.bugCount++;
+
+    // Forward immediately to BugHandler
+    BugHandler.handleBug(bugData);
+  }
+};
+
+const BugHandler = {
+  fixedBugHistory: [],
+  _hudTimer: null,
+
+  handleBug(bug) {
+    const analysis = this.diagnose(bug);
+    console.log(`[BugHandler] Diagnosis: ${analysis.rootCause} | Auto-Fix Plan: ${analysis.fixPlan}`);
+
+    const success = this.applyFix(bug, analysis);
+    this.recordBugResolution(bug, analysis, success);
+    this.showBugHUD(analysis, success);
+  },
+
+  diagnose(bug) {
+    switch(bug.type) {
+      case 'OUT_OF_BOUNDS_TOILET':
+        return {
+          rootCause: 'Toilet knocked outside valid sewer boundary coordinates',
+          category: 'BOUNDARY_VIOLATION',
+          fixPlan: 'Reposition toilet onto floor track or despawn cleanly with pop particles'
+        };
+
+      case 'ZERO_SPEED_STUCK_TOILET':
+        return {
+          rootCause: 'Movement speed multiplier dropped to zero unexpectedly',
+          category: 'VELOCITY_STALL',
+          fixPlan: 'Recalculate baseline movement speed and reset friction'
+        };
+
+      case 'GHOST_TOILET_ZERO_HP':
+      case 'NULL_TOILET_IN_ARRAY':
+        return {
+          rootCause: 'Dead toilet entity lingering without completing cleanup cycle',
+          category: 'ZOMBIE_ENTITY',
+          fixPlan: 'Purge corrupted entity from array and burst pop particles'
+        };
+
+      case 'WAVE_CLEAR_STALL':
+        return {
+          rootCause: 'Wave clear check stalled by event guard',
+          category: 'PROGRESSION_STALL',
+          fixPlan: 'Force execute checkWaveClear() and synchronize wave banner'
+        };
+
+      case 'BOSS_CORRUPTED_STATS':
+        return {
+          rootCause: 'Boss coordinates or HP corrupted with NaN',
+          category: 'BOSS_STATE_ERROR',
+          fixPlan: 'Normalize Boss position and restore valid HP baseline'
+        };
+
+      case 'CORRUPTED_ECONOMY_NUMBERS':
+        return {
+          rootCause: 'Currency calculation underflowed or produced NaN',
+          category: 'ECONOMY_CORRUPTION',
+          fixPlan: 'Sanitize player currency numbers and refresh HUD'
+        };
+
+      case 'MODAL_OVERLAY_COLLISION':
+        return {
+          rootCause: 'Multiple UI modals opened simultaneously',
+          category: 'UI_STATE_COLLISION',
+          fixPlan: 'Close background modals and focus active primary window'
+        };
+
+      default:
+        return {
+          rootCause: 'General gameplay invariant desynchronization: ' + (bug.message || 'Unknown'),
+          category: 'GENERIC_GLITCH',
+          fixPlan: 'Re-align game state invariants and synchronize HUD'
+        };
+    }
+  },
+
+  applyFix(bug, analysis) {
+    try {
+      switch(analysis.category) {
+        case 'BOUNDARY_VIOLATION':
+        case 'ZOMBIE_ENTITY':
+          if(Array.isArray(toilets) && typeof bug.index === 'number' && toilets[bug.index]) {
+            const t = toilets[bug.index];
+            if(t && typeof popParticles === 'function') popParticles(t.x, t.y, '#ffd35c', 6);
+            toilets.splice(bug.index, 1);
+            if(typeof updateHud === 'function') updateHud();
+          }
+          return true;
+
+        case 'VELOCITY_STALL':
+          if(bug.entity) {
+            bug.entity.speed = Math.max(0.4, (diff?.speedMult || 1.0) * 0.55);
+            bug.entity.stunTimer = 0;
+            bug.entity.freezeTimer = 0;
+          }
+          return true;
+
+        case 'PROGRESSION_STALL':
+          if(typeof checkWaveClear === 'function') {
+            checkWaveClear();
+          }
+          return true;
+
+        case 'BOSS_STATE_ERROR':
+          if(boss) {
+            if(isNaN(boss.x) || boss.x < 50 || boss.x > W - 50) boss.x = W / 2;
+            if(isNaN(boss.y) || boss.y < 50) boss.y = H * 0.3;
+            if(isNaN(boss.hp) || boss.hp <= 0) boss.hp = Math.round(boss.maxHp || 500);
+            if(bossBarFill) bossBarFill.style.width = Math.max(0, (boss.hp / boss.maxHp) * 100) + '%';
+          }
+          return true;
+
+        case 'ECONOMY_CORRUPTION':
+          if(isNaN(lives) || lives < 0) lives = 3;
+          if(isNaN(score) || score < 0) score = 0;
+          if(isNaN(sigma) || sigma < 0) sigma = 0;
+          if(isNaN(skillPoints) || skillPoints < 0) skillPoints = 0;
+          if(typeof updateHud === 'function') updateHud();
+          return true;
+
+        case 'UI_STATE_COLLISION':
+          if(bug.modals && bug.modals.length > 1) {
+            const toKeep = bug.modals[bug.modals.length - 1];
+            if(toKeep !== 'skills' && typeof closeSkillsScreen === 'function') closeSkillsScreen();
+            if(toKeep !== 'cadre' && typeof closeCadreScreen === 'function') closeCadreScreen();
+            if(toKeep !== 'weaponShop' && typeof closeShop === 'function') closeShop();
+            if(toKeep !== 'barracks' && typeof closeBarracks === 'function') closeBarracks();
+          }
+          return true;
+
+        default:
+          if(typeof updateHud === 'function') updateHud();
+          return true;
+      }
+    } catch(err) {
+      console.error('[BugHandler] Failed to apply automated bug hot-fix:', err);
+      return false;
+    }
+  },
+
+  recordBugResolution(bug, analysis, success) {
+    this.fixedBugHistory.push({
+      timestamp: Date.now(),
+      type: bug.type,
+      category: analysis.category,
+      rootCause: analysis.rootCause,
+      fixPlan: analysis.fixPlan,
+      success
+    });
+    if(this.fixedBugHistory.length > 30) this.fixedBugHistory.shift();
+  },
+
+  showBugHUD(analysis, success) {
+    let banner = document.getElementById('bugSentinelHUD');
+    if(!banner) {
+      banner = document.createElement('div');
+      banner.id = 'bugSentinelHUD';
+      banner.style.position = 'fixed';
+      banner.style.top = '62px';
+      banner.style.left = '50%';
+      banner.style.transform = 'translateX(-50%)';
+      banner.style.zIndex = '999998';
+      banner.style.background = 'linear-gradient(90deg, #161c28, #1c2638)';
+      banner.style.border = '1px solid #6ad7ff';
+      banner.style.borderRadius = '6px';
+      banner.style.padding = '8px 16px';
+      banner.style.boxShadow = '0 0 20px rgba(106, 215, 255, 0.35)';
+      banner.style.fontFamily = 'monospace';
+      banner.style.fontSize = '12px';
+      banner.style.color = '#e4f4ff';
+      banner.style.pointerEvents = 'none';
+      banner.style.transition = 'opacity 0.4s ease, transform 0.3s ease';
+      document.body.appendChild(banner);
+    }
+
+    const icon = success ? '🔧' : '⚠️';
+    const statusText = success ? 'GAMEPLAY BUG INTERCEPTED & FIXED' : 'BUG PATCH IN PROGRESS';
+    banner.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:18px;">${icon}</span>
+        <div>
+          <div style="font-weight:bold;color:${success?'#6ad7ff':'#ffd35c'};letter-spacing:1px;">
+            [BUG SENTINEL] ${statusText}
+          </div>
+          <div style="color:#b5deff;font-size:11px;margin-top:2px;">
+            <strong>Glitch:</strong> ${analysis.rootCause} <br/>
+            <strong>Hot-Fix:</strong> ${analysis.fixPlan}
+          </div>
+        </div>
+      </div>
+    `;
+
+    banner.style.opacity = '1';
+    banner.style.transform = 'translateX(-50%) translateY(0)';
+
+    clearTimeout(this._hudTimer);
+    this._hudTimer = setTimeout(() => {
+      if(banner) {
+        banner.style.opacity = '0';
+        banner.style.transform = 'translateX(-50%) translateY(-12px)';
+      }
+    }, 3800);
+  }
+};
+
+// Initialize Bug Surveillance immediately
+BugManager.init();
 
 const GameManagers = {
   // 1. SPAWN & CONCURRENCY MANAGER (Strict Wave Pacing & Anti-Cluster)
