@@ -830,7 +830,7 @@
 
   <!-- INFINITY MODE TOGGLE BUTTON -->
   <div style="margin: 12px 0 6px; text-align: center;">
-    <button id="infinityModeBtn" class="infinityToggleBtn" title="Toggle Infinite Waves Mode">
+    <button id="infinityModeBtn" class="infinityToggleBtn" title="Toggle Infinite Waves Mode" onclick="toggleInfinityMode(event)" ontouchend="toggleInfinityMode(event)">
       ♾️ INFINITY MODE: <span id="infinityStateText" style="color:#ff4d4d;">OFF</span>
     </button>
   </div>
@@ -964,6 +964,7 @@
     </div>
     <p>Nothing moves while paused.</p>
     <button id="resumeBtn">RESUME</button>
+    <button id="pauseInfinityToggleBtn" style="background:#181028;border:1.5px solid #c084fc;color:#c084fc;padding:8px 18px;margin-top:6px;cursor:pointer;font-family:inherit;font-weight:bold;box-shadow:0 0 12px rgba(192,132,252,0.3);" onclick="toggleInfinityMode(event)">♾️ TOGGLE INFINITY MODE</button>
     <button id="restartRunBtn" style="background:#2a2a3a;color:var(--porcelain);border:1px solid var(--pipe);padding:8px 18px;margin-top:6px;cursor:pointer;">RESTART RUN</button>
     <button id="pauseTutBtn" style="background:#141f17;border:1px solid var(--gold);color:var(--gold);padding:8px 18px;margin-top:6px;cursor:pointer;">📖 OPERATIVE'S MANUAL</button>
     <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
@@ -1246,13 +1247,16 @@ let isInfinityMode = false;
 
 let lastInfToggleTime = 0;
 function toggleInfinityMode(e){
-  if(e && e.preventDefault) e.preventDefault();
+  if(e){
+    if(e.stopPropagation) e.stopPropagation();
+    if(e.type === 'touchend' && e.preventDefault) e.preventDefault();
+  }
   const now = performance.now();
-  if(now - lastInfToggleTime < 300) return; // Prevent double-trigger!
+  if(now - lastInfToggleTime < 180) return;
   lastInfToggleTime = now;
 
   isInfinityMode = !isInfinityMode;
-  sfx.upgrade();
+  try { ensureAudio(); sfx.upgrade(); } catch(err){}
 
   const infBtn = document.getElementById('infinityModeBtn');
   const infText = document.getElementById('infinityStateText');
@@ -1275,7 +1279,7 @@ function toggleInfinityMode(e){
         desc.innerHTML = 'Endless escalating waves. Bosses repeat every 5 waves. Survive as long as you can!';
       }
     });
-    showToast('♾️ INFINITY MODE ACTIVATED!');
+    showToast('♾️ INFINITY MODE: ENGAGED!');
   } else {
     if(infBtn) infBtn.classList.remove('active');
     if(infText){ infText.textContent = 'OFF'; infText.style.color = '#ff4d4d'; }
@@ -1290,18 +1294,23 @@ function toggleInfinityMode(e){
         else if(diffKey === 'hard') title.innerHTML = 'GYATT (Hard)';
       }
       if(desc){
-        if(diffKey === 'easy') desc.innerHTML = 'Slow toilets. Long waves. For beginners.';
-        else if(diffKey === 'normal') desc.innerHTML = 'Balanced pace. The intended experience.';
-        else if(diffKey === 'hard') desc.innerHTML = 'Fast toilets. Short waves. Good luck.';
+        desc.innerHTML = diffKey === 'easy' ? 'Slow toilets. Long waves. For beginners.' :
+                         diffKey === 'normal' ? 'Balanced pace. The intended experience.' :
+                         'Fast toilets. Short waves. Good luck.';
       }
     });
-    showToast('STANDARD 100-WAVE CAMPAIGN RESTORED');
+    showToast('♾️ INFINITY MODE: DEACTIVATED');
   }
-}
 
-let diff = DIFFICULTIES.normal;
-let speedMultiplier = Number(storage.get('skibidiSpeed', 1)); // 1 or 2
-let chosenDifficultyKey = storage.get('skibidiLastDifficulty', 'normal');
+  // Update in-game wave indicator if toggled mid-run
+  if(typeof waveVal !== 'undefined' && waveVal) {
+    waveVal.textContent = isInfinityMode ? 'WAVE ' + wave + '/♾️' : 'WAVE ' + wave + '/' + (typeof TOTAL_WAVES !== 'undefined' ? TOTAL_WAVES : 100);
+  }
+  if(typeof boss !== 'undefined' && boss && isInfinityMode) {
+    boss.isFinal = false;
+  }
+  if(typeof updateHud === 'function') updateHud();
+}
 
 /* ================= SOUND & PROCEDURAL BGM ENGINE ================= */
 
@@ -7929,6 +7938,9 @@ const BugManager = {
     // 6. Game State & Wave Invariants
     this.checkGameStateInvariants();
 
+    // 6b. Infinity Mode Integrity Watchdog
+    this.checkInfinityModeIntegrity();
+
     // 7. Buff & Ability Timers
     this.checkAbilityAndBuffTimers();
 
@@ -8072,6 +8084,30 @@ const BugManager = {
     }
     if(typeof paused === 'boolean' && paused && (state === 'gameOver' || state === 'victory' || state === 'title')) {
       this.reportBug({ type: 'PAUSED_IN_TERMINAL_STATE', message: `Pause flag true in terminal state ${state}` });
+    }
+  },
+
+  checkInfinityModeIntegrity() {
+    const infBtn = document.getElementById('infinityModeBtn');
+    if(infBtn) {
+      if(!infBtn.onclick) {
+        this.reportBug({ type: 'INFINITY_MODE_DESYNC', message: 'Infinity mode button missing click handler binding' });
+      }
+      const infText = document.getElementById('infinityStateText');
+      if(infText) {
+        const expected = isInfinityMode ? 'ON' : 'OFF';
+        if(!infText.textContent.includes(expected)) {
+          this.reportBug({ type: 'INFINITY_MODE_DESYNC', message: 'Infinity mode UI label out of sync with engine state' });
+        }
+      }
+    }
+    if(typeof state !== 'undefined' && state === 'playing') {
+      if(isInfinityMode && typeof waveVal !== 'undefined' && waveVal && !waveVal.textContent.includes('♾️')) {
+        this.reportBug({ type: 'INFINITY_HUD_DESYNC', message: 'In-game wave indicator missing infinity symbol' });
+      }
+      if(isInfinityMode && typeof wave !== 'undefined' && wave >= 100 && typeof boss !== 'undefined' && boss && boss.isFinal) {
+        this.reportBug({ type: 'INFINITY_WAVE_CAP_DESYNC', message: 'Boss flagged as terminal during Infinity Mode run' });
+      }
     }
   },
 
@@ -8522,6 +8558,15 @@ const BugHandler = {
           fixPlan: 'Deduplicate relics, purge nulls, clamp cadre ranks to allowed limits'
         };
 
+      case 'INFINITY_MODE_DESYNC':
+      case 'INFINITY_HUD_DESYNC':
+      case 'INFINITY_WAVE_CAP_DESYNC':
+        return {
+          rootCause: 'Infinity Mode state, UI binding, or wave cap desynchronized',
+          category: 'INFINITY_MODE_ANOMALY',
+          fixPlan: 'Re-bind infinity button, resync state machine, and remove terminal wave cap'
+        };
+
       case 'INVALID_GAME_STATE':
       case 'CORRUPTED_WAVE_NUMBER':
       case 'CORRUPTED_STREAK':
@@ -8701,6 +8746,27 @@ const BugHandler = {
               if(cadreRanks[k] > 5) cadreRanks[k] = 3;
             }
           }
+          return true;
+
+        case 'INFINITY_MODE_ANOMALY':
+          const infBtnRef = document.getElementById('infinityModeBtn');
+          if(infBtnRef) {
+            infBtnRef.onclick = (e) => toggleInfinityMode(e);
+            infBtnRef.ontouchend = (e) => toggleInfinityMode(e);
+            const infText = document.getElementById('infinityStateText');
+            if(infText) {
+              infText.textContent = isInfinityMode ? 'ON (NEVER-ENDING WAVES)' : 'OFF';
+              infText.style.color = isInfinityMode ? '#c084fc' : '#ff4d4d';
+            }
+            infBtnRef.classList.toggle('active', isInfinityMode);
+          }
+          if(typeof waveVal !== 'undefined' && waveVal) {
+            waveVal.textContent = isInfinityMode ? 'WAVE ' + wave + '/♾️' : 'WAVE ' + wave + '/' + (typeof TOTAL_WAVES !== 'undefined' ? TOTAL_WAVES : 100);
+          }
+          if(typeof boss !== 'undefined' && boss && isInfinityMode) {
+            boss.isFinal = false;
+          }
+          if(typeof updateHud === 'function') updateHud();
           return true;
 
         case 'STATE_MACHINE_DESYNC':
