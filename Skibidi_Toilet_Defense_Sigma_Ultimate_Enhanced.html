@@ -4886,7 +4886,8 @@ let finalMinionTimer = 0;
 
 const TOTAL_WAVES = 100;
 function isFinalWave(w){ return !isInfinityMode && w === TOTAL_WAVES; }
-function isBossWave(w){ return !isFinalWave(w) && w % 5 === 0; }
+function isGManWave(w){ return (!isInfinityMode && w === TOTAL_WAVES) || (isInfinityMode && w > 0 && w % 100 === 0); }
+function isBossWave(w){ return !isGManWave(w) && w % 5 === 0; }
 
 function resetGame(){
   toilets = []; particles = []; floorTraps = []; ragdolls = []; floorDecals = [];
@@ -4943,10 +4944,11 @@ function startWave(){
   const modSpawn = waveModifier === 'OVERCLOCKED' ? 0.82 : 1;
   spawnInterval = Math.max(diff.spawnMin, (diff.spawnStart - diff.spawnDecay*(wave-1)) * modSpawn);
 
-  if(isFinalWave(wave)){
+  if(isGManWave(wave)){
     state = 'bossIntro';
-    showBanner('WAVE 100', 'THE G-MAN HAS ARRIVED', ()=>{
-      spawnFinalBoss();
+    const gmanSubtitle = isInfinityMode ? 'G-MAN 1.0 (APEX OVERLORD) HAS ENTERED THE RUN' : 'THE G-MAN HAS ARRIVED';
+    showBanner('WAVE ' + wave, gmanSubtitle, ()=>{
+      spawnGManBoss();
       state = 'playing';
     }, 1800);
   } else if(isBossWave(wave)){
@@ -5092,25 +5094,29 @@ function spawnBoss(){
   showToast('WARNING: ' + bossTitle + ' HAS ENTERED!');
 }
 
-function spawnFinalBoss(){
+function spawnGManBoss(){
   sfx.bossSpawn();
   finalMinionTimer = 0;
-  const hp = Math.round(820 * diff.hpMult);
+  const scale = Math.max(1, wave / 100);
+  const hp = Math.round((850 + (scale - 1) * 600) * diff.hpMult);
   boss = {
     x: W/2, y: H + 120,
-    r: 95, vx: 1.1,
+    r: 96, vx: 1.25,
     hp, maxHp: hp,
-    targetY: H * 0.3,
+    targetY: H * 0.28,
     phase: 'rising',
-    isFinal: true,
-    laserTimer: 170,      // frames until next charge begins
-    laserState: 'idle',   // 'idle' | 'charging' | 'firing'
+    isFinal: !isInfinityMode,
+    isGMan: true,
+    title: 'G-MAN 1.0 (APEX)',
+    laserTimer: 160,
+    laserState: 'idle',
     laserStateTimer: 0,
     wobble: 0
   };
   bossBarWrap.style.display = 'block';
   bossBarFill.style.width = '100%';
 }
+function spawnFinalBoss(){ spawnGManBoss(); }
 
 function popParticles(x,y,color,count=14){
   if(particles.length > 180) particles.splice(0, count);
@@ -5977,6 +5983,224 @@ function drawSuitedFigure(r, now, opts){
   ctx.beginPath(); ctx.moveTo(-r * 0.16, -r * 0.22); ctx.lineTo(r * 0.16, -r * 0.22); ctx.stroke();
 }
 
+
+function drawGMan10Toilet(ent, now, opts){
+  const r = ent.r;
+  const charging = opts && opts.laserState === 'charging';
+  const firing = opts && opts.laserState === 'firing';
+  const rage = opts && opts.rage;
+
+  ctx.save();
+  ctx.translate(ent.x, ent.y);
+  ctx.rotate(Math.sin(ent.wobble || 0) * 0.05);
+
+  // 1. CONTACT GROUND SHADOW
+  ctx.save();
+  const shadowGrad = ctx.createRadialGradient(0, r * 0.9, r * 0.2, 0, r * 0.9, r * 1.35);
+  shadowGrad.addColorStop(0, 'rgba(0,0,0,0.85)');
+  shadowGrad.addColorStop(0.6, 'rgba(10,15,12,0.45)');
+  shadowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = shadowGrad;
+  ctx.beginPath(); ctx.ellipse(0, r * 0.9, r * 1.3, r * 0.35, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+
+  // 2. PURE VITREOUS WHITE PORCELAIN WATER TANK (Sketchfab Gman 1.0 spec)
+  const tankX = -r * 0.52, tankY = -r * 1.12, tankW = r * 1.04, tankH = r * 0.82;
+  const tankGrad = ctx.createLinearGradient(tankX, tankY, tankX + tankW, tankY + tankH);
+  tankGrad.addColorStop(0, '#ffffff');
+  tankGrad.addColorStop(0.22, '#f2f6f3');
+  tankGrad.addColorStop(0.65, '#c5cfc4');
+  tankGrad.addColorStop(1, '#687766');
+  ctx.fillStyle = tankGrad;
+  roundPath(tankX, tankY, tankW, tankH, r * 0.12); ctx.fill();
+  ctx.strokeStyle = '#2b362c'; ctx.lineWidth = 2.4; ctx.stroke();
+
+  // Tank Porcelain Specular Highlight Strip
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(tankX + r * 0.1, tankY + r * 0.1); ctx.lineTo(tankX + tankW * 0.7, tankY + r * 0.1); ctx.stroke();
+
+  // Chrome Flush Button on Lid
+  ctx.fillStyle = '#1c2225';
+  ctx.beginPath(); ctx.ellipse(0, tankY + r * 0.06, r * 0.12, r * 0.045, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#e8f4f8';
+  ctx.beginPath(); ctx.ellipse(0, tankY + r * 0.05, r * 0.08, r * 0.025, 0, 0, Math.PI * 2); ctx.fill();
+
+  // 3. PORCELAIN TOILET BOWL (Gman 1.0 Bare Ceramic)
+  const bowlGrad = ctx.createRadialGradient(-r * 0.2, r * 0.12, r * 0.15, 0, r * 0.32, r * 1.0);
+  bowlGrad.addColorStop(0, '#ffffff');
+  bowlGrad.addColorStop(0.25, '#edf4ea');
+  bowlGrad.addColorStop(0.68, '#b8c4b6');
+  bowlGrad.addColorStop(1, '#566354');
+  ctx.fillStyle = bowlGrad;
+  ctx.beginPath(); ctx.ellipse(0, r * 0.32, r * 0.94, r * 0.58, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#232b24'; ctx.lineWidth = 2.2; ctx.stroke();
+
+  // Porcelain Bowl Interior Hole
+  ctx.beginPath(); ctx.ellipse(0, r * 0.28, r * 0.62, r * 0.34, 0, 0, Math.PI * 2);
+  const holeGrad = ctx.createRadialGradient(0, r * 0.15, 5, 0, r * 0.3, r * 0.6);
+  holeGrad.addColorStop(0, '#10252b');
+  holeGrad.addColorStop(0.7, '#071114');
+  holeGrad.addColorStop(1, '#010405');
+  ctx.fillStyle = holeGrad; ctx.fill();
+
+  // Ceramic Rim Specular Bevel
+  ctx.beginPath(); ctx.ellipse(0, r * 0.08, r * 0.86, r * 0.26, 0, 0, Math.PI * 2);
+  ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 2.8; ctx.stroke();
+
+  // 4. G-MAN 1.0 REALISTIC HEAD & FACE
+  ctx.save();
+  ctx.translate(0, -r * 0.30);
+
+  // Muscular Neck
+  const neckGrad = ctx.createLinearGradient(-r * 0.22, 0, r * 0.22, r * 0.45);
+  neckGrad.addColorStop(0, '#9c775e');
+  neckGrad.addColorStop(0.45, '#d6b196');
+  neckGrad.addColorStop(1, '#7a5a43');
+  ctx.fillStyle = neckGrad;
+  ctx.beginPath();
+  ctx.moveTo(-r * 0.22, r * 0.05); ctx.lineTo(-r * 0.26, r * 0.52);
+  ctx.lineTo(r * 0.26, r * 0.52); ctx.lineTo(r * 0.22, r * 0.05);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#4a3324'; ctx.lineWidth = 1.4; ctx.stroke();
+
+  // Head Base Geometry (Chiseled Jawline)
+  const faceGrad = ctx.createRadialGradient(-r * 0.08, -r * 0.22, 6, 0, -r * 0.05, r * 0.52);
+  faceGrad.addColorStop(0, '#fae6d4');
+  faceGrad.addColorStop(0.35, '#e4c4ab');
+  faceGrad.addColorStop(0.75, '#b58f73');
+  faceGrad.addColorStop(1, '#70513b');
+  ctx.fillStyle = faceGrad;
+
+  // Chiseled Head Shape with jaw contours
+  ctx.beginPath();
+  ctx.moveTo(-r * 0.34, -r * 0.25);
+  ctx.quadraticCurveTo(-r * 0.38, r * 0.08, -r * 0.22, r * 0.28);
+  ctx.lineTo(-r * 0.08, r * 0.35);
+  ctx.lineTo(0, r * 0.36);
+  ctx.lineTo(r * 0.08, r * 0.35);
+  ctx.quadraticCurveTo(r * 0.38, r * 0.08, r * 0.34, -r * 0.25);
+  ctx.quadraticCurveTo(r * 0.36, -r * 0.55, 0, -r * 0.56);
+  ctx.quadraticCurveTo(-r * 0.36, -r * 0.55, -r * 0.34, -r * 0.25);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#402a1b'; ctx.lineWidth = 1.8; ctx.stroke();
+
+  // Chin Cleft & Jaw Stubble
+  ctx.fillStyle = 'rgba(70, 50, 40, 0.25)';
+  ctx.beginPath(); ctx.ellipse(0, r * 0.32, r * 0.12, r * 0.05, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(60, 40, 30, 0.45)'; ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.moveTo(0, r * 0.29); ctx.lineTo(0, r * 0.35); ctx.stroke();
+
+  // G-MAN SLICKED CREW CUT HAIR WITH WIDOW'S PEAK
+  const hairGrad = ctx.createLinearGradient(0, -r * 0.62, 0, -r * 0.25);
+  hairGrad.addColorStop(0, '#100e0d');
+  hairGrad.addColorStop(0.5, '#261f1c');
+  hairGrad.addColorStop(1, '#3d322d');
+  ctx.fillStyle = hairGrad;
+
+  ctx.beginPath();
+  ctx.moveTo(-r * 0.35, -r * 0.22);
+  ctx.quadraticCurveTo(-r * 0.37, -r * 0.58, 0, -r * 0.60);
+  ctx.quadraticCurveTo(r * 0.37, -r * 0.58, r * 0.35, -r * 0.22);
+  ctx.quadraticCurveTo(r * 0.24, -r * 0.32, r * 0.12, -r * 0.30);
+  ctx.lineTo(0, -r * 0.24); // Widow's Peak
+  ctx.lineTo(-r * 0.12, -r * 0.30);
+  ctx.quadraticCurveTo(-r * 0.24, -r * 0.32, -r * 0.35, -r * 0.22);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#0a0807'; ctx.lineWidth = 1.6; ctx.stroke();
+
+  // Forehead Stress Creases
+  ctx.strokeStyle = 'rgba(85, 55, 38, 0.45)'; ctx.lineWidth = 1.3;
+  ctx.beginPath(); ctx.moveTo(-r * 0.18, -r * 0.18); ctx.quadraticCurveTo(0, -r * 0.21, r * 0.18, -r * 0.18); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(-r * 0.14, -r * 0.13); ctx.quadraticCurveTo(0, -r * 0.16, r * 0.14, -r * 0.13); ctx.stroke();
+
+  // Heavy Furrowed Eyebrow Ridge (Aggressive Scowl)
+  ctx.fillStyle = '#1c1613';
+  ctx.beginPath();
+  ctx.moveTo(-r * 0.24, -r * 0.08); ctx.lineTo(-r * 0.04, -r * 0.02); ctx.lineTo(-r * 0.05, -r * 0.06); ctx.lineTo(-r * 0.23, -r * 0.11);
+  ctx.closePath(); ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(r * 0.24, -r * 0.08); ctx.lineTo(r * 0.04, -r * 0.02); ctx.lineTo(r * 0.05, -r * 0.06); ctx.lineTo(r * 0.23, -r * 0.11);
+  ctx.closePath(); ctx.fill();
+
+  // Aquiline Nose
+  const noseGrad = ctx.createLinearGradient(-r * 0.04, -r * 0.04, r * 0.08, r * 0.12);
+  noseGrad.addColorStop(0, '#fad5be'); noseGrad.addColorStop(1, '#a67d60');
+  ctx.fillStyle = noseGrad;
+  ctx.beginPath();
+  ctx.moveTo(0, -r * 0.04); ctx.lineTo(-r * 0.05, r * 0.09); ctx.lineTo(0, r * 0.11); ctx.lineTo(r * 0.05, r * 0.09);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#5a3d2a'; ctx.lineWidth = 1.1; ctx.stroke();
+
+  // G-MAN 1.0 MANIACAL HORIZONTAL GRIN & CLENCHED TEETH
+  const mouthW = r * 0.26, mouthH = r * 0.09;
+  const mouthY = r * 0.19;
+
+  // Smile Cheek Creases (Nasolabial Folds)
+  ctx.strokeStyle = 'rgba(70, 42, 28, 0.7)'; ctx.lineWidth = 1.6;
+  ctx.beginPath(); ctx.moveTo(-r * 0.07, r * 0.08); ctx.quadraticCurveTo(-r * 0.28, r * 0.16, -r * 0.24, r * 0.26); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(r * 0.07, r * 0.08); ctx.quadraticCurveTo(r * 0.28, r * 0.16, r * 0.24, r * 0.26); ctx.stroke();
+
+  // Dark Open Mouth Interior Cavity
+  ctx.fillStyle = '#220808';
+  ctx.beginPath();
+  ctx.moveTo(-mouthW, mouthY - r * 0.02);
+  ctx.quadraticCurveTo(0, mouthY - r * 0.04, mouthW, mouthY - r * 0.02);
+  ctx.quadraticCurveTo(0, mouthY + mouthH + r * 0.02, -mouthW, mouthY - r * 0.02);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#3a1111'; ctx.lineWidth = 1.5; ctx.stroke();
+
+  // Upper Clenched White Teeth
+  ctx.fillStyle = '#f8f9fa';
+  ctx.beginPath();
+  ctx.moveTo(-mouthW * 0.85, mouthY - r * 0.015);
+  ctx.quadraticCurveTo(0, mouthY - r * 0.03, mouthW * 0.85, mouthY - r * 0.015);
+  ctx.lineTo(mouthW * 0.8, mouthY + r * 0.015);
+  ctx.quadraticCurveTo(0, mouthY, -mouthW * 0.8, mouthY + r * 0.015);
+  ctx.closePath(); ctx.fill();
+
+  // Lower Clenched White Teeth
+  ctx.fillStyle = '#e8ebed';
+  ctx.beginPath();
+  ctx.moveTo(-mouthW * 0.75, mouthY + mouthH * 0.8);
+  ctx.quadraticCurveTo(0, mouthY + mouthH * 0.65, mouthW * 0.75, mouthY + mouthH * 0.8);
+  ctx.lineTo(mouthW * 0.7, mouthY + mouthH * 0.4);
+  ctx.quadraticCurveTo(0, mouthY + mouthH * 0.3, -mouthW * 0.7, mouthY + mouthH * 0.4);
+  ctx.closePath(); ctx.fill();
+
+  // Individual Teeth Separator Lines
+  ctx.strokeStyle = 'rgba(40, 20, 20, 0.4)'; ctx.lineWidth = 1;
+  for(let tx = -mouthW * 0.65; tx <= mouthW * 0.65; tx += mouthW * 0.22){
+    ctx.beginPath(); ctx.moveTo(tx, mouthY - r * 0.02); ctx.lineTo(tx, mouthY + mouthH * 0.7); ctx.stroke();
+  }
+
+  // PIERCING DEEP-SET EYES & LASER GLOW
+  const glow = firing ? 1.0 : charging ? (0.55 + Math.sin(now / 35) * 0.35) : 0.15;
+  const eyeDX = r * 0.12, eyeY = -r * 0.04;
+
+  [[-eyeDX, eyeY], [eyeDX, eyeY]].forEach(([ex, ey]) => {
+    ctx.fillStyle = '#e8ded4';
+    ctx.beginPath(); ctx.ellipse(ex, ey, r * 0.065, r * 0.042, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#2b1b12'; ctx.lineWidth = 1.2; ctx.stroke();
+
+    if(!firing && !charging){
+      ctx.fillStyle = '#2f4f4f';
+      ctx.beginPath(); ctx.arc(ex, ey, r * 0.026, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#050707';
+      ctx.beginPath(); ctx.arc(ex, ey, r * 0.013, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(ex - 1.5, ey - 1.5, 1.2, 0, Math.PI * 2); ctx.fill();
+    } else {
+      ctx.fillStyle = firing ? '#ffffff' : '#ffd27d';
+      ctx.shadowColor = '#ff2b14'; ctx.shadowBlur = 12 + glow * 20;
+      ctx.beginPath(); ctx.arc(ex, ey, r * 0.035 + glow * 2, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+  });
+
+  ctx.restore();
+  ctx.restore();
+}
+
 function drawPorcelainToilet(ent, now, opts){
   const r = ent.r;
   const armored = !!(ent.armored || (opts && opts.armored));
@@ -6217,6 +6441,18 @@ function hitBoss(rawDamage, x, y, source='CLICK'){
     flash=Math.min(0.26,flash+0.06);
     if(boss.isFinal){
       showVictory();
+      return true;
+    }
+    if(boss.isGMan && isInfinityMode){
+      // Defeated G-Man 1.0 in Infinity Mode!
+      score += Math.round(500 * (1 + wave * 0.5));
+      sigma += 50;
+      totalPops++;
+      skillPoints += 5;
+      boss = null;
+      showBanner('WAVE ' + wave + ' CONQUERED!', 'G-MAN 1.0 DESTROYED! +5 SKILL POINTS & ANCIENT RELIC!', ()=>{
+        openRelicModal();
+      }, 2400);
       return true;
     }
     score+=Math.round(100*(1+wave*0.25));
@@ -6791,9 +7027,18 @@ function loop(ts){
           popParticles(boss.x + (Math.random()-0.5)*boss.r, boss.y + (Math.random()-0.5)*boss.r, '#ff3a1a', 2);
         }
 
-        drawPorcelainToilet(boss,now,{gold:true,suit:true,laserState:boss.laserState,rage:isPhase3Rage});
-        if(boss.laserState==='firing') [eyeL,eyeR].forEach(eye=>{const grad=ctx.createLinearGradient(eye.x,eye.y,eye.x,H);grad.addColorStop(0,'rgba(255,240,180,.95)');grad.addColorStop(.15,'rgba(255,70,40,.75)');grad.addColorStop(1,'rgba(255,60,45,0)');ctx.fillStyle=grad;ctx.beginPath();ctx.moveTo(eye.x-4,eye.y);ctx.lineTo(eye.x+4,eye.y);ctx.lineTo(eye.x+14,H);ctx.lineTo(eye.x-14,H);ctx.closePath();ctx.fill();});
-        drawLabel('THE G-MAN',boss.x,boss.y-boss.r-24,'#ff5c3d');
+        drawGMan10Toilet(boss, now, {laserState: boss.laserState, rage: isPhase3Rage});
+        if(boss.laserState==='firing') [eyeL,eyeR].forEach(eye=>{
+          const grad=ctx.createLinearGradient(eye.x,eye.y,eye.x,H);
+          grad.addColorStop(0,'rgba(255,255,220,1)');
+          grad.addColorStop(0.12,'rgba(255,50,20,0.9)');
+          grad.addColorStop(0.6,'rgba(255,140,0,0.4)');
+          grad.addColorStop(1,'rgba(255,40,20,0)');
+          ctx.fillStyle=grad;
+          ctx.beginPath(); ctx.moveTo(eye.x-6,eye.y); ctx.lineTo(eye.x+6,eye.y);
+          ctx.lineTo(eye.x+22,H); ctx.lineTo(eye.x-22,H); ctx.closePath(); ctx.fill();
+        });
+        drawLabel(boss.title || 'G-MAN 1.0 (APEX)', boss.x, boss.y-boss.r-26, '#ff4732');
       }
     }
     sigma=Math.max(0,sigma-(0.035+player.sigmaDecayBonus)*dt);
