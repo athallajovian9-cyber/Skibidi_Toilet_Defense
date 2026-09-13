@@ -5184,7 +5184,7 @@ function spawnToilet(forcedType=null){
     else type = 'normal';
   }
   const speedScale = Math.min(wave, 80);
-  const base = type === 'runner' ? 1.05 : type === 'astro' ? 1.15 : type === 'tank' ? 0.31 : type === 'juggernaut' ? 0.34 : type === 'mutant' ? 0.40 : type === 'glitch' ? 0.95 : type === 'copter' ? 0.82 : type === 'nitro' ? 0.78 : type === 'phantom' ? 0.92 : type === 'healer' ? 0.43 : type === 'splitter' ? 0.58 : 0.52;
+  const base = type === 'runner' ? 0.92 : type === 'astro' ? 0.76 : type === 'tank' ? 0.34 : type === 'juggernaut' ? 0.36 : type === 'mutant' ? 0.42 : type === 'glitch' ? 0.72 : type === 'copter' ? 0.65 : type === 'nitro' ? 0.68 : type === 'phantom' ? 0.75 : type === 'healer' ? 0.46 : type === 'splitter' ? 0.54 : 0.52;
   const variance = type === 'runner' ? 0.34 : type === 'tank' ? 0.12 : 0.22;
   let hpBase = type === 'tank' ? Math.min(8, 3 + Math.floor(wave/12)) : type === 'juggernaut' ? Math.min(9, 4 + Math.floor(wave/10)) : type === 'mutant' ? Math.min(10, 4 + Math.floor(wave/9)) : type === 'astro' ? 2 : type === 'splitter' ? 2 : type === 'healer' ? 2 : type === 'phantom' ? 2 : 1;
   const modHp = waveModifier === 'LOW GRAV' && (type === 'tank' || type === 'splitter') ? 1.18 : 1;
@@ -7716,11 +7716,12 @@ function loop(ts){
       t.wobble += 0.05*dt;
       if(t.type === 'astro'){
         t.warpTimer = (t.warpTimer || 0) + dt;
-        if(t.warpTimer > 65){
+        if(t.warpTimer > 75){
           t.warpTimer = 0;
-          t.y -= 75 * dt;
+          // Balanced cosmetic thruster burst with slight horizontal evasive sway (no unfair forward teleport)
+          t.x += (Math.random() - 0.5) * 28;
           sfx.warpDash();
-          popParticles(t.x, t.y, '#6ad7ff', 12);
+          popParticles(t.x, t.y, '#6ad7ff', 8);
         }
       }
       if(t.type==='phantom') t.phase += 0.04*dt;
@@ -7750,23 +7751,24 @@ function loop(ts){
       if(chronoFreezeTimer > 0) moveFactor *= 0.18;
       if(t.hypnoTimer > 0){ t.hypnoTimer -= dt; moveFactor = 0; }
 
-      // Special Toilet Variant Behaviors
+      // Special Toilet Variant Behaviors (Balanced, Predictable, Fair Pacing)
       if(t.type === 'glitch'){
         t.glitchTimer = (t.glitchTimer || 0) + dt;
-        if(t.glitchTimer > 60){
+        if(t.glitchTimer > 65){
           t.glitchTimer = 0;
-          t.y -= 42 * dt;
-          t.x += (Math.random() - 0.5) * 55;
-          popParticles(t.x, t.y, '#6ad7ff', 8);
+          // Balanced horizontal flicker (purely evasive, keeping vertical speed consistent)
+          t.x += (Math.random() - 0.5) * 35;
+          popParticles(t.x, t.y, '#6ad7ff', 6);
           sfx.teleport();
         }
       } else if(t.type === 'copter'){
-        t.x += Math.cos(now * 0.005 + t.wobble) * 1.6 * dt;
+        t.x += Math.cos(now * 0.005 + t.wobble) * 1.4 * dt;
         t.rotorAngle = (t.rotorAngle || 0) + 0.45 * dt;
       } else if(t.type === 'nitro'){
+        // Balanced damage sprint: smooth +20% boost with telegraphed flame particles instead of sudden 75% lurch
         if(t.hp < t.maxHp){
-          moveFactor *= 1.75;
-          if(Math.random() < 0.3) popParticles(t.x, t.y + t.r * 0.8, '#ff7a3d', 1);
+          moveFactor *= 1.20;
+          if(Math.random() < 0.25) popParticles(t.x, t.y + t.r * 0.8, '#ff7a3d', 1);
         }
       }
       const stealth=t.type==='phantom' ? (0.32+0.24*Math.sin(t.phase)) : 1;
