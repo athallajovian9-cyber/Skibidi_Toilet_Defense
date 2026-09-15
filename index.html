@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- Screenshot hero restored; keep the legacy Pages build in sync with main. -->
 <html lang="en">
 <head>
   <meta charset="utf-8">
@@ -15,12 +16,11 @@
     *{box-sizing:border-box}
     html,body{margin:0;min-height:100%;background:var(--ink);color:#f4faef;font-family:"Courier New",ui-monospace,monospace}
     body{min-height:100dvh;overflow-x:hidden}
-    .landing{position:relative;width:min(100vw,calc(100dvh * .462085));min-height:100dvh;aspect-ratio:390/844;margin:0 auto;background:#030604 url("skibiditoiletdefense.png") center/100% 100% no-repeat;overflow:hidden}
-    .landing:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(1,7,3,.2),rgba(1,5,2,.28)),url("aislop.jpg") center/cover no-repeat;opacity:.16;mix-blend-mode:screen;z-index:0}
+    .landing{position:relative;width:min(100vw,calc(100dvh * .462085));min-height:100dvh;aspect-ratio:390/844;margin:0 auto;background:#030604 url("skibiditoiletdefense.png") center top/100% 100% no-repeat;overflow:hidden}
     .visual-content{position:absolute;inset:0;pointer-events:none}
-    .semantic-content{position:absolute;inset:0;z-index:2;padding:19px 21px;pointer-events:none;color:transparent}
-    .semantic-content h1,.semantic-content p{position:absolute;margin:0;color:transparent}
-    .semantic-content a{position:absolute;left:10%;right:10%;height:7.5%;display:block;color:transparent;pointer-events:auto}
+    .semantic-content{position:absolute;inset:auto 0 0;z-index:2;padding:18px;color:transparent;pointer-events:none}
+    .semantic-content h1,.semantic-content p{margin:0}
+    .semantic-content a{color:transparent}
     .hotspot{position:absolute;z-index:5;display:block;border-radius:7px;outline:0;text-indent:-9999px}
     .hotspot:focus-visible{outline:2px solid var(--green);outline-offset:3px}
     .play{left:10%;top:64%;width:80%;height:7.5%}
@@ -37,7 +37,7 @@
       .desktop-actions a:hover{background:var(--green);color:#031004}
     }
     @media (prefers-reduced-motion:no-preference){
-        .landing:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(transparent 50%,rgba(141,255,77,.025) 50%);background-size:100% 4px;mix-blend-mode:screen;opacity:.1}
+      .landing:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(transparent 50%,rgba(141,255,77,.025) 50%);background-size:100% 4px;mix-blend-mode:screen;opacity:.26}
     }
   </style>
 </head>
