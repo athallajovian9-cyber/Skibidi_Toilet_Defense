@@ -3,61 +3,69 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>Skibidi Upgrade Hub</title>
-  <meta name="description" content="Skibidi Toilet Defense: Sigma Edition workspace and live game preview.">
-  <meta name="theme-color" content="#171719">
+  <title>Skibidi Defense | Sigma Protocol 3.0</title>
+  <meta name="description" content="Skibidi Toilet Defense: Sigma Edition. Defend the sewer, smash the toilets, and survive the next wave.">
+  <meta name="theme-color" content="#030604">
+  <meta name="author" content="Vortex Studios">
+  <link rel="canonical" href="https://athallajovian9-cyber.github.io/Skibidi_Toilet_Defense_WinOs/">
   <link rel="icon" href="Skibidi_Defense_Minimal_Esports.png" type="image/png">
+  <link rel="manifest" href="manifest.json">
   <style>
-    :root{--bg:#171719;--surface:#202023;--surface-2:#26262a;--surface-3:#2d2d31;--line:#353539;--text:#f4f4f5;--muted:#a1a1aa;--quiet:#71717a;--purple:#a78bfa;--blue:#818cf8;--green:#86efac;--sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px}body{overflow:hidden}button,a{font:inherit;color:inherit}button{border:0;cursor:pointer}.app{height:100dvh;display:grid;grid-template-columns:256px minmax(0,1fr);background:var(--bg)}
-    .sidebar{border-right:1px solid var(--line);background:#1b1b1d;display:flex;flex-direction:column;min-width:0}.side-top{padding:12px 12px 8px}.brand{height:36px;display:flex;align-items:center;gap:10px;padding:0 8px;text-decoration:none;font-weight:600}.brand img{width:23px;height:23px;border-radius:6px;object-fit:cover}.brand small{display:block;color:var(--muted);font-size:11px;font-weight:400}.workspace{margin-top:8px;width:100%;height:34px;padding:0 8px;border-radius:7px;background:transparent;text-align:left;color:var(--text);display:flex;align-items:center;gap:8px}.workspace:hover,.nav a:hover{background:var(--surface-2)}.avatar{width:20px;height:20px;border-radius:6px;background:#f59e0b;display:grid;place-items:center;color:#241600;font-size:11px;font-weight:700}.chevron{margin-left:auto;color:var(--quiet)}.nav{padding:8px 10px;display:grid;gap:2px}.nav-label{padding:12px 10px 6px;color:var(--quiet);font-size:11px}.nav a{height:34px;border-radius:6px;display:flex;align-items:center;gap:10px;padding:0 10px;color:var(--muted);text-decoration:none}.nav a.active{background:var(--surface-3);color:var(--text)}.nav svg{width:16px;height:16px;color:var(--quiet)}.nav .active svg{color:var(--purple)}.project-list{border-top:1px solid var(--line);margin:8px 12px 0;padding:14px 0}.project{display:flex;align-items:center;gap:8px;padding:8px;color:var(--muted);font-size:13px}.project.current{color:var(--text)}.project img{width:22px;height:22px;border-radius:6px}.side-bottom{margin-top:auto;border-top:1px solid var(--line);padding:12px}.side-bottom a{display:flex;align-items:center;gap:10px;padding:9px;color:var(--muted);text-decoration:none;border-radius:6px}.side-bottom a:hover{background:var(--surface-2);color:var(--text)}.upgrade{margin-top:10px;padding:12px;border:1px solid #4c3c7e;border-radius:8px;background:linear-gradient(135deg,#2b2543,#20202c)}.upgrade b{font-size:12px}.upgrade p{color:var(--muted);font-size:11px;line-height:1.45;margin:6px 0 12px}.upgrade a{display:block;text-align:center;padding:7px;border-radius:5px;background:var(--purple);color:#1d1235;font-weight:700;font-size:12px}
-    .workspace-main{min-width:0;display:grid;grid-template-rows:56px minmax(0,1fr)}.topbar{border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:#1a1a1c}.crumbs{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}.crumbs strong{color:var(--text);font-weight:500}.crumbs .slash{color:var(--quiet)}.top-actions{display:flex;align-items:center;gap:7px}.top-actions button,.top-actions a{height:32px;padding:0 11px;display:inline-flex;align-items:center;gap:6px;border-radius:6px;background:transparent;color:var(--muted);text-decoration:none}.top-actions button:hover,.top-actions a:hover{background:var(--surface-2);color:var(--text)}.publish{background:#fafafa!important;color:#1b1b1d!important;font-weight:600}.publish:hover{background:#fff!important}.content{min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 360px}.preview{min-width:0;display:grid;grid-template-rows:48px minmax(0,1fr);background:#101011}.preview-head{display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid var(--line)}.preview-title{display:flex;align-items:center;gap:9px;font-size:13px}.preview-title span{color:var(--muted)}.preview-tabs{display:flex;height:100%;align-items:center;gap:16px}.preview-tabs button{height:100%;background:transparent;color:var(--muted);font-size:12px}.preview-tabs button.active{color:var(--text);border-bottom:2px solid var(--purple)}.preview-stage{padding:18px;overflow:auto;background:radial-gradient(circle at 50% 0,#24212d 0,#101011 42%)}.site-frame{height:100%;min-height:600px;display:flex;flex-direction:column;border:1px solid #3b3b42;border-radius:9px;overflow:hidden;background:#080b12;box-shadow:0 18px 60px rgba(0,0,0,.38)}.site-toolbar{height:34px;flex:0 0 34px;background:#202024;display:flex;align-items:center;padding:0 10px;gap:8px;border-bottom:1px solid #3a3a40}.dots{display:flex;gap:5px}.dots i{width:7px;height:7px;border-radius:50%;background:#55555c}.dots i:first-child{background:#ef8c8c}.url{height:21px;flex:1;border-radius:4px;background:#161619;color:#81818a;padding:4px 8px;font:10px ui-monospace,monospace}.site-frame iframe{border:0;width:100%;height:100%;flex:1;background:#080b12}.chat{border-left:1px solid var(--line);background:#1b1b1d;display:grid;grid-template-rows:48px minmax(0,1fr) auto}.chat-head{display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--line);font-size:13px}.chat-head span{color:var(--muted)}.chat-head button{background:transparent;color:var(--quiet);font-size:18px}.messages{padding:17px;overflow:auto}.message{display:flex;gap:9px;margin-bottom:22px}.message .avatar{flex:0 0 25px;width:25px;height:25px;border-radius:8px}.message-body{min-width:0;line-height:1.55;color:#d4d4d8;font-size:13px}.message-body .meta{display:flex;gap:8px;align-items:center;margin-bottom:4px;color:var(--text);font-weight:600}.message-body time{color:var(--quiet);font-size:10px;font-weight:400}.message-body p{margin:0;color:var(--muted)}.system{padding:11px;border:1px solid var(--line);border-radius:7px;background:var(--surface);color:var(--muted);font-size:12px}.composer{padding:12px 14px 14px;border-top:1px solid var(--line)}.composer-box{border:1px solid #44444a;border-radius:8px;background:#222225;padding:10px}.composer textarea{display:block;width:100%;height:48px;resize:none;border:0;outline:0;background:transparent;color:var(--text);font:13px var(--sans)}.composer textarea::placeholder{color:var(--quiet)}.composer-row{display:flex;align-items:center;justify-content:space-between;margin-top:7px;color:var(--quiet);font-size:11px}.send{width:28px;height:28px;border-radius:6px;background:var(--purple);color:#1e1337;font-weight:800}.quick{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 0}.quick a{padding:5px 8px;border:1px solid var(--line);border-radius:5px;text-decoration:none;color:var(--muted);font-size:11px}.quick a:hover{color:var(--text);border-color:var(--purple)}
-    @media(max-width:1050px){.content{grid-template-columns:minmax(0,1fr) 310px}.sidebar{width:220px}.app{grid-template-columns:220px minmax(0,1fr)}}@media(max-width:760px){body{overflow:auto}.app{display:block;height:auto;min-height:100dvh}.sidebar{height:auto;border-right:0;border-bottom:1px solid var(--line)}.side-bottom,.upgrade,.project-list{display:none}.nav{display:flex;overflow:auto}.nav-label{display:none}.nav a{flex:0 0 auto}.workspace-main{display:block}.topbar{height:52px}.content{display:block}.preview{height:calc(100dvh - 104px);min-height:620px}.preview-stage{padding:10px}.site-frame{min-height:560px}.chat{border-left:0;border-top:1px solid var(--line);min-height:500px}.chat .messages{max-height:430px}.top-actions a:not(.publish){display:none}.crumbs{font-size:12px}}
+    :root{--green:#8dff4d;--green-soft:#c5ff9b;--ink:#020403}
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:var(--ink);color:#f4faef;font-family:"Courier New",ui-monospace,monospace}
+    body{min-height:100dvh;overflow-x:hidden}
+    .landing{position:relative;width:min(100vw,calc(100dvh * .462085));min-height:100dvh;aspect-ratio:390/844;margin:0 auto;background:#030604 url("skibiditoiletdefense.png") center top/100% 100% no-repeat;overflow:hidden}
+    .visual-content{position:absolute;inset:0;pointer-events:none}
+    .semantic-content{position:absolute;inset:auto 0 0;z-index:2;padding:18px;color:transparent;pointer-events:none}
+    .semantic-content h1,.semantic-content p{margin:0}
+    .semantic-content a{color:transparent}
+    .hotspot{position:absolute;z-index:5;display:block;border-radius:7px;outline:0;text-indent:-9999px}
+    .hotspot:focus-visible{outline:2px solid var(--green);outline-offset:3px}
+    .play{left:10%;top:64%;width:80%;height:7.5%}
+    .download{left:10%;top:73%;width:80%;height:7.5%}
+    .logo-link{left:5%;top:3%;width:90%;height:13%}
+    .discord{left:5%;top:16%;width:90%;height:8%}
+    .stats-link{left:5%;bottom:0;width:90%;height:12%}
+    .desktop-actions{display:none}
+    @media (min-width:700px){
+      body{display:grid;place-items:center;padding:20px 0}
+      .landing{min-height:0;height:min(100dvh - 40px,1100px);width:auto}
+      .desktop-actions{display:flex;position:fixed;right:24px;bottom:24px;z-index:10;gap:8px}
+      .desktop-actions a{padding:10px 14px;border:1px solid rgba(141,255,77,.55);border-radius:5px;background:#071008;color:var(--green-soft);font:700 11px "Courier New",monospace;text-decoration:none;text-transform:uppercase;letter-spacing:.08em}
+      .desktop-actions a:hover{background:var(--green);color:#031004}
+    }
+    @media (prefers-reduced-motion:no-preference){
+      .landing:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(transparent 50%,rgba(141,255,77,.025) 50%);background-size:100% 4px;mix-blend-mode:screen;opacity:.26}
+    }
   </style>
 </head>
 <body>
-  <div class="app">
-    <aside class="sidebar">
-      <div class="side-top">
-        <a class="brand" href="#"><img src="Skibidi_Defense_Minimal_Esports.png" alt=""><span>Skibidi Upgrade Hub<small>Vortex Studios workspace</small></span></a>
-        <button class="workspace"><span class="avatar">A</span>Athalla's Lovable<span class="chevron">⌄</span></button>
-      </div>
-      <nav class="nav" aria-label="Main menu">
-        <span class="nav-label">Dashboard</span>
-        <a href="#preview" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 9h18M9 21V9"/></svg>Overview</a>
-        <a href="#projects"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 6h16M4 12h16M4 18h16"/></svg>Projects</a>
-        <a href="#settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.8 1.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5v.2h-2.6v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1-1.8-1.8.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H6v-2.6h.2a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.9l-.1-.1 1.8-1.8.1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.5V6h2.6v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1 1.8 1.8-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.5 1h.2v2.6h-.2a1.7 1.7 0 0 0-1.5 1Z"/></svg>Settings</a>
-      </nav>
-      <div class="project-list" id="projects"><div class="nav-label">Projects</div><div class="project current"><img src="Skibidi_Defense_Minimal_Esports.png" alt="">Skibidi Upgrade Hub</div><div class="project">＋ <span>New project</span></div></div>
-      <div class="side-bottom"><a href="https://discord.gg/3qRP6zHHjq" target="_blank" rel="noopener">◉ &nbsp;Community Discord</a><a href="#downloads">↓ &nbsp;Downloads</a><div class="upgrade"><b>Upgrade to Pro</b><p>Unlock more features and faster builds for your projects.</p><a href="#downloads">View plans</a></div></div>
-    </aside>
-    <section class="workspace-main">
-      <header class="topbar">
-        <div class="crumbs"><strong>Skibidi Upgrade Hub</strong><span class="slash">/</span><span>Homepage</span></div>
-        <div class="top-actions"><a href="https://discord.gg/3qRP6zHHjq" target="_blank" rel="noopener">Share</a><a href="Skibidi_Toilet_Defense_Mobile.html" target="_blank" rel="noopener">Open live site</a><a href="#downloads" class="publish">Publish</a></div>
-      </header>
-      <div class="content">
-        <main class="preview" id="preview">
-          <div class="preview-head"><div class="preview-title"><span>Preview</span><span>•</span><strong>Live</strong></div><div class="preview-tabs"><button class="active">Preview</button><button>Code</button><button>More&nbsp;⌄</button></div></div>
-          <div class="preview-stage">
-            <div class="site-frame">
-              <div class="site-toolbar"><div class="dots"><i></i><i></i><i></i></div><div class="url">athallajovian9-cyber.github.io / Skibidi_Toilet_Defense_WinOs</div><a href="Skibidi_Toilet_Defense_Mobile.html" target="_blank" rel="noopener" title="Open fullscreen">↗</a></div>
-              <iframe src="Skibidi_Toilet_Defense_Mobile.html" title="Skibidi Toilet Defense live preview" allow="fullscreen; autoplay"></iframe>
-            </div>
-          </div>
-        </main>
-        <aside class="chat" aria-label="Project chat">
-          <div class="chat-head"><span>Chat</span><button aria-label="More options">•••</button></div>
-          <div class="messages">
-            <div class="message"><span class="avatar">A</span><div class="message-body"><div class="meta">Athalla <time>Today at 8:01 PM</time></div><p>can you make my website look cooler</p></div></div>
-            <div class="message"><span class="avatar" style="background:linear-gradient(135deg,#818cf8,#f472b6)">✦</span><div class="message-body"><div class="meta">Lovable <time>Thought for 7s</time></div><p>I’ll review your current site and turn its Windows-style game page into a more polished, energetic experience.</p><div class="system" style="margin-top:10px"><b style="color:var(--text)">Finalized Sigma Protocol build</b><br>Done · Review current game site</div></div></div>
-            <div class="message"><span class="avatar">A</span><div class="message-body"><div class="meta">Athalla <time>Today at 8:08 PM</time></div><p>its good man</p></div></div>
-            <div class="message"><span class="avatar" style="background:linear-gradient(135deg,#818cf8,#f472b6)">✦</span><div class="message-body"><div class="meta">Lovable <time>Thought for 2s</time></div><p>Thanks, glad you like it. Let me know if you want any tweaks or additions.</p></div></div>
-          </div>
-          <div class="composer"><div class="composer-box"><textarea placeholder="Ask Lovable..."></textarea><div class="composer-row"><span>Plan&nbsp;&nbsp; Annotation&nbsp;&nbsp; Clear</span><button class="send" type="button" aria-label="Send">↑</button></div></div><div class="quick"><a href="#downloads">Build a real launcher</a><a href="#community">Add a community page</a><a href="#features">Polish the game itself</a></div></div>
-        </aside>
-      </div>
-    </section>
-  </div>
+  <main class="landing" aria-label="Skibidi Toilet Defense Sigma Protocol landing page">
+    <div class="visual-content" aria-hidden="true"></div>
+    <div class="semantic-content">
+      <h1>Defend the sewer. Smash the toilets.</h1>
+      <p>Deploy titans, arm physics traps, and purge the horde in the Sigma Protocol 3.0 arcade defense operation.</p>
+      <a href="Skibidi_Toilet_Defense_Mobile.html">Play free in browser</a>
+      <a href="Skibidi_Toilet_Defense_DirectX_EXE.zip" download>Download Windows DirectX build</a>
+    </div>
+    <a class="hotspot logo-link" href="#" aria-label="Skibidi Defense home">Skibidi Defense home</a>
+    <a class="hotspot discord" href="https://discord.gg/3qRP6zHHjq" target="_blank" rel="noopener" aria-label="Join the Skibidi Defense Discord">Join Discord</a>
+    <a class="hotspot play" href="Skibidi_Toilet_Defense_Mobile.html" target="_blank" rel="noopener" aria-label="Play Skibidi Toilet Defense in browser">Play free</a>
+    <a class="hotspot download" href="Skibidi_Toilet_Defense_DirectX_EXE.zip" download aria-label="Download the standalone Windows DirectX build">Download Windows build</a>
+    <a class="hotspot stats-link" href="#downloads" aria-label="View all deployment downloads">View deployment downloads</a>
+  </main>
+  <nav class="desktop-actions" aria-label="Desktop actions">
+    <a href="Skibidi_Toilet_Defense_Mobile.html" target="_blank" rel="noopener">Launch fullscreen</a>
+    <a href="Skibidi_Toilet_Defense_PC_Package.zip" download>PC bundle</a>
+    <a href="Skibidi_Toilet_Defense_Vulkan.apk" download>Android APK</a>
+  </nav>
+  <section id="downloads" hidden>
+    <h2>Official downloads</h2>
+    <a href="Skibidi_Toilet_Defense_DirectX_EXE.zip" download>DirectX EXE</a>
+    <a href="Skibidi_Toilet_Defense_PC_Package.zip" download>PC package</a>
+    <a href="Skibidi_Toilet_Defense_Vulkan.apk" download>Android APK</a>
+    <a href="Skibidi_Toilet_Defense_Mobile.html" download>Mobile HTML</a>
+  </section>
 </body>
 </html>
