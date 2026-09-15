@@ -15,11 +15,19 @@
     *{box-sizing:border-box}
     html,body{margin:0;min-height:100%;background:var(--ink);color:#f4faef;font-family:"Courier New",ui-monospace,monospace}
     body{min-height:100dvh;overflow-x:hidden}
-    .landing{position:relative;width:min(100vw,calc(100dvh * .462085));min-height:100dvh;aspect-ratio:390/844;margin:0 auto;background:#030604 url("skibiditoiletdefense.png") center top/100% 100% no-repeat;overflow:hidden}
+    .landing{position:relative;width:min(100vw,calc(100dvh * .462085));min-height:100dvh;aspect-ratio:390/844;margin:0 auto;background:#030604 url("aislop.jpg") center/cover no-repeat;overflow:hidden}
+    .landing:before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(1,7,3,.78) 0%,rgba(1,8,4,.35) 35%,rgba(1,5,2,.82) 100%),linear-gradient(90deg,rgba(0,8,3,.42),rgba(0,0,0,.1),rgba(0,8,3,.45));z-index:0}
     .visual-content{position:absolute;inset:0;pointer-events:none}
-    .semantic-content{position:absolute;inset:auto 0 0;z-index:2;padding:18px;color:transparent;pointer-events:none}
-    .semantic-content h1,.semantic-content p{margin:0}
-    .semantic-content a{color:transparent}
+    .semantic-content{position:absolute;inset:0;z-index:2;padding:19px 21px;pointer-events:none}
+    .semantic-content h1{position:absolute;top:39%;left:8%;right:8%;margin:0;color:#f1faed;font:700 clamp(35px,10vw,58px)/.93 Arial,sans-serif;letter-spacing:-.07em;text-transform:uppercase;text-shadow:0 3px 24px #000}
+    .semantic-content p{position:absolute;top:53%;left:10%;right:10%;margin:0;color:#c9d5c6;font:13px/1.45 "Courier New",monospace;text-align:center}
+    .semantic-content a{position:absolute;left:10%;right:10%;height:7.5%;display:flex;align-items:center;justify-content:center;text-decoration:none;text-transform:uppercase;font:700 13px "Courier New",monospace;letter-spacing:.12em;pointer-events:auto}
+    .semantic-content a:first-of-type{top:64%;background:var(--green);color:#061006;border-radius:6px;box-shadow:0 0 24px rgba(141,255,77,.25)}
+    .semantic-content a:last-of-type{top:73%;border:1px solid var(--green);color:var(--green-soft);border-radius:6px;background:rgba(3,12,5,.45)}
+    .semantic-content:before{content:"LIVE OPERATION  //  BROWSER READY";position:absolute;top:33%;left:0;right:0;color:var(--green);font:700 10px "Courier New",monospace;letter-spacing:.13em;text-align:center}
+    .semantic-content:after{content:"SKIBIDI DEFENSE     SIGMA PROTOCOL // 3.0";position:absolute;top:6%;left:7%;right:7%;padding:14px 0;border-bottom:1px solid rgba(141,255,77,.3);color:#e4f5dc;font:700 12px "Courier New",monospace;letter-spacing:.08em;white-space:pre;text-align:center}
+    .stats{position:absolute;left:7%;right:7%;bottom:2.5%;display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid rgba(141,255,77,.3);padding-top:13px;text-align:center;color:var(--green-soft);font:700 11px "Courier New",monospace;letter-spacing:.04em}
+    .stats span{display:block;color:#82927d;font-size:8px;font-weight:400;margin-top:5px;letter-spacing:.08em}
     .hotspot{position:absolute;z-index:5;display:block;border-radius:7px;outline:0;text-indent:-9999px}
     .hotspot:focus-visible{outline:2px solid var(--green);outline-offset:3px}
     .play{left:10%;top:64%;width:80%;height:7.5%}
@@ -54,6 +62,7 @@
     <a class="hotspot play" href="Skibidi_Toilet_Defense_Mobile.html" target="_blank" rel="noopener" aria-label="Play Skibidi Toilet Defense in browser">Play free</a>
     <a class="hotspot download" href="Skibidi_Toilet_Defense_DirectX_EXE.zip" download aria-label="Download the standalone Windows DirectX build">Download Windows build</a>
     <a class="hotspot stats-link" href="#downloads" aria-label="View all deployment downloads">View deployment downloads</a>
+    <div class="stats" aria-label="Game statistics"><div>2.5D<span>PHYSICAL COMBAT</span></div><div>60 FPS<span>BROWSER READY</span></div><div>∞ WAVES<span>HOLD THE LINE</span></div></div>
   </main>
   <nav class="desktop-actions" aria-label="Desktop actions">
     <a href="Skibidi_Toilet_Defense_Mobile.html" target="_blank" rel="noopener">Launch fullscreen</a>
