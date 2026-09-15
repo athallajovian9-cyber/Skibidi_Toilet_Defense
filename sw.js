@@ -1,4 +1,4 @@
-const CACHE_NAME = 'skibidi-defense-v3-vulkan';
+const CACHE_NAME = 'skibidi-defense-v4-original';
 const ASSETS = [
   './',
   './index.html',
@@ -20,6 +20,7 @@ self.addEventListener('activate', (e) => {
     caches.keys().then((keys) => Promise.all(
       keys.map((k) => {
         if (k !== CACHE_NAME) return caches.delete(k);
+        return undefined;
       })
     )).then(() => self.clients.claim())
   );
