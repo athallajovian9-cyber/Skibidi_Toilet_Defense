@@ -1,4 +1,4 @@
-const CACHE_NAME = 'skibidi-defense-v4-original';
+const CACHE_NAME = 'skibidi-defense-v5-neon';
 const ASSETS = [
   './',
   './index.html',

@@ -1,9 +1,9 @@
 {
   "name": "Skibidi Toilet Defense: Sigma Edition",
   "short_name": "Skibidi Defense",
-  "start_url": "/Skibidi_Toilet_Defense-PC/Skibidi_Toilet_Defense_Mobile.html",
-  "scope": "/Skibidi_Toilet_Defense-PC/",
-  "id": "/Skibidi_Toilet_Defense-PC/",
+  "start_url": "./Skibidi_Toilet_Defense_Mobile.html",
+  "scope": "./",
+  "id": "./",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#070a08",
@@ -16,13 +16,13 @@
   ],
   "icons": [
     {
-      "src": "https://athallajovian9-cyber.github.io/Skibidi_Toilet_Defense-PC/icon-192.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://athallajovian9-cyber.github.io/Skibidi_Toilet_Defense-PC/icon-512.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -30,14 +30,14 @@
   ],
   "screenshots": [
     {
-      "src": "https://athallajovian9-cyber.github.io/Skibidi_Toilet_Defense-PC/screenshot1.png",
+      "src": "screenshot1.png",
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Skibidi Toilet Defense Mobile Arcade Action"
     },
     {
-      "src": "https://athallajovian9-cyber.github.io/Skibidi_Toilet_Defense-PC/screenshot2.png",
+      "src": "screenshot2.png",
       "sizes": "1920x1080",
       "type": "image/png",
       "form_factor": "wide",
